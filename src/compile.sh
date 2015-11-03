@@ -1,4 +1,4 @@
 #!/bin/bash
 
-gcc bib.c main.c pool4.c
+gcc -Wall bib.c main.c pool4.c
 

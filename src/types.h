@@ -66,7 +66,7 @@ struct ipv4_transport_addr {
 	__u16 l4;
 };
 
-static bool taddr4_equals(const struct ipv4_transport_addr *a1,
+static inline bool taddr4_equals(const struct ipv4_transport_addr *a1,
 		const struct ipv4_transport_addr *a2)
 {
 	return a1->l3.s_addr == a2->l3.s_addr && a2->l4 == a2->l4;
