@@ -9,7 +9,9 @@ struct bib_entry {
 	struct ipv4_transport_addr addr;
 	enum l4_protocol proto;
 };
-
+struct in_addr {
+    unsigned long s_addr;  // load with inet_aton()
+};
 #define TABLE_SIZE 100
 struct bib_entry table[TABLE_SIZE];
 

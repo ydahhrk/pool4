@@ -1,5 +1,9 @@
 #include "pool4.h"
 
+struct in_addr {
+    unsigned long s_addr;  // load with inet_aton()
+};
+
 int pool4_init(void)
 {
 	/* Init code here. */
