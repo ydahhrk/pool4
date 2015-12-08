@@ -1,14 +1,24 @@
 #ifndef _JOOL_COMMON_TYPES_H
 #define _JOOL_COMMON_TYPES_H
 
+
 /**
  * @file
  * The core data types. Structures used all over the code.
  */
 
-#include <linux/types.h>
 #include <stdbool.h>
-#include <arpa/inet.h>
+#include <stdint.h>
+#include <string.h>
+
+typedef unsigned char uint8_t;
+typedef unsigned int uint16_t;
+typedef unsigned long int uint32_t;
+typedef unsigned long long int uint64_t;
+
+struct in_addr {
+    unsigned long s_addr;  // load with inet_aton()
+};
 
 /**
  * Network (layer 3) protocols Jool is supposed to support.
@@ -16,6 +26,7 @@
  * compiler to pester me during defaultless switch'es. Also, the zero-based
  * index is convenient in the Translate Packet module.
  */
+
 typedef enum l3_protocol {
 	/** RFC 2460. */
 	L3PROTO_IPV6 = 0,
@@ -63,7 +74,7 @@ struct ipv4_transport_addr {
 	/**
 	 * The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id).
 	 */
-	__u16 l4;
+	uint16_t l4;
 };
 
 static inline bool taddr4_equals(const struct ipv4_transport_addr *a1,
@@ -83,7 +94,7 @@ struct ipv6_transport_addr {
 	/**
 	 * The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id).
 	 */
-	__u16 l4;
+	uint16_t l4;
 };
 
 /**
@@ -93,7 +104,7 @@ struct ipv4_prefix {
 	/** IPv4 prefix. */
 	struct in_addr address;
 	/** Number of bits from "address" which represent the network. */
-	__u8 len;
+	uint8_t len;
 };
 
 /**
@@ -103,17 +114,17 @@ struct ipv6_prefix {
 	/** IPv6 prefix. */
 	struct in6_addr address;
 	/** Number of bits from "address" which represent the network. */
-	__u8 len;
+	uint8_t len;
 };
 
 struct port_range {
-	__u16 min;
-	__u16 max;
+	uint16_t min;
+	uint16_t max;
 };
 
 struct pool4_sample {
-	__u32 mark;
-	__u8 proto;
+	uint32_t mark;
+	uint8_t proto;
 	struct in_addr addr;
 	struct port_range range;
 };
@@ -131,7 +142,7 @@ static inline bool port_range_touches(const struct port_range *r1,
 }
 
 static inline bool port_range_contains(const struct port_range *range,
-		__u16 port)
+		uint16_t port)
 {
 	return range->min <= port && port <= range->max;
 }
