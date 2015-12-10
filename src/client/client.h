@@ -6,9 +6,10 @@
  */
 
 
-
 #ifndef CLIENT_H_
 #define CLIENT_H_
+#include "client.c"
+
 
 
 void client_add(struct ipv6_prefix prefix);
