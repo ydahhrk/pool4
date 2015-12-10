@@ -1,4 +1,4 @@
-#include "bib.h"
+/*#include "bib.h"
 #include "pool4.h"
 
 #include <stdio.h>
@@ -59,9 +59,13 @@ static void destroy(void)
 	pool4_destroy();
 	bibdb_destroy();
 }
-
+*/
 int main(void)
 {
+/*	puts("do_things() threw errcode.\n");*/
+	return 0;
+
+	/*
 	int error;
 
 	error = init();
@@ -75,5 +79,5 @@ int main(void)
 		printf("do_things() threw errcode %d.\n", error);
 
 	destroy();
-	return error;
+	return error;*/
 }
