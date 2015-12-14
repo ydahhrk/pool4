@@ -23,26 +23,32 @@ static unsigned int power;
 struct client{
 	struct ipv6_prefix ipx;
 	struct list_head list_hook;
-};
+}client;
 
 struct client client_list;
 
-void client_add(struct ipv6_prefix prefix)
+void client_init()
 {
-	struct client *tmp;
-	int error;
 	INIT_LIST_HEAD(&client_list.list_hook);
+}
+
+void client_add(struct ipv6_prefix *prefix)
+{
+	int error;
+
+	error= -ENOMEM;
+	struct client *tmp;
 	tmp= (struct client *)malloc(sizeof(struct client));
 	list_add(&(tmp->list_hook), &(client_list.list_hook));
 }
 
 
-void client_delete(struct ipv6_prefix *prefix, struct list_head *entry)
+void client_delete(struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	struct client *tmp;
-	list_for_each_safe(iter, tmpdummy, entry) {
+	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
 		tmp = list_entry(iter, struct client, list_hook);
 		if (prefix6_equals(prefix, &tmp->ipx)) {
 			list_del(&tmp->list_hook);
@@ -52,61 +58,54 @@ void client_delete(struct ipv6_prefix *prefix, struct list_head *entry)
 	}
 }
 
-void client_flush(struct list_head *entry)
+void client_flush()
 {
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	struct client *objPtr;
 
-	list_for_each_safe(iter, tmpdummy, entry) {
+	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
 		objPtr = list_entry(iter, struct client , list_hook);
 		list_del(&objPtr->list_hook);
 		free(objPtr);
 	}
 }
 
-bool client_is_empty(struct list_head *list_hook)
+bool client_is_empty(struct ipv6_prefix *prefix)
 {
-	return list_empty(list_hook);
+	struct list_head *iter;
+	struct list_head *tmpdummy;
+	struct client *tmp;
+	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
+		tmp = list_entry(iter, struct client, list_hook);
+		if (prefix6_equals(prefix, &tmp->ipx)) {
+			return true;
+		}
+		else
+			return false;
+	}
 }
 
-int client_count(struct list_head *entry)
+int client_count()
 {
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	int i = 0;
 
-	list_for_each_safe(iter, tmpdummy, entry) {
+	list_for_each_safe(iter, tmpdummy, client_list.list_hook){
 		i++;
 	}
 	return i;
 }
 
-void client_print(struct ipv6_prefix *prefix, struct list_head *entry)
-{
 
-	struct list_head *iter;
-	struct list_head *tmpdummy;
-	struct client *tmp;
-	int i;
-	list_for_each_safe(iter, tmpdummy, entry) {
-		tmp = list_entry(iter, struct client, list_hook);
-		if (prefix6_equals(prefix, &tmp->ipx)) {
-			for (i = 0; i < 16; i += 2) {
-				printf("%x:\n %i:\n", tmp->ipx.address,tmp->ipx.len);
-			}
-			return;
-		}
-	}
-}
-
-void client_print_all(struct list_head *entry)
+void client_print_all()
 {
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	struct client *objPtr;
 
-	list_for_each_safe(iter, tmpdummy, entry) {
+	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
 		objPtr = list_entry(iter, struct client , list_hook);
 		printf("%x:\n %i:\n", &objPtr->ipx.address, &objPtr->ipx.len);
 	}

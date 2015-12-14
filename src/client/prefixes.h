@@ -23,6 +23,7 @@ static inline bool ipv6_addr_equal(const struct in6_addr *a1, const struct in6_a
 			(a1->s6_addr32[3] ^ a2->s6_addr32[3])) == 0;
  #endif
 }
+
 bool prefix6_equals(const struct ipv6_prefix *expected, const struct ipv6_prefix *actual)
 {
 	if (expected == actual)

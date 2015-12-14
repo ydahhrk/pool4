@@ -4,19 +4,18 @@
  *  Created on: Dec 10, 2015
  *      Author: cfrutos
  */
-#include "client.h"
 
+#include "client.h"
 
 #define cpu_to_be32(x) x
 
 
+
 int main() {
 
-	struct client client_list;
 
-	INIT_LIST_HEAD(&client_list.list_hook);
+	struct client *test1 = malloc(sizeof(test1));
 
-	client_list.ipx.address -> cpu_to_be32(0xc0000201);
-
+	printf("Debugging");
 	return 0;
 }

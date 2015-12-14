@@ -5,22 +5,28 @@
  *      Author: cfrutos
  */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "types.h"
+#include "list.h"
+#include "prefixes.h"
 
 #ifndef CLIENT_H_
 #define CLIENT_H_
-#include "client.c"
 
+void client_init();
 
+void client_add(struct ipv6_prefix *prefix);
 
-void client_add(struct ipv6_prefix prefix);
+void client_delete(struct ipv6_prefix *prefix);
 
-void client_delete(struct ipv6_prefix *prefix, struct list_head *entry);
+void client_flush();
 
-void client_delete_all(struct list_head *head);
+int client_is_empty(struct ipv6_prefix *prefix);
 
-int client_is_empty(struct list_head *root);
+int client_count();
 
-int client_count(struct list_head *root);
+void client_print_all();
 
 
 #endif /* CLIENT_H_ */
