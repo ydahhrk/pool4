@@ -34,13 +34,57 @@ void client_init()
 
 void client_add(struct ipv6_prefix *prefix)
 {
+	struct client *tmp;
+	int error;
+	tmp= (struct client *)malloc(sizeof(struct client));
+	tmp->ipx = *prefix;
+	list_add(&(tmp->list_hook), &(client_list.list_hook));
+
+}
+/*
+int pool4db_add(const __u32 mark, enum l4_protocol proto,
+		struct ipv4_prefix *prefix, struct port_range *ports)
+{
+	struct hlist_head *database;
+	struct pool4_table *table;
 	int error;
 
-	error= -ENOMEM;
-	struct client *tmp;
-	tmp= (struct client *)malloc(sizeof(struct client));
-	list_add(&(tmp->list_hook), &(client_list.list_hook));
+	mutex_lock(&lock);
+
+	database = rcu_dereference_protected(db, lockdep_is_held(&lock));
+	table = find_table(database, mark, proto);
+	if (!table) {
+		table = pool4table_create(mark, proto);
+		if (!table) {
+			error = -ENOMEM;
+			goto end;
+		}
+
+		error = pool4table_add(table, prefix, ports);
+		if (error) {
+			pool4table_destroy(table);
+			goto end;
+		}
+
+		tables++;
+		hlist_add_head_rcu(&table->hlist_hook,
+				&database[hash_32(mark, power)]);
+		if (tables > slots()) {
+			log_warn_once("You have lots of pool4s, which can lag "
+					"Jool. Consider increasing "
+					"pool4_size.");
+		}
+
+	} else {
+		error = pool4table_add(table, prefix, ports);
+
+	}
+
+end:
+	mutex_unlock(&lock);
+	return error;
 }
+*/
 
 
 void client_delete(struct ipv6_prefix *prefix)
@@ -48,7 +92,7 @@ void client_delete(struct ipv6_prefix *prefix)
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	struct client *tmp;
-	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
+	list_for_each_safe(iter, tmpdummy, &client_list.list_hook) {
 		tmp = list_entry(iter, struct client, list_hook);
 		if (prefix6_equals(prefix, &tmp->ipx)) {
 			list_del(&tmp->list_hook);
@@ -64,26 +108,27 @@ void client_flush()
 	struct list_head *tmpdummy;
 	struct client *objPtr;
 
-	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
+	list_for_each_safe(iter, tmpdummy, &client_list.list_hook) {
 		objPtr = list_entry(iter, struct client , list_hook);
 		list_del(&objPtr->list_hook);
 		free(objPtr);
 	}
 }
 
-bool client_is_empty(struct ipv6_prefix *prefix)
+void client_exist(struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	struct client *tmp;
-	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
+	list_for_each_safe(iter, tmpdummy, &client_list.list_hook) {
 		tmp = list_entry(iter, struct client, list_hook);
 		if (prefix6_equals(prefix, &tmp->ipx)) {
-			return true;
+			printf("Client exist\n");
+			return;
 		}
-		else
-			return false;
+
 	}
+	printf("Client does not exist\n");
 }
 
 int client_count()
@@ -92,7 +137,7 @@ int client_count()
 	struct list_head *tmpdummy;
 	int i = 0;
 
-	list_for_each_safe(iter, tmpdummy, client_list.list_hook){
+	list_for_each_safe(iter, tmpdummy, &client_list.list_hook){
 		i++;
 	}
 	return i;
@@ -105,9 +150,9 @@ void client_print_all()
 	struct list_head *tmpdummy;
 	struct client *objPtr;
 
-	list_for_each_safe(iter, tmpdummy, client_list.list_hook) {
+	list_for_each_safe(iter, tmpdummy, &client_list.list_hook) {
 		objPtr = list_entry(iter, struct client , list_hook);
-		printf("%x:\n %i:\n", &objPtr->ipx.address, &objPtr->ipx.len);
+		printf("Address: %x\nLength:%i\n", objPtr->ipx.address, objPtr->ipx.len);
 	}
 }
 
@@ -147,22 +192,4 @@ end:
 	return error;
 }
 */
-/*
-void client_print(struct list_head *head){
-	struct list_head *iter;
-	struct pool4_entry *objPtr;
-	list_for_each(iter, head) {
-		objPtr = list_entry(iter, struct client, list_hook);
-		printf("%ip6", objPtr->ipx);
-	}
-	printf("\n");
-}
-*/
 
-
-//p = ipv6_prefix entonces tiene un address y un len,
-//con ello se sacara el prefijo con el lenght
-
-//a::a
-
-//0000:0000:0000:0000:0000:0000
