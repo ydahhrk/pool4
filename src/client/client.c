@@ -8,22 +8,13 @@
  ============================================================================
  */
 //<>
-/*
- ============================================================================
- Name        : clientes2.c
- Author      : Carlos Frutos
- Version     :
- Copyright   : Your copyright notice
- Description : Hello World in C, Ansi-style
- ============================================================================
- */
-//<>
 #include <stdio.h>
 #include <stdlib.h>
 #include "types.h"
 #include "list.h"
 #include "prefixes.h"
 #include "client.h"
+#include "errno.h"
 
 
 #define client(prefix, list_hook)
@@ -59,51 +50,6 @@ int client_add(struct ipv6_prefix *prefix)
 	return error;
 
 }
-/*
-int pool4db_add(const __u32 mark, enum l4_protocol proto,
-		struct ipv4_prefix *prefix, struct port_range *ports)
-{
-	struct hlist_head *database;
-	struct pool4_table *table;
-	int error;
-
-	mutex_lock(&lock);
-
-	database = rcu_dereference_protected(db, lockdep_is_held(&lock));
-	table = find_table(database, mark, proto);
-	if (!table) {
-		table = pool4table_create(mark, proto);
-		if (!table) {
-			error = -ENOMEM;
-			goto end;
-		}
-
-		error = pool4table_add(table, prefix, ports);
-		if (error) {
-			pool4table_destroy(table);
-			goto end;
-		}
-
-		tables++;
-		hlist_add_head_rcu(&table->hlist_hook,
-				&database[hash_32(mark, power)]);
-		if (tables > slots()) {
-			log_warn_once("You have lots of pool4s, which can lag "
-					"Jool. Consider increasing "
-					"pool4_size.");
-		}
-
-	} else {
-		error = pool4table_add(table, prefix, ports);
-
-	}
-
-end:
-	mutex_unlock(&lock);
-	return error;
-}
-*/
-
 
 void client_delete(struct ipv6_prefix *prefix)
 {
@@ -178,40 +124,55 @@ void client_print_all()
 	}
 }
 
-/*
-int client_foreach_sample(int (*cb)(struct client *, void *), void *arg,
-		struct client *offset)
+int clinet_for_each(int (*func)(struct ipv6_prefix *, void *),
+		void *arg, struct ipv6_prefix *offset)
 {
-	struct hlist_head *database;
-	struct pool4_table *table;
-	struct hlist_node *node;
-	__u32 hash = offset ? hash_32(offset->ipx, power) : 0;
+	struct list_head *iter;
+	struct list_head *tmpdummy;
+	struct client *tmp;
 	int error = 0;
 
-	database = rcu_dereference_bh();
-	for (; hash < slots(); hash++) {
-		hlist_for_each_rcu_bh(node, &database||||[hash]) {
-			table = table_entry(node);
-			if (offset) {
-				if ((prefix6_equals(table->ipx, offset->ipx)) {
-					error = pool4table_foreach_sample(table,
-							cb, arg, offset);
-					if (error)
-						goto end;
-					offset = NULL;
-				}
-			} else {
-				error = pool4table_foreach_sample(table, cb,
-						arg, NULL);
-				if (error)
-					goto end;
-			}
+	list_for_each_safe(iter, tmpdummy, &client_list.list_hook) {
+
+		tmp = list_entry(iter, struct client, list_hook);
+
+		if (!offset) {
+			error = func(&tmp->ipx, arg);
+		if (error)
+			break;
+
+		} else if (prefix6_equals(offset, &tmp->ipx)) {
+		offset = NULL;
+		}
+	}
+	return offset ? -ESRCH : error;
+}
+
+/*
+int pool6_for_each(int (*func)(struct ipv6_prefix *, void *), void *arg,
+		struct ipv6_prefix *offset)
+{
+	struct list_head *list;
+	struct list_head *node;
+	struct pool_entry *entry;
+	int error = 0;
+
+	rcu_read_lock_bh();
+	list = rcu_dereference_bh(pool);
+
+	list_for_each_rcu_bh(node, list) {
+		entry = get_entry(node);
+		if (!offset) {
+			error = func(&entry->prefix, arg);
+			if (error)
+				break;
+		} else if (prefix6_equals(offset, &entry->prefix)) {
+			offset = NULL;
 		}
 	}
 
-end:
 	rcu_read_unlock_bh();
-	return error;
+	return offset ? -ESRCH : error;
 }
 */
 

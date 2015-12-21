@@ -23,7 +23,6 @@ typedef int bool;
 #define INET_ADDRSTRLEN		(16)
 #define INET6_ADDRSTRLEN	(48)
 #define AF_INET6		(10)
-#define	ENOMEM		12	/* Not enough space */
 
 
 struct in6_addr

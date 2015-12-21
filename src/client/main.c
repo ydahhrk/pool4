@@ -46,7 +46,6 @@ int main()
 	prefix.address.s6_addr32[0] = cpu_to_be32(0x20010db7);
 	client_exist(&prefix);
 
-
 	printf("Debugging");
 	return 0;
 }

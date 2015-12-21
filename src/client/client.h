@@ -26,5 +26,8 @@ int client_count();
 
 void client_print_all();
 
+int clinet_for_each(int (*func)(struct ipv6_prefix *, void *), void *arg,
+		struct ipv6_prefix *offset);
+
 
 #endif /* CLIENT_H_ */
