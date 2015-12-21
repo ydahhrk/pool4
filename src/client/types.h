@@ -18,6 +18,8 @@ typedef int bool;
 #define true 1
 #endif
 
+#define kmalloc(x,y)		malloc(x)
+#define GFP_KERNEL		(__GFP_WAIT | __GFP_IO | __GFP_FS)
 #define INET_ADDRSTRLEN		(16)
 #define INET6_ADDRSTRLEN	(48)
 #define AF_INET6		(10)

@@ -8,6 +8,16 @@
  ============================================================================
  */
 //<>
+/*
+ ============================================================================
+ Name        : clientes2.c
+ Author      : Carlos Frutos
+ Version     :
+ Copyright   : Your copyright notice
+ Description : Hello World in C, Ansi-style
+ ============================================================================
+ */
+//<>
 #include <stdio.h>
 #include <stdlib.h>
 #include "types.h"
@@ -17,8 +27,6 @@
 
 
 #define client(prefix, list_hook)
-
-static unsigned int power;
 
 struct client{
 	struct ipv6_prefix ipx;
@@ -32,13 +40,23 @@ void client_init()
 	INIT_LIST_HEAD(&client_list.list_hook);
 }
 
-void client_add(struct ipv6_prefix *prefix)
+int client_add(struct ipv6_prefix *prefix)
 {
 	struct client *tmp;
 	int error;
 	tmp= (struct client *)malloc(sizeof(struct client));
+	tmp = kmalloc(sizeof(*tmp), GFP_KERNEL);
+	if (!tmp) {
+		printf("Memory allocation error");
+		error = -ENOMEM;
+		goto end;
+
+	}
 	tmp->ipx = *prefix;
 	list_add(&(tmp->list_hook), &(client_list.list_hook));
+
+	end:
+	return error;
 
 }
 /*
@@ -149,10 +167,14 @@ void client_print_all()
 	struct list_head *iter;
 	struct list_head *tmpdummy;
 	struct client *objPtr;
-
 	list_for_each_safe(iter, tmpdummy, &client_list.list_hook) {
 		objPtr = list_entry(iter, struct client , list_hook);
-		printf("Address: %x\nLength:%i\n", objPtr->ipx.address, objPtr->ipx.len);
+		printf("Address: %x.%x.%x.%x\nLength:%u\n",
+				objPtr->ipx.address.s6_addr32[0],
+				objPtr->ipx.address.s6_addr32[1],
+				objPtr->ipx.address.s6_addr32[2],
+				objPtr->ipx.address.s6_addr32[3],
+				objPtr->ipx.len);
 	}
 }
 

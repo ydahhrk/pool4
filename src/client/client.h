@@ -14,7 +14,7 @@
 
 void client_init();
 
-void client_add(struct ipv6_prefix *prefix);
+int client_add(struct ipv6_prefix *prefix);
 
 void client_delete(struct ipv6_prefix *prefix);
 
