@@ -20,13 +20,13 @@ void client_delete(struct ipv6_prefix *prefix);
 
 void client_flush();
 
-void client_exist(struct ipv6_prefix *prefix);
+bool client_exist(struct ipv6_prefix *prefix);
 
 int client_count();
 
 void client_print_all();
 
-int clinet_for_each(int (*func)(struct ipv6_prefix *, void *), void *arg,
+int client_for_each(int (*func)(struct ipv6_prefix *, void *), void *arg,
 		struct ipv6_prefix *offset);
 
 
