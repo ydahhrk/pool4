@@ -5,6 +5,7 @@
 #include "prefixes.h"
 #include "client.h"
 #include "errno.h"
+#include <math.h>
 
 struct ipv6_client{
 	struct ipv6_prefix ipx;
@@ -30,14 +31,21 @@ int client_add(struct ipv6_prefix *prefix)
 
 	}
 	client->ipx = *prefix;
-	list_add(&(client->list_hook), &(client_hook));
-
+	/* Functions not implemented within validate.(unlikely, log_err,...)
+	error = prefix6_validate(prefix);
+	if(error){
+		printf("Prefix not valid");
+		return error;
+	}
+	*/
+	list_add_tail(&(client->list_hook), &(client_hook));
+	return 0;
 }
 
 void client_delete(struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
-	struct list_head *client_dummy;
+
 	struct ipv6_client *client;
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
@@ -79,7 +87,6 @@ bool client_exist(struct ipv6_prefix *prefix)
 unsigned int client_count()
 {
 	struct list_head *iter;
-	struct list_head *client_dummy;
 	unsigned int i = 0;
 
 	list_for_each(iter, &client_hook){
@@ -92,7 +99,7 @@ unsigned int client_count()
 void client_print_all()
 {
 	struct list_head *iter;
-	struct list_head *client_dummy;
+
 	struct ipv6_client *obj_ptr;
 	list_for_each(iter, &client_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client , list_hook);
@@ -105,16 +112,14 @@ void client_print_all()
 	}
 }
 
-int client_for_each(int (*func)(struct ipv6_prefix *, void *),
+int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
 		void *arg, struct ipv6_prefix *offset)
 {
 	struct list_head *iter;
-	struct list_head *client_dummy;
 	struct ipv6_client *client;
 	int error = 0;
 
-	list_for_each(iter, client_hook) {
-
+	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
 
 		if (!offset) {
@@ -127,6 +132,40 @@ int client_for_each(int (*func)(struct ipv6_prefix *, void *),
 		}
 	}
 	return offset ? -ESRCH : error;
+}
+
+int client_for_each(int (*cb)(struct in6_addr *, void *),
+		void *arg, unsigned int *offset)
+{
+
+	struct list_head *iter;
+	struct ipv6_client *client;
+	int error = 0;
+	int total_clients = 0;
+	int i;
+	list_for_each(iter, &client_hook) {
+		client = list_entry(iter, struct ipv6_client, list_hook);
+		total_clients = total_clients + pow(2, 128- client->ipx.len);
+
+	}
+
+	list_for_each(iter, &client_hook) {
+		client = list_entry(iter, struct ipv6_client, list_hook);
+		for ( i = (offset % total_clients); i<total_clients;i++ ){
+
+		}
+		if (offset>0) { //if offset is different than a negative number
+
+
+		if (error)
+			break;
+
+		} else {
+			offset = NULL;
+		}
+	}
+	return offset ? -ESRCH : error;
+
 }
 
 

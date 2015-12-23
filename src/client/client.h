@@ -22,12 +22,13 @@ void client_flush();
 
 bool client_exist(struct ipv6_prefix *prefix);
 
-int client_count();
+unsigned int client_count();
 
 void client_print_all();
 
-int client_for_each(int (*func)(struct ipv6_prefix *, void *), void *arg,
+int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *), void *arg,
 		struct ipv6_prefix *offset);
+
 
 
 #endif /* CLIENT_H_ */
