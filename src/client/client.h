@@ -29,6 +29,9 @@ void client_print_all();
 int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *), void *arg,
 		struct ipv6_prefix *offset);
 
+int client_for_each(int (*cb)(struct in6_addr *, void *),
+		void *arg, unsigned int *offset);
+
 
 
 #endif /* CLIENT_H_ */

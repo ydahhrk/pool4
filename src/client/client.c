@@ -140,29 +140,30 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	struct list_head *iter;
 	struct ipv6_client *client;
+
 	int error = 0;
-	int total_clients = 0;
 	int i;
-	list_for_each(iter, &client_hook) {
+	/*
+	 * list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
 		total_clients = total_clients + pow(2, 128- client->ipx.len);
-
 	}
+	 */
 
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
-		for ( i = (offset % total_clients); i<total_clients;i++ ){
+		for (i = 0; i < pow(2, 128-client->ipx.len); i++){
+			 //if offset is different than a negative number
+			if (!offset) {
+				error = cb(&client->ipx.address,arg);
+				client->ipx.address.s6_addr32[3]++;
+			} else if (i == offset){
+
+			}
 
 		}
-		if (offset>0) { //if offset is different than a negative number
 
 
-		if (error)
-			break;
-
-		} else {
-			offset = NULL;
-		}
 	}
 	return offset ? -ESRCH : error;
 
