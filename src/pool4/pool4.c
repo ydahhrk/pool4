@@ -175,3 +175,12 @@ int pool4_count(void)
 	}
 	return counter;
 }
+
+int pool4_get_nth_taddr(struct client_mask_domain *domain,
+			unsigned int n,
+			struct ipv4_transport_addr *result)
+{
+
+
+	return 0;
+}
