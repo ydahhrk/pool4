@@ -6,6 +6,7 @@
  */
 
 #include "types.h"
+#include "errno.h"
 #ifndef PREFIXES_H_
 #define PREFIXES_H_
 
@@ -23,6 +24,7 @@ static inline bool ipv6_addr_equal(const struct in6_addr *a1, const struct in6_a
 			(a1->s6_addr32[3] ^ a2->s6_addr32[3])) == 0;
  #endif
 }
+
 bool prefix6_equals(const struct ipv6_prefix *expected, const struct ipv6_prefix *actual)
 {
 	if (expected == actual)
@@ -36,5 +38,31 @@ bool prefix6_equals(const struct ipv6_prefix *expected, const struct ipv6_prefix
 
 	return true;
 }
+/*
+int prefix6_validate(struct ipv6_prefix *prefix)
+{
+	unsigned int i;
+
+	if (unlikely(!prefix)) {
+		log_err("Prefix is NULL.");
+		return -EINVAL;
+	}
+
+	if (prefix->len > 128) {
+		log_err("Prefix length %u is too high.", prefix->len);
+		return -EINVAL;
+	}
+
+	for (i = prefix->len; i < 128; i++) {
+		if (addr6_get_bit(&prefix->address, i)) {
+			log_err("'%pI6c/%u' seems to have a suffix; please fix.",
+					&prefix->address, prefix->len);
+			return -EINVAL;
+		}
+	}
+
+	return 0;
+}
+*/
 
 #endif /* PREFIXES_H_ */
