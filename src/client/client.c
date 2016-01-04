@@ -143,12 +143,6 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	int error = 0;
 	int i;
-	/*
-	 * list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
-		total_clients = total_clients + pow(2, 128- client->ipx.len);
-	}
-	 */
 
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
@@ -156,9 +150,36 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 			 //if offset is different than a negative number
 			if (!offset) {
 				error = cb(&client->ipx.address,arg);
-				client->ipx.address.s6_addr32[3]++;
-			} else if (i == offset){
 
+				if (!(client->ipx.address.s6_addr32[3] == MAXipv6)) {
+					client->ipx.address.s6_addr32[3]++;
+					break;
+				}
+
+				if (!(client->ipx.address.s6_addr32[2] == MAXipv6)) {
+					client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
+					client->ipx.address.s6_addr32[2]++;
+					break;
+				}
+
+				if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
+					client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
+					client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
+					client->ipx.address.s6_addr32[1]++;
+					break;
+				}
+
+				if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
+					client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
+					client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
+					client->ipx.address.s6_addr32[1] = cpu_to_be32(0X0);
+					break;
+				} else
+					return -EINVAL;
+
+
+			} else if (i == &offset){
+				//Still figuring out what to do in here.
 			}
 
 		}
@@ -168,5 +189,4 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	return offset ? -ESRCH : error;
 
 }
-
 

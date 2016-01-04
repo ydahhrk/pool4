@@ -17,7 +17,9 @@ typedef int bool;
 #ifndef true
 #define true 1
 #endif
+#define cpu_to_be32(x)	x
 
+#define MAXipv6		cpu_to_be32(0xffffffff)
 #define kmalloc(x,y)		malloc(x)
 #define kfree(x)		free(x)
 #define GFP_KERNEL		(__GFP_WAIT | __GFP_IO | __GFP_FS)
