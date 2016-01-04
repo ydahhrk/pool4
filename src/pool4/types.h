@@ -27,19 +27,19 @@ struct pool4_entry {
 	struct list_hook list;
 };
 
-struct ipv4_transport_addr {
-	struct in_addr l3;
-
-	uint16_t l4;
-};
-
 struct client_mask_domain {
 
-		struct ipv4_transport_addr first;
+		struct ipv4_transport_addr *first;
 		unsigned int step;
 		unsigned int count;
 };
 
+struct ipv4_transport_addr {
+	/** The layer-3 identifier. */
+	struct in_addr l3;
+	/** The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id). */
+	__u16 l4;
+};
 #define cpu_to_be32(x) x
 
 #define ENOMEM 12    /* Out of memory */
