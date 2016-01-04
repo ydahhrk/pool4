@@ -1,9 +1,19 @@
+<<<<<<< HEAD
+#include "pool4.c"
+
+int main()
+{
+	struct pool4_entry test_list;
+	INIT_LIST_HEAD(&test_list.list);
+
+=======
 #include "types.h"
 #include "pool4.h"
 
 int main()
 {
 	pool4_init();
+>>>>>>> A.-Avalos
 
 	struct pool4_entry *one = malloc(sizeof(*one));
 	one->mark = 1;
@@ -26,6 +36,16 @@ int main()
 	three->range.min = 3;
 	three->range.max = 3;
 
+<<<<<<< HEAD
+	pool4_add(one->mark, one->proto, one->addr, &one->range,
+			&test_list);
+
+	pool4_add(two->mark, two->proto, two->addr, &two->range,
+			&test_list);
+
+	pool4_add(three->mark, three->proto, three->addr,
+			&three->range, &test_list);
+=======
 	struct pool4_entry *four = malloc(sizeof(*four));
 	four->mark = 4;
 	four->proto = 4;
@@ -101,6 +121,7 @@ int main()
 
 	//Checking if list is empty...
 	pool4_is_empty();
+>>>>>>> A.-Avalos
 
 	return 0;
 }

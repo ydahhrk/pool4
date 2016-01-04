@@ -26,6 +26,20 @@ struct pool4_entry {
 	struct port_range range;
 	struct list_hook list;
 };
+struct ipv4_transport_addr {
+	struct in_addr l3;
+
+	uint16_t l4;
+};
+
+struct client_mask_domain {
+
+		struct ipv4_transport_addr first;
+
+		unsigned int step;
+
+		unsigned int count;
+	};
 
 #define cpu_to_be32(x) x
 
