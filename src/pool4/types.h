@@ -27,8 +27,18 @@ struct pool4_entry {
 	struct list_hook list;
 };
 
+struct pool4_mask {
+		__u32 mark;
+		__u8 proto;
+		struct in_addr addr;
+		__u16 *port;
+	};
+
 #define cpu_to_be32(x) x
 
 #define ENOMEM 12    /* Out of memory */
+#define	ESRCH 3	    /* No such process */
 
 typedef enum { false, true } bool;
+
+

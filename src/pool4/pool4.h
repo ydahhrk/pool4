@@ -24,4 +24,7 @@ int pool4_count(void);
 
 void pool4_print_all(void);
 
+int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
+		struct pool4_entry *offset);
+
 #endif /* POOL4_H_ */

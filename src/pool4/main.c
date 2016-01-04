@@ -1,6 +1,31 @@
 #include "types.h"
 #include "pool4.h"
 
+int cb(struct pool4_entry *entry, void *arg)
+{
+	int *arg_int = arg;
+
+	/*
+	 * Nota que aquí estoy imprimiendo la dirección según
+	 * se hace en el kernel (%pI4).
+	 * En tu caso probablemente vas a tener que hacerlo
+	 * distinto.
+	 */
+	if (arg) {
+		printf("%pI4 %u-%u %d\n", &entry->addr.s_addr,
+				entry->range.min,
+				entry->range.max,
+				*arg_int);
+		(*arg_int)++;
+	} else {
+		printf("%pI4 %u-%u\n", &entry->addr.s_addr,
+				entry->range.min,
+				entry->range.max);
+	}
+
+	return 0;
+}
+
 int main()
 {
 	pool4_init();
@@ -33,7 +58,7 @@ int main()
 	four->range.min = 4;
 	four->range.max = 4;
 
-	//Adding 4 elements to the list: test_list
+	//Adding 4 elements to the list
 	printf("Adding 4 elements to the list...\n\n");
 	pool4_add(one->mark, one->proto, one->addr, &one->range);
 
@@ -93,6 +118,7 @@ int main()
 	pool4_print_all();
 	printf("\n");
 
+	/*
 	//Flushing the list...
 	printf("Flushing the list...\n");
 	pool4_flush();
@@ -101,6 +127,20 @@ int main()
 
 	//Checking if list is empty...
 	pool4_is_empty();
+	*/
+
+	int error;
+	int a = 12;
+
+	printf("%d\n", a);
+	error = pool4_foreach_sample(cb, &a, NULL);
+	if (error)
+		return error;
+	printf("%d\n\n", a);
+
+	error = pool4_foreach_sample(cb, NULL, four);
+	if (error)
+	 	return error;
 
 	return 0;
 }

@@ -46,7 +46,7 @@ static bool pool4_equals(struct pool4_entry *new, struct pool4_entry *old)
 
 static bool pool4_compare(struct pool4_entry *new, struct pool4_entry *old)
 {
-	if (new->proto == old->proto &&	new->addr.s_addr == old->addr.s_addr) {
+	if (new->proto == old->proto && new->addr.s_addr == old->addr.s_addr) {
 			return true;
 		} else {
 			return false;
@@ -173,5 +173,39 @@ int pool4_count(void)
 	list_for_each(iter, &pool4_list) {
 		counter++;
 	}
+
 	return counter;
 }
+
+int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
+		struct pool4_entry *offset)
+{
+	struct list_hook *iter;
+	struct pool4_entry *tmp;
+	int error = 0;
+
+	list_for_each(iter, &pool4_list) {
+		tmp = list_entry(iter, struct pool4_entry, list);
+
+		if(!offset) {
+			error = cb(tmp, arg);
+			if (error)
+				break;
+		} else if (pool4_equals(offset, tmp)) {
+			offset = NULL;
+		}
+	}
+
+	return offset ? -ESRCH : error;
+}
+
+
+
+
+
+
+
+
+
+
+
