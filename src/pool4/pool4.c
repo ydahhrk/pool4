@@ -183,36 +183,35 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 
 
 	struct list_hook *iter;
-		struct pool4_entry *pool4;
-		int error = 0;
-		int aux = 0;
-		int auxI = 0;
-		bool flag = false;
-		int i;
-		list_for_each(iter, &pool4_list) {
-			pool4 = list_entry(iter, struct pool4_entry, list);
-			if ((domain->first->l3.s_addr == pool4->addr.s_addr) || flag) {
-				if (!flag){
-					for (i = domain->first->l4; i <= pool4->range.max ; i++){
-						if(aux == n){
-							result->l3 = pool4->addr;
-							result->l4 = auxI;
-						}
-						aux++;
+	struct pool4_entry *pool4;
+	int error = 0;
+	int aux = 0;
+	int auxI = 0;
+	bool flag = false;
+	int i;
+	list_for_each(iter, &pool4_list) {
+		pool4 = list_entry(iter, struct pool4_entry, list);
+		if ((domain->first->l3.s_addr == pool4->addr.s_addr) || flag) {
+			if (!flag) {
+				for (i = domain->first->l4; i <= pool4->range.max ; i++) {
+					if (aux == n) {
+						result->l3 = pool4->addr;
+						result->l4 = auxI;
 					}
+					aux++;
 				}
-				else{
-					for (i = pool4->range.min; i <= pool4->range.max ; i++){
-						if(aux == n){
-							result->l3 = pool4->addr;
-							result->l4 = i;
-						}
-						aux++;
-					}
-				}
-				flag= true;
 			}
+			else{
+				for (i = pool4->range.min; i <= pool4->range.max ; i++) {
+					if (aux == n) {
+						result->l3 = pool4->addr;
+						result->l4 = i;
+					}
+					aux++;
+				}
+			}
+			flag= true;
 		}
-
-		return error;
+	}
+	return error;
 }
