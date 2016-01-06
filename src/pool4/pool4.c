@@ -196,7 +196,8 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 				for (i = domain->first->l4; i <= pool4->range.max ; i++) {
 					if (aux == n) {
 						result->l3 = pool4->addr;
-						result->l4 = auxI;
+						result->l4 = i;
+						break;
 					}
 					aux++;
 				}
@@ -206,12 +207,14 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 					if (aux == n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
+						break;
 					}
 					aux++;
 				}
 			}
-			flag= true;
+			flag = true;
 		}
 	}
+
 	return error;
 }
