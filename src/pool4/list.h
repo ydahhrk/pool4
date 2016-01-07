@@ -240,5 +240,28 @@ static inline void list_splice_init(struct list_hook *list,
 	     &pos->member != (head); 					\
 	     pos = n, n = list_entry(n->member.next, typeof(*n), member))
 
+/**
+ * list_next_entry - get the next element in list
+ * @pos:	the type * to cursor
+ * @member:	the name of the list_head within the struct.
+ */
+#define list_next_entry(pos, member) \
+	list_entry((pos)->member.next, typeof(*(pos)), member)
+
+/**
+ * list_for_each_entry_continue - continue iteration over list of given type
+ * @pos:	the type * to use as a loop cursor.
+ * @head:	the head for your list.
+ * @member:	the name of the list_head within the struct.
+ *
+ * Continue to iterate over list of given type, continuing after
+ * the current position.
+ */
+
+#define list_for_each_entry_continue(pos, head, member) \
+for (pos = list_entry(pos->member.next, typeof(*pos), member);  \
+              &pos->member != (head);                                    \
+              pos = list_entry(pos->member.next, typeof(*pos), member))
+
 
 #endif

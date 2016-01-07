@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdint.h>
 #include "list.h"
 
@@ -28,11 +29,17 @@ struct pool4_entry {
 };
 
 struct pool4_mask {
-		__u32 mark;
-		__u8 proto;
-		struct in_addr addr;
-		__u16 *port;
-	};
+	__u32 mark;
+	__u8 proto;
+	struct in_addr addr;
+	__u16 port;
+};
+
+static char *ip_to_str (unsigned int ip, char *buffer) {
+    sprintf (buffer, "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xff,
+        (ip >> 8) & 0xff, ip & 0xff);
+    return buffer;
+}
 
 #define cpu_to_be32(x) x
 
@@ -40,5 +47,3 @@ struct pool4_mask {
 #define	ESRCH 3	    /* No such process */
 
 typedef enum { false, true } bool;
-
-
