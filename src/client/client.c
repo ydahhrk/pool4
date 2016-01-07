@@ -33,13 +33,6 @@ int client_add(struct ipv6_prefix *prefix)
 
 	}
 	client->ipx = *prefix;
-	/* Functions not implemented within validate.(unlikely, log_err,...)
-	error = prefix6_validate(prefix);
-	if(error){
-		printf("Prefix not valid");
-		return error;
-	}
-	*/
 	list_add_tail(&(client->list_hook), &(client_hook));
 	return 0;
 }
@@ -136,8 +129,25 @@ int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
 	return offset ? -ESRCH : error;
 }
 
+void addr6_iterations(struct ipv6_client *client){
+	if (!(client->ipx.address.s6_addr32[3] == MAXipv6)) {
+		client->ipx.address.s6_addr32[3]++;
+	}else if (!(client->ipx.address.s6_addr32[2] == MAXipv6)) {
+		client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
+		client->ipx.address.s6_addr32[2]++;
+	}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
+		client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
+		client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
+		client->ipx.address.s6_addr32[1]++;
+	}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
+		client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
+		client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
+		client->ipx.address.s6_addr32[1] = cpu_to_be32(0X0);
+	}
+}
+
 int client_for_each(int (*cb)(struct in6_addr *, void *),
-		void *arg, unsigned int *offset)
+		void *arg, unsigned int offset)
 {
 
 	struct list_head *iter;
@@ -160,29 +170,12 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 		for (i = 0; i < pow(2, 128-client->ipx.len); i++){
 			if (offset)
 				client_index++;
-			 //if offset is different than a negative number
 			if (!offset) {
 				error = cb(&client->ipx.address,arg);
-				if (!(client->ipx.address.s6_addr32[3] == MAXipv6)) {
-					client->ipx.address.s6_addr32[3]++;
-				}else if (!(client->ipx.address.s6_addr32[2] == MAXipv6)) {
-					client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-					client->ipx.address.s6_addr32[2]++;
-				}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
-					client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-					client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
-					client->ipx.address.s6_addr32[1]++;
-				}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
-					client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-					client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
-					client->ipx.address.s6_addr32[1] = cpu_to_be32(0X0);
-				} else
-					return -EINVAL;
-
-
-			} else if (client_index == *offset){
+				addr6_iterations(client);
+			} else if (client_index == offset){
 				flag = true;
-				offset = NULL;
+				offset = 0;
 			}
 
 		}
@@ -194,21 +187,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 				client_index_aux++;
 				if (client_index_aux <= client_index){
 					error = cb(&client->ipx.address,arg);
-					if (!(client->ipx.address.s6_addr32[3] == MAXipv6)) {
-						client->ipx.address.s6_addr32[3]++;
-					}else if (!(client->ipx.address.s6_addr32[2] == MAXipv6)) {
-						client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-						client->ipx.address.s6_addr32[2]++;
-					}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
-						client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-						client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
-						client->ipx.address.s6_addr32[1]++;
-					}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
-						client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-						client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
-						client->ipx.address.s6_addr32[1] = cpu_to_be32(0X0);
-					} else
-						return -EINVAL;
+					addr6_iterations(client);
 				}
 			}
 		}

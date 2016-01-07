@@ -40,6 +40,17 @@ struct ipv4_transport_addr {
 	/** The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id). */
 	__u16 l4;
 };
+
+static char *ip4_to_str (unsigned int ip, char *buffer) {
+
+    sprintf (buffer, "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xff,
+
+        (ip >> 8) & 0xff, ip & 0xff);
+
+    return buffer;
+
+}
+
 #define cpu_to_be32(x) x
 
 #define ENOMEM 12    /* Out of memory */

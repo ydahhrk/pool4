@@ -18,7 +18,7 @@ int main()
 	two->addr.s_addr = cpu_to_be32(0xc0000201);
 	two->range.min = 2;
 	two->range.max = 2;
-
+/*
 	struct pool4_entry *three = malloc(sizeof(*three));
 	three->mark = 3;
 	three->proto = 3;
@@ -32,22 +32,23 @@ int main()
 	four->addr.s_addr = cpu_to_be32(0xc0000201);
 	four->range.min = 4;
 	four->range.max = 4;
-
+*/
 	//Adding 4 elements to the list: test_list
 	printf("Adding 4 elements to the list...\n\n");
 	pool4_add(one->mark, one->proto, one->addr, &one->range);
 
 	pool4_add(two->mark, two->proto, two->addr, &two->range);
 
-	pool4_add(three->mark, three->proto, three->addr, &three->range);
+	//pool4_add(three->mark, three->proto, three->addr, &three->range);
 
-	pool4_add(four->mark, four->proto, four->addr, &four->range);
+	//pool4_add(four->mark, four->proto, four->addr, &four->range);
 
 
 	struct client_mask_domain domain;
 
 	struct ipv4_transport_addr mask;
 	int error;
+	char addr[16];
 	domain.first = malloc(sizeof(domain.first));
 
 	domain.first->l3.s_addr = cpu_to_be32(0xc0000201);
@@ -55,10 +56,10 @@ int main()
 	domain.step = 1;
 	domain.count = 7;
 	error = pool4_get_nth_taddr(&domain, 5, &mask);
-	printf("%pI4 #%u\n", mask.l3.s_addr, mask.l4);
+	printf("%s #%u\n\n\n", ip_to_str(mask.l3.s_addr,addr), mask.l4);
 
 
-
+/*
 	//Checking if list is empty...
 	printf("Checking if the list is empty:\n");
 	pool4_is_empty();
@@ -120,7 +121,7 @@ int main()
 	//Checking if list is empty...
 	pool4_is_empty();
 
-
+*/
 
 	return 0;
 }
