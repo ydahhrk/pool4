@@ -186,7 +186,6 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 	struct pool4_entry *pool4;
 	int error = 0;
 	int aux = 0;
-	int auxI = 0;
 	bool flag = false;
 	int i;
 	list_for_each(iter, &pool4_list) {
