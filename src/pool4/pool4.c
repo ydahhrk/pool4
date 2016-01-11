@@ -259,62 +259,6 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 
 
 
-	/*
-	list_for_each(iter, &pool4_list) {
-		if (indx == offset) {
-			entry = list_entry(iter, struct pool4_entry, list);
-			for (i = entry->range.min; i <= entry->range.max; i++) {
-				mask.mark = entry->mark;
-				mask.proto = entry->proto;
-				mask.addr.s_addr = entry->addr.s_addr;
-				mask.port = i;
-				error = cback(&mask, arg);
-				if (error)
-					break;
-			}
-			break;
-		}
-		indx++;
-	}
-
-	list_for_each_entry_continue(entry, &pool4_list, list) {
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
-			error = cback(&mask, arg);
-			if (error)
-				break;
-		}
-	}
-
-
-
-	list_for_each(iter, &pool4_list) {
-		if (indx == 0)
-			break;
-		entry = list_entry(iter, struct pool4_entry, list);
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
-			error = cback(&mask, arg);
-			if (error)
-				break;
-		}
-
-		indx = indx - 1;
-	}
-	*/
-
-
-
-
-
-
-
 
 
 
