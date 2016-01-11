@@ -16,6 +16,11 @@ struct ipv6_client{
 
 struct list_head client_hook;
 
+static unsigned int get_addr6_count(struct ipv6_prefix *prefix)
+{
+	return 1 << (128-prefix->len);
+}
+
 void client_init()
 {
 	INIT_LIST_HEAD(&client_hook);
@@ -129,20 +134,20 @@ int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
 	return offset ? -ESRCH : error;
 }
 
-void addr6_iterations(struct ipv6_client *client){
-	if (!(client->ipx.address.s6_addr32[3] == MAXipv6)) {
-		client->ipx.address.s6_addr32[3]++;
-	}else if (!(client->ipx.address.s6_addr32[2] == MAXipv6)) {
-		client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-		client->ipx.address.s6_addr32[2]++;
-	}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
-		client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-		client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
-		client->ipx.address.s6_addr32[1]++;
-	}else if (!(client->ipx.address.s6_addr32[1] == MAXipv6)) {
-		client->ipx.address.s6_addr32[3] = cpu_to_be32(0x0);
-		client->ipx.address.s6_addr32[2] = cpu_to_be32(0x0);
-		client->ipx.address.s6_addr32[1] = cpu_to_be32(0X0);
+void addr6_iterations(struct in6_addr client){
+	if (!(client.s6_addr32[3] == MAXipv6)) {
+		client.s6_addr32[3]++;
+	}else if (!(client.s6_addr32[2] == MAXipv6)) {
+		client.s6_addr32[3] = cpu_to_be32(0x0);
+		client.s6_addr32[2]++;
+	}else if (!(client.s6_addr32[1] == MAXipv6)) {
+		client.s6_addr32[3] = cpu_to_be32(0x0);
+		client.s6_addr32[2] = cpu_to_be32(0x0);
+		client.s6_addr32[1]++;
+	}else if (!(client.s6_addr32[1] == MAXipv6)) {
+		client.s6_addr32[3] = cpu_to_be32(0x0);
+		client.s6_addr32[2] = cpu_to_be32(0x0);
+		client.s6_addr32[1] = cpu_to_be32(0X0);
 	}
 }
 
@@ -152,7 +157,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	struct list_head *iter;
 	struct ipv6_client *client;
-	struct ipv6_client dummy;
+	struct in6_addr *dummy = malloc(sizeof(*dummy));
 	bool flag = false;
 	int error = 0;
 	int i;
@@ -160,46 +165,48 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	int client_index = 0;
 	int client_index_aux = 0;
 
+
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
-		total_clients = total_clients + pow(2, 128- client->ipx.len);
+		total_clients = total_clients + get_addr6_count(client);
 
 	}
 
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
-		dummy.ipx.address = client->ipx.address; //Saving the original value of the address
-		for (i = 0; i < pow(2, 128-client->ipx.len); i++){
+		*dummy = client->ipx.address;
+		//Saving the original value of the address
+		for (i = 0; i < get_addr6_count(client); i++){
 			if (offset)
 				client_index++;
 			if (!offset) {
-				error = cb(&client->ipx.address,arg);
-				addr6_iterations(client);
+				error = cb(dummy,arg);
+				if (error)
+					return error;
+				addr6_iterations(*dummy);
 			} else if (client_index == offset){
 				flag = true;
 				offset = 0;
 			}
 
 		}
-		client->ipx.address = dummy.ipx.address;
 	}
 	if (flag){
 		list_for_each(iter, &client_hook){
 			client = list_entry(iter, struct ipv6_client, list_hook);
-			dummy.ipx.address = client->ipx.address;
-			for (i = 0; i < pow(2, 128-client->ipx.len); i++){
+			dummy = client->ipx.address;
+			for (i = 0; i < get_addr6_count(client); i++){
 				client_index_aux++;
 				if (client_index_aux <= client_index){
-					error = cb(&client->ipx.address,arg);
-					addr6_iterations(client);
+					error = cb(dummy,arg);
+					if (error)
+						return error;
+					addr6_iterations(*dummy);
 				}
 			}
-			client->ipx.address = dummy.ipx.address;
 		}
 	}
 
-
 	return offset ? -ESRCH : error;
-
 }
 
