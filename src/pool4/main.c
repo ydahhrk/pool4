@@ -18,14 +18,14 @@ int main()
 	two->addr.s_addr = cpu_to_be32(0xc0000201);
 	two->range.min = 2;
 	two->range.max = 2;
-/*
+
 	struct pool4_entry *three = malloc(sizeof(*three));
 	three->mark = 3;
 	three->proto = 3;
 	three->addr.s_addr = cpu_to_be32(0xc0000201);
 	three->range.min = 3;
 	three->range.max = 3;
-
+/*
 	struct pool4_entry *four = malloc(sizeof(*four));
 	four->mark = 4;
 	four->proto = 4;
@@ -39,7 +39,7 @@ int main()
 
 	pool4_add(two->mark, two->proto, two->addr, &two->range);
 
-	//pool4_add(three->mark, three->proto, three->addr, &three->range);
+	pool4_add(three->mark, three->proto, three->addr, &three->range);
 
 	//pool4_add(four->mark, four->proto, four->addr, &four->range);
 
