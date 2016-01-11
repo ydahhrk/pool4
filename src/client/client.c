@@ -152,6 +152,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	struct list_head *iter;
 	struct ipv6_client *client;
+	struct ipv6_client dummy;
 	bool flag = false;
 	int error = 0;
 	int i;
@@ -167,6 +168,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
+		dummy.ipx.address = client->ipx.address; //Saving the original value of the address
 		for (i = 0; i < pow(2, 128-client->ipx.len); i++){
 			if (offset)
 				client_index++;
@@ -179,10 +181,12 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 			}
 
 		}
+		client->ipx.address = dummy.ipx.address;
 	}
 	if (flag){
 		list_for_each(iter, &client_hook){
 			client = list_entry(iter, struct ipv6_client, list_hook);
+			dummy.ipx.address = client->ipx.address;
 			for (i = 0; i < pow(2, 128-client->ipx.len); i++){
 				client_index_aux++;
 				if (client_index_aux <= client_index){
@@ -190,6 +194,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 					addr6_iterations(client);
 				}
 			}
+			client->ipx.address = dummy.ipx.address;
 		}
 	}
 

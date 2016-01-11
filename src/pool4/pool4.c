@@ -196,7 +196,7 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 					if (aux == n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
-						break;
+						return error;
 					}
 					aux++;
 				}
@@ -206,7 +206,7 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 					if (aux == n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
-						break;
+						return error;
 					}
 					aux++;
 				}

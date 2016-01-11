@@ -56,7 +56,7 @@ int main()
 	domain.step = 1;
 	domain.count = 7;
 	error = pool4_get_nth_taddr(&domain, 5, &mask);
-	printf("%s #%u\n\n\n", ip_to_str(mask.l3.s_addr,addr), mask.l4);
+	printf("%s #%u\n\n\n", ip4_to_str(mask.l3.s_addr,addr), mask.l4);
 
 
 /*
