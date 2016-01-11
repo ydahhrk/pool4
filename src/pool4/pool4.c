@@ -250,7 +250,40 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 		}
 	}
 
-	return 0;
+	struct list_hook *iter;
+	struct pool4_entry *pool4;
+	int error = 0;
+	int aux = 0;
+	bool flag = false;
+	int i;
+	list_for_each(iter, &pool4_list) {
+		pool4 = list_entry(iter, struct pool4_entry, list);
+		if ((domain->first->l3.s_addr == pool4->addr.s_addr) || flag) {
+			if (!flag) {
+				for (i = domain->first->l4; i <= pool4->range.max ; i++) {
+					if (aux == n) {
+						result->l3 = pool4->addr;
+						result->l4 = i;
+						return error;
+					}
+					aux++;
+				}
+			}
+			else{
+				for (i = pool4->range.min; i <= pool4->range.max ; i++) {
+					if (aux == n) {
+						result->l3 = pool4->addr;
+						result->l4 = i;
+						return error;
+					}
+					aux++;
+				}
+			}
+			flag = true;
+		}
+	}
+
+	return error;
 }
 
 
