@@ -28,7 +28,6 @@ struct pool4_entry {
 	struct list_hook list;
 };
 
-<<<<<<< HEAD
 struct pool4_mask {
 	__u32 mark;
 	__u8 proto;
@@ -40,30 +39,6 @@ static char *ip_to_str (unsigned int ip, char *buffer) {
     sprintf (buffer, "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xff,
         (ip >> 8) & 0xff, ip & 0xff);
     return buffer;
-=======
-struct client_mask_domain {
-
-		struct ipv4_transport_addr *first;
-		unsigned int step;
-		unsigned int count;
-};
-
-struct ipv4_transport_addr {
-	/** The layer-3 identifier. */
-	struct in_addr l3;
-	/** The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id). */
-	__u16 l4;
-};
-
-static char *ip4_to_str (unsigned int ip, char *buffer) {
-
-    sprintf (buffer, "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xff,
-
-        (ip >> 8) & 0xff, ip & 0xff);
-
-    return buffer;
-
->>>>>>> refs/remotes/origin/Frutos
 }
 
 #define cpu_to_be32(x) x

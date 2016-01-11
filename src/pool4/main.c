@@ -1,6 +1,5 @@
 #include "types.h"
 #include "pool4.h"
-<<<<<<< HEAD
 
 
 int cb(struct pool4_entry *entry, void *arg)
@@ -39,8 +38,6 @@ int cback(struct pool4_mask *mask, void *arg)
 
 	return 0;
 }
-=======
->>>>>>> refs/remotes/origin/Frutos
 
 int main()
 {
@@ -50,13 +47,8 @@ int main()
 	one->mark = 1;
 	one->proto = 1;
 	one->addr.s_addr = cpu_to_be32(0xc0000201);
-<<<<<<< HEAD
 	one->range.min = 4;
 	one->range.max = 7;
-=======
-	one->range.min = 10;
-	one->range.max = 30;
->>>>>>> refs/remotes/origin/Frutos
 
 	struct pool4_entry *two = malloc(sizeof(*two));
 	two->mark = 2;
@@ -68,41 +60,24 @@ int main()
 	struct pool4_entry *three = malloc(sizeof(*three));
 	three->mark = 3;
 	three->proto = 3;
-<<<<<<< HEAD
 	three->addr.s_addr = cpu_to_be32(0xc0000280);
 	three->range.min = 253;
 	three->range.max = 256;
 
-=======
-	three->addr.s_addr = cpu_to_be32(0xc0000201);
-	three->range.min = 3;
-	three->range.max = 3;
-/*
->>>>>>> refs/remotes/origin/Frutos
 	struct pool4_entry *four = malloc(sizeof(*four));
 	four->mark = 4;
 	four->proto = 4;
 	four->addr.s_addr = cpu_to_be32(0xc0000201);
-<<<<<<< HEAD
 	four->range.min = 63;
 	four->range.max = 68;
 
 
-=======
-	four->range.min = 4;
-	four->range.max = 4;
-*/
-	//Adding 4 elements to the list: test_list
-	printf("Adding 4 elements to the list...\n\n");
-	pool4_add(one->mark, one->proto, one->addr, &one->range);
->>>>>>> refs/remotes/origin/Frutos
 
 
 	//Adding 4 elements to the list
 	printf("Adding 3 elements to the list...\n\n");
 	pool4_add(one->mark, one->proto, &one->addr, &one->range);
 
-<<<<<<< HEAD
 	pool4_add(two->mark, two->proto, &two->addr, &two->range);
 
 	pool4_add(three->mark, three->proto, &three->addr, &three->range);
@@ -112,27 +87,6 @@ int main()
 	pool4_print_all();
 	printf("\n");
 	/*
-=======
-	//pool4_add(four->mark, four->proto, four->addr, &four->range);
-
-
-	struct client_mask_domain domain;
-
-	struct ipv4_transport_addr mask;
-	int error;
-	char addr[16];
-	domain.first = malloc(sizeof(domain.first));
-
-	domain.first->l3.s_addr = cpu_to_be32(0xc0000201);
-	domain.first->l4 = 14;
-	domain.step = 1;
-	domain.count = 7;
-	error = pool4_get_nth_taddr(&domain, 5, &mask);
-	printf("%s #%u\n\n\n", ip4_to_str(mask.l3.s_addr,addr), mask.l4);
-
-
-/*
->>>>>>> refs/remotes/origin/Frutos
 	//Checking if list is empty...
 	printf("Checking if the list is empty:\n");
 	pool4_is_empty();
@@ -184,10 +138,6 @@ int main()
 	printf("\n");
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> refs/remotes/origin/Frutos
 	//Flushing the list...
 	printf("Flushing the list...\n");
 	pool4_flush();
@@ -196,12 +146,7 @@ int main()
 
 	//Checking if list is empty...
 	pool4_is_empty();
-<<<<<<< HEAD
 	*/
-=======
-
-*/
->>>>>>> refs/remotes/origin/Frutos
 
 
 	int error;
