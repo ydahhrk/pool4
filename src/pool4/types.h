@@ -35,7 +35,21 @@ struct pool4_mask {
 	__u16 port;
 };
 
-static char *ip_to_str (unsigned int ip, char *buffer) {
+struct ipv4_transport_addr {
+	/** The layer-3 identifier. */
+	struct in_addr l3;
+	/** The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id). */
+	__u16 l4;
+};
+
+struct client_mask_domain {
+	struct ipv4_transport_addr first;
+	unsigned int step;
+	unsigned int count;
+};
+
+static char *ip_to_str (unsigned int ip, char *buffer)
+{
     sprintf (buffer, "%d.%d.%d.%d", ip >> 24, (ip >> 16) & 0xff,
         (ip >> 8) & 0xff, ip & 0xff);
     return buffer;

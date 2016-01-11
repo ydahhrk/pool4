@@ -181,6 +181,23 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 	return offset ? -ESRCH : error;
 }
 
+static int taddr4_count()
+{
+	struct list_hook *iter;
+	struct pool4_entry *entry;
+	unsigned int entries = 0;
+	unsigned int i;
+
+	list_for_each(iter, &pool4_list) {
+		entry = list_entry(iter, struct pool4_entry, list);
+		for (i = entry->range.min; i <= entry->range.max; i++) {
+			entries++;
+		}
+	}
+
+	return entries;
+}
+
 int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 		unsigned int offset)
 {
@@ -192,16 +209,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	int indx = 0;
 	unsigned int i;
 
-	list_for_each(iter, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list);
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
-			entries++;
-		}
-	}
+	entries = taddr4_count();
 
 	printf("%d entries", entries);
 	printf("\n\n");
@@ -252,71 +260,3 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 
 	return 0;
 }
-
-
-
-
-
-
-
-	/*
-	list_for_each(iter, &pool4_list) {
-		if (indx == offset) {
-			entry = list_entry(iter, struct pool4_entry, list);
-			for (i = entry->range.min; i <= entry->range.max; i++) {
-				mask.mark = entry->mark;
-				mask.proto = entry->proto;
-				mask.addr.s_addr = entry->addr.s_addr;
-				mask.port = i;
-				error = cback(&mask, arg);
-				if (error)
-					break;
-			}
-			break;
-		}
-		indx++;
-	}
-
-	list_for_each_entry_continue(entry, &pool4_list, list) {
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
-			error = cback(&mask, arg);
-			if (error)
-				break;
-		}
-	}
-
-
-
-	list_for_each(iter, &pool4_list) {
-		if (indx == 0)
-			break;
-		entry = list_entry(iter, struct pool4_entry, list);
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
-			error = cback(&mask, arg);
-			if (error)
-				break;
-		}
-
-		indx = indx - 1;
-	}
-	*/
-
-
-
-
-
-
-
-
-
-
-
-
