@@ -12,7 +12,7 @@ struct pool4_entry {
 	__u8 proto;
 	struct in_addr addr;
 	struct port_range range;
-	struct list_hook list;
+	struct list_head list_hook;
 } pool4_dbase;
 =======
 #ifndef POOL4_H_

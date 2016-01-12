@@ -9,7 +9,7 @@
 struct pool4_entry pool4_list;
 =======
 
-struct list_hook pool4_list;
+struct list_head pool4_list;
 >>>>>>> refs/remotes/origin/A.-Avalos
 
 void pool4_init()
@@ -35,7 +35,7 @@ int pool4_add(__u32 mark, __u8 proto,  struct in_addr addr,
 	tmp->addr.s_addr = addr.s_addr;
 	tmp->range.min = range->min;
 	tmp->range.max = range->max;
-	list_add_tail(&(tmp->list), &(entry->list));
+	list_add_tail(&(tmp->list_hook), &(entry->list_hook));
 	return err;
 }
 
@@ -63,7 +63,7 @@ int pool4_add(__u32 mark, __u8 proto,  struct in_addr *addr,
 	add->addr.s_addr = addr->s_addr;
 	add->range.min = range->min;
 	add->range.max = range->max;
-	list_add_tail(&(add->list), &(pool4_list));
+	list_add_tail(&(add->list_hook), &(pool4_list));
 
 	return 0;
 }
@@ -94,8 +94,8 @@ static bool pool4_compare(struct pool4_entry *one, struct pool4_entry *two)
 int pool4_rm(__u32 mark, __u8 proto, struct in_addr addr,
 		struct port_range *range, struct pool4_entry *entry)
 {
-	struct list_hook *iter;
-	struct list_hook *tmp;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry *tmp1;
 	struct pool4_entry *tmp2;
 	int err;
@@ -113,10 +113,10 @@ int pool4_rm(__u32 mark, __u8 proto, struct in_addr addr,
 	tmp1->range.min = range->min;
 	tmp1->range.max = range->max;
 
-	list_for_each_safe(iter, tmp, &entry->list) {
-		tmp2 = list_entry(iter, struct pool4_entry, list);
+	list_for_each_safe(iter, tmp, &entry->list_hook) {
+		tmp2 = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_entry_equals(*tmp1, *tmp2)) {
-			list_del(&tmp2->list);
+			list_del(&tmp2->list_hook);
 			free(tmp1);
 			free(tmp2);
 		}
@@ -129,8 +129,8 @@ int pool4_flush(struct pool4_entry *entry)
 int pool4_rm(__u32 mark, __u8 proto, struct in_addr *addr,
 		struct port_range *range)
 {
-	struct list_hook *iter;
-	struct list_hook *tmp;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry rm;
 	struct pool4_entry *exist;
 
@@ -141,9 +141,9 @@ int pool4_rm(__u32 mark, __u8 proto, struct in_addr *addr,
 	rm.range.max = range->max;
 
 	list_for_each_safe(iter, tmp, &pool4_list) {
-		exist = list_entry(iter, struct pool4_entry, list);
+		exist = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_equals(&rm, exist)) {
-			list_del(&exist->list);
+			list_del(&exist->list_hook);
 			free(exist);
 		}
 	}
@@ -156,8 +156,8 @@ int pool4_flush(void)
 {
 	printf("List flushed.\n\n");
 	int err;
-	struct list_hook *iter;
-	struct list_hook *tmp;
+	struct list_head *iter;
+	struct list_head *tmp;
 <<<<<<< HEAD
 	struct pool4_entry *tmpx;
 
@@ -168,8 +168,8 @@ int pool4_flush(void)
 			err = 0;
 		}
 
-	list_for_each_safe(iter, tmp, &entry->list) {
-		tmpx = list_entry(iter, struct pool4_entry, list);
+	list_for_each_safe(iter, tmp, &entry->list_hook) {
+		tmpx = list_entry(iter, struct pool4_entry, list_hook);
 		list_del(iter);
 		free(tmpx);
 	}
@@ -180,7 +180,7 @@ bool pool4_is_empty(struct pool4_entry *entry)
 {
 	bool empty;
 
-	if (!list_empty(&entry->list)){
+	if (!list_empty(&entry->list_hook)){
 		empty = false;
 		printf("It is not empty.\n\n");
 	} else {
@@ -190,7 +190,7 @@ bool pool4_is_empty(struct pool4_entry *entry)
 	struct pool4_entry *entry;
 
 	list_for_each_safe(iter, tmp, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list);
+		entry = list_entry(iter, struct pool4_entry, list_hook);
 		list_del(iter);
 		free(entry);
 	}
@@ -211,13 +211,13 @@ bool pool4_is_empty(void)
 void pool4_print_all(void)
 {
 	printf("Elements in the list:\n\n");
-	struct list_hook *iter;
-	struct list_hook *tmp;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry *entry;
 	char addr[16];
 
 	list_for_each_safe(iter, tmp, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list);
+		entry = list_entry(iter, struct pool4_entry, list_hook);
 		printf("%u, ", entry->mark);
 		printf("%u, ", entry->proto);
 		printf("%s, ", ip_to_str(entry->addr.s_addr, addr));
@@ -230,12 +230,12 @@ void pool4_print_all(void)
 void pool4_print_all(struct pool4_entry *entry)
 {
 	printf("Elements in the list:\n\n");
-	struct list_hook *iter;
-	struct list_hook *tmp;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry *tmpx;
 
-	list_for_each_safe(iter, tmp, &entry->list) {
-		tmpx = list_entry(iter, struct pool4_entry, list);
+	list_for_each_safe(iter, tmp, &entry->list_hook) {
+		tmpx = list_entry(iter, struct pool4_entry, list_hook);
 		printf("%u, ", tmpx->mark);
 		printf("%u, ", tmpx->proto);
 		printf("%pI4, ", &tmpx->addr.s_addr);
@@ -280,8 +280,8 @@ bool pool4_contains(struct pool4_entry new, struct pool4_entry *entry)
 bool pool4_contains(__u32 mark, __u8 proto, struct in_addr *addr,
 		struct port_range *range)
 {
-	struct list_hook *iter;
-	struct list_hook *tmp;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry requested;
 	struct pool4_entry *listed;
 
@@ -292,7 +292,7 @@ bool pool4_contains(__u32 mark, __u8 proto, struct in_addr *addr,
 	requested.range.max = range->max;
 
 	list_for_each_safe(iter, tmp, &pool4_list) {
-		listed = list_entry(iter, struct pool4_entry, list);
+		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
 			printf("It is in the list.\n\n");
 			return true;
@@ -306,7 +306,7 @@ bool pool4_contains(__u32 mark, __u8 proto, struct in_addr *addr,
 int pool4_count(void)
 {
 
-	struct list_hook *iter;
+	struct list_head *iter;
 	int counter = 0;
 
 	list_for_each(iter, &pool4_list) {
@@ -319,12 +319,12 @@ int pool4_count(void)
 int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 		struct pool4_entry *offset)
 {
-	struct list_hook *iter;
+	struct list_head *iter;
 	struct pool4_entry *tmp;
 	int error = 0;
 
 	list_for_each(iter, &pool4_list) {
-		tmp = list_entry(iter, struct pool4_entry, list);
+		tmp = list_entry(iter, struct pool4_entry, list_hook);
 
 		if(!offset) {
 			error = cb(tmp, arg);
@@ -341,7 +341,7 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 		unsigned int offset)
 {
-	struct list_hook *iter;
+	struct list_head *iter;
 	struct pool4_mask mask;
 	struct pool4_entry *entry;
 	int error = 0;
@@ -350,7 +350,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	unsigned int i;
 
 	list_for_each(iter, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list);
+		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
 			mask.mark = entry->mark;
 			mask.proto = entry->proto;
@@ -368,7 +368,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	}
 
 	list_for_each(iter, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list);
+		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
 			mask.mark = entry->mark;
 			mask.proto = entry->proto;
@@ -391,7 +391,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	list_for_each(iter, &pool4_list) {
 		if (offset == 0)
 			break;
-		entry = list_entry(iter, struct pool4_entry, list);
+		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
 			mask.mark = entry->mark;
 			mask.proto = entry->proto;
