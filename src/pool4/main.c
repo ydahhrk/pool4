@@ -129,7 +129,7 @@ int main()
 
 
 	//Adding 4 elements to the list
-	printf("Adding 3 elements to the list...\n\n");
+	printf("Adding 4 elements to the list...\n\n");
 	pool4_add(one->mark, one->proto, &one->addr, &one->range);
 
 	pool4_add(two->mark, two->proto, &two->addr, &two->range);

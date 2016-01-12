@@ -10,6 +10,9 @@ struct pool4_entry pool4_list;
 =======
 
 struct list_head pool4_list;
+<<<<<<< HEAD
+>>>>>>> refs/remotes/origin/A.-Avalos
+=======
 >>>>>>> refs/remotes/origin/A.-Avalos
 
 void pool4_init()
@@ -154,6 +157,7 @@ int pool4_rm(__u32 mark, __u8 proto, struct in_addr *addr,
 int pool4_flush(void)
 >>>>>>> refs/remotes/origin/A.-Avalos
 {
+<<<<<<< HEAD
 	printf("List flushed.\n\n");
 	int err;
 	struct list_head *iter;
@@ -187,6 +191,10 @@ bool pool4_is_empty(struct pool4_entry *entry)
 		empty = true;
 		printf("It is empty.\n\n");
 =======
+=======
+	struct list_head *iter;
+	struct list_head *tmp;
+>>>>>>> refs/remotes/origin/A.-Avalos
 	struct pool4_entry *entry;
 
 	list_for_each_safe(iter, tmp, &pool4_list) {
@@ -229,6 +237,7 @@ void pool4_print_all(void)
 <<<<<<< HEAD
 void pool4_print_all(struct pool4_entry *entry)
 {
+<<<<<<< HEAD
 	printf("Elements in the list:\n\n");
 	struct list_head *iter;
 	struct list_head *tmp;
@@ -280,6 +289,8 @@ bool pool4_contains(struct pool4_entry new, struct pool4_entry *entry)
 bool pool4_contains(__u32 mark, __u8 proto, struct in_addr *addr,
 		struct port_range *range)
 {
+=======
+>>>>>>> refs/remotes/origin/A.-Avalos
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry requested;
@@ -338,6 +349,27 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 	return offset ? -ESRCH : error;
 }
 
+static int taddr4_count()
+{
+	struct list_head *iter;
+<<<<<<< HEAD
+	struct pool4_mask mask;
+=======
+>>>>>>> refs/remotes/origin/A.-Avalos
+	struct pool4_entry *entry;
+	unsigned int entries = 0;
+	unsigned int i;
+
+	list_for_each(iter, &pool4_list) {
+		entry = list_entry(iter, struct pool4_entry, list_hook);
+		for (i = entry->range.min; i <= entry->range.max; i++) {
+			entries++;
+		}
+	}
+
+	return entries;
+}
+
 int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 		unsigned int offset)
 {
@@ -349,20 +381,8 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	int indx = 0;
 	unsigned int i;
 
-	list_for_each(iter, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list_hook);
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
-			entries++;
-		}
-	}
-
-	printf("%d entries", entries);
-	printf("\n\n");
-
+	entries = taddr4_count();
+	printf("%d entries\n\n", entries);
 	if (offset > entries) {
 		offset = offset % entries;
 	}
@@ -377,16 +397,13 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 			if (indx >= offset){
 				error = cback(&mask, arg);
 				if (error) {
-					break;
+					return error;
 				}
 			}
 			indx++;
 		}
 	}
-
 	indx = 0;
-	if (error)
-		return error;
 
 	list_for_each(iter, &pool4_list) {
 		if (offset == 0)
@@ -400,7 +417,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 			if (indx < offset) {
 				error = cback(&mask, arg);
 				if (error) {
-					break;
+					return error;
 				}
 			}
 			indx++;
@@ -409,6 +426,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 
 	return 0;
 }
+<<<<<<< HEAD
 
 
 
@@ -421,4 +439,6 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 
 
 
+>>>>>>> refs/remotes/origin/A.-Avalos
+=======
 >>>>>>> refs/remotes/origin/A.-Avalos
