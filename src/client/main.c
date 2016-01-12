@@ -132,6 +132,12 @@ int main()
 
 	printf("%d\n", i);
 
+	error = client_for_each(callback, &i, 0);
+
+	if(error)
+		return error;
+	printf("%d\n", i);
+
 
 	return 0;
 }
