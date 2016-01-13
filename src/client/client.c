@@ -134,9 +134,11 @@ int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
 	return offset ? -ESRCH : error;
 }
 
-void addr6_iterations(struct in6_addr client){
+void addr6_iterations(struct in6_addr client)
+{
 	if (!(client.s6_addr32[3] == MAXipv6)) {
 		client.s6_addr32[3]++;
+		prinf("debug");
 	}else if (!(client.s6_addr32[2] == MAXipv6)) {
 		client.s6_addr32[3] = cpu_to_be32(0x0);
 		client.s6_addr32[2]++;
@@ -162,7 +164,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	int error = 0;
 	int i;
 	int total_clients = 0;
-	int client_index = 0;
+	int client_index = offset;
 	int client_index_aux = 0;
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
@@ -170,42 +172,41 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	}
 
+	offset = offset%total_clients;
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
 		*dummy = client->ipx.address;
-		//Saving the original value of the address
-		for (i = 0; i < get_addr6_count(&client->ipx); i++){
-			if (offset)
-				client_index++;
-			if (!offset) {
-				error = cb(dummy,arg);
-				if(error)
-					return error;
-				addr6_iterations(*dummy);
-			} else if (client_index == offset){
+		/*Saving the original value of the address */
+		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+			if (offset == 0) {
 				flag = true;
-				offset = 0;
+				addr6_iterations(*dummy);
+				error = cb(dummy, arg);
+				if (error)
+					return error;
+			} else {
+				printf("%d\n", offset);
+				offset--;
 			}
-
 		}
+
 	}
+
 	if (flag){
 		list_for_each(iter, &client_hook){
 			client = list_entry(iter, struct ipv6_client, list_hook);
 			*dummy = client->ipx.address;
-			for (i = 0; i < get_addr6_count(&client->ipx); i++){
+			for (i = 0; i < get_addr6_count(&client->ipx); i++) {
 				client_index_aux++;
-				if (client_index_aux <= client_index){
+				if (client_index_aux <= client_index) {
 					error = cb(dummy,arg);
-					if(error)
+					if (error)
 						return error;
 					addr6_iterations(*dummy);
 				}
 			}
 		}
 	}
-
-
 	return offset ? -ESRCH : error;
 
 }
