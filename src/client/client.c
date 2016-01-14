@@ -201,7 +201,8 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 					if (error)
 						return error;
 					addr6_iterations(dummy);
-				}
+				} else
+					return error;
 				client_index_aux++;
 			}
 		}
@@ -209,3 +210,4 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	return offset ? -ESRCH : error;
 
 }
+

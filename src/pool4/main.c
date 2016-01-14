@@ -10,29 +10,30 @@ int main()
 	one->proto = 1;
 	one->addr.s_addr = cpu_to_be32(0xc0000201);
 	one->range.min = 10;
-	one->range.max = 30;
+	one->range.max = 20;
 
 	struct pool4_entry *two = malloc(sizeof(*two));
 	two->mark = 2;
 	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000201);
-	two->range.min = 2;
-	two->range.max = 2;
+	two->addr.s_addr = cpu_to_be32(0xc0000202);
+	two->range.min = 30;
+	two->range.max = 40;
 
 	struct pool4_entry *three = malloc(sizeof(*three));
 	three->mark = 3;
 	three->proto = 3;
 	three->addr.s_addr = cpu_to_be32(0xc0000201);
-	three->range.min = 3;
-	three->range.max = 3;
-/*
+	three->range.min = 50;
+	three->range.max = 60;
+
+
 	struct pool4_entry *four = malloc(sizeof(*four));
 	four->mark = 4;
 	four->proto = 4;
 	four->addr.s_addr = cpu_to_be32(0xc0000201);
-	four->range.min = 4;
-	four->range.max = 4;
-*/
+	four->range.min = 70;
+	four->range.max = 80;
+
 	//Adding 4 elements to the list: test_list
 	printf("Adding 4 elements to the list...\n\n");
 	pool4_add(one->mark, one->proto, one->addr, &one->range);
@@ -41,7 +42,7 @@ int main()
 
 	pool4_add(three->mark, three->proto, three->addr, &three->range);
 
-	//pool4_add(four->mark, four->proto, four->addr, &four->range);
+	pool4_add(four->mark, four->proto, four->addr, &four->range);
 
 
 	struct client_mask_domain domain;
