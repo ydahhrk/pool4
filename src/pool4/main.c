@@ -30,7 +30,7 @@ int main()
 	struct pool4_entry *four = malloc(sizeof(*four));
 	four->mark = 4;
 	four->proto = 4;
-	four->addr.s_addr = cpu_to_be32(0xc0000201);
+	four->addr.s_addr = cpu_to_be32(0xc0000203);
 	four->range.min = 70;
 	four->range.max = 80;
 
@@ -53,10 +53,10 @@ int main()
 	domain.first = malloc(sizeof(domain.first));
 
 	domain.first->l3.s_addr = cpu_to_be32(0xc0000201);
-	domain.first->l4 = 14;
-	domain.step = 1;
-	domain.count = 7;
-	error = pool4_get_nth_taddr(&domain, 5, &mask);
+	domain.first->l4 = 55;
+	domain.step = 3;
+	domain.count = 4;
+	pool4_get_nth_taddr(&domain, 10, &mask);
 	printf("%s #%u\n\n\n", ip4_to_str(mask.l3.s_addr,addr), mask.l4);
 
 
