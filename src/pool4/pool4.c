@@ -167,6 +167,7 @@ bool pool4_contains(__u32 mark, __u8 proto, struct in_addr addr,
 int pool4_count(void)
 {
 
+
 	struct list_hook *iter;
 	int counter = 0;
 
@@ -181,18 +182,23 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 			struct ipv4_transport_addr *result)
 {
 
-
 	struct list_hook *iter;
 	struct pool4_entry *pool4;
 	int error = 0;
 	int aux = 0;
 	bool flag = false;
 	int i;
+	n = n % domain->count;
 	list_for_each(iter, &pool4_list) {
 		pool4 = list_entry(iter, struct pool4_entry, list);
-		if ((domain->first->l3.s_addr == pool4->addr.s_addr) || flag) {
+		if (((domain->first->l3.s_addr == pool4->addr.s_addr) &&
+				(pool4->range.min < domain->first->l4) &&
+				(pool4->range.max > domain->first->l4))
+				|| flag) {
 			if (!flag) {
-				for (i = domain->first->l4; i <= pool4->range.max ; i++) {
+				for (i = domain->first->l4;
+						i <= pool4->range.max;
+						i += domain->step) {
 					if (aux == n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
@@ -200,9 +206,12 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 					}
 					aux++;
 				}
+				flag = true;
 			}
 			else{
-				for (i = pool4->range.min; i <= pool4->range.max ; i++) {
+				for (i = pool4->range.min;
+						i <= pool4->range.max;
+						i += domain->step) {
 					if (aux == n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
@@ -211,9 +220,8 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 					aux++;
 				}
 			}
-			flag = true;
+
 		}
 	}
-
 	return error;
 }
