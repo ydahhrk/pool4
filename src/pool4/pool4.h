@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "types.h"
 
 
 void pool4_init();
@@ -26,6 +27,8 @@ void pool4_print_all(void);
 
 int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 		struct pool4_entry *offset);
+
+int taddr4_count();
 
 int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 		unsigned int offset);

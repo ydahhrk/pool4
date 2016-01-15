@@ -6,6 +6,7 @@
 #include "client.h"
 #include "errno.h"
 #include <math.h>
+#include "..\pool4\pool4.h"
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 

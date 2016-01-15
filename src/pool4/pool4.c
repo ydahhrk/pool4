@@ -181,7 +181,7 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 	return offset ? -ESRCH : error;
 }
 
-static int taddr4_count()
+int taddr4_count()
 {
 	struct list_head *iter;
 	struct pool4_entry *entry;
