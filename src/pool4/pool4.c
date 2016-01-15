@@ -5,53 +5,14 @@
 #include "list.h"
 #include "pool4.h"
 
-<<<<<<< HEAD
-struct pool4_entry pool4_list;
-=======
 
 struct list_head pool4_list;
-<<<<<<< HEAD
->>>>>>> refs/remotes/origin/A.-Avalos
-=======
->>>>>>> refs/remotes/origin/A.-Avalos
 
 void pool4_init()
 {
 	INIT_LIST_HEAD(&pool4_list);
 }
 
-<<<<<<< HEAD
-int pool4_add(__u32 mark, __u8 proto,  struct in_addr addr,
-		struct port_range *range, struct pool4_entry *entry)
-{
-	int err;
-	struct pool4_entry *tmp;
-	tmp = malloc(sizeof(struct pool4_entry));
-	if (!tmp) {
-		err = -ENOMEM;
-	} else {
-		err = 0;
-	}
-
-	tmp->mark = mark;
-	tmp->proto = proto;
-	tmp->addr.s_addr = addr.s_addr;
-	tmp->range.min = range->min;
-	tmp->range.max = range->max;
-	list_add_tail(&(tmp->list_hook), &(entry->list_hook));
-	return err;
-}
-
-static bool pool4_entry_equals(struct pool4_entry new, struct pool4_entry old)
-{
-	bool equals;
-
-	if (new.mark == old.mark && new.proto == old.proto &&
-			new.addr.s_addr == old.addr.s_addr &&
-			new.range.max == old.range.max &&
-			new.range.min == old.range.min) {
-		equals = true;
-=======
 int pool4_add(__u32 mark, __u8 proto,  struct in_addr *addr,
 		struct port_range *range)
 {
@@ -87,48 +48,11 @@ static bool pool4_compare(struct pool4_entry *one, struct pool4_entry *two)
 {
 	if (one->proto == two->proto && one->addr.s_addr == two->addr.s_addr) {
 		return true;
->>>>>>> refs/remotes/origin/A.-Avalos
 	} else {
 		return false;
 	}
 }
 
-<<<<<<< HEAD
-int pool4_rm(__u32 mark, __u8 proto, struct in_addr addr,
-		struct port_range *range, struct pool4_entry *entry)
-{
-	struct list_head *iter;
-	struct list_head *tmp;
-	struct pool4_entry *tmp1;
-	struct pool4_entry *tmp2;
-	int err;
-
-	tmp1 = malloc(sizeof(struct pool4_entry));
-	if (!tmp1) {
-		err = -ENOMEM;
-	} else {
-		err = 0;
-	}
-
-	tmp1->mark = mark;
-	tmp1->proto = proto;
-	tmp1->addr.s_addr = addr.s_addr;
-	tmp1->range.min = range->min;
-	tmp1->range.max = range->max;
-
-	list_for_each_safe(iter, tmp, &entry->list_hook) {
-		tmp2 = list_entry(iter, struct pool4_entry, list_hook);
-		if (pool4_entry_equals(*tmp1, *tmp2)) {
-			list_del(&tmp2->list_hook);
-			free(tmp1);
-			free(tmp2);
-		}
-	}
-	return err;
-}
-
-int pool4_flush(struct pool4_entry *entry)
-=======
 int pool4_rm(__u32 mark, __u8 proto, struct in_addr *addr,
 		struct port_range *range)
 {
@@ -155,46 +79,9 @@ int pool4_rm(__u32 mark, __u8 proto, struct in_addr *addr,
 }
 
 int pool4_flush(void)
->>>>>>> refs/remotes/origin/A.-Avalos
 {
-<<<<<<< HEAD
-	printf("List flushed.\n\n");
-	int err;
 	struct list_head *iter;
 	struct list_head *tmp;
-<<<<<<< HEAD
-	struct pool4_entry *tmpx;
-
-	tmpx = malloc(sizeof(struct pool4_entry));
-		if (!tmpx) {
-			err = -ENOMEM;
-		} else {
-			err = 0;
-		}
-
-	list_for_each_safe(iter, tmp, &entry->list_hook) {
-		tmpx = list_entry(iter, struct pool4_entry, list_hook);
-		list_del(iter);
-		free(tmpx);
-	}
-	return err;
-}
-
-bool pool4_is_empty(struct pool4_entry *entry)
-{
-	bool empty;
-
-	if (!list_empty(&entry->list_hook)){
-		empty = false;
-		printf("It is not empty.\n\n");
-	} else {
-		empty = true;
-		printf("It is empty.\n\n");
-=======
-=======
-	struct list_head *iter;
-	struct list_head *tmp;
->>>>>>> refs/remotes/origin/A.-Avalos
 	struct pool4_entry *entry;
 
 	list_for_each_safe(iter, tmp, &pool4_list) {
@@ -230,67 +117,12 @@ void pool4_print_all(void)
 		printf("%u, ", entry->proto);
 		printf("%s, ", ip_to_str(entry->addr.s_addr, addr));
 		printf("%u-%u\n", entry->range.min, entry->range.max);
->>>>>>> refs/remotes/origin/A.-Avalos
 	}
 }
 
-<<<<<<< HEAD
-void pool4_print_all(struct pool4_entry *entry)
-{
-<<<<<<< HEAD
-	printf("Elements in the list:\n\n");
-	struct list_head *iter;
-	struct list_head *tmp;
-	struct pool4_entry *tmpx;
-
-	list_for_each_safe(iter, tmp, &entry->list_hook) {
-		tmpx = list_entry(iter, struct pool4_entry, list_hook);
-		printf("%u, ", tmpx->mark);
-		printf("%u, ", tmpx->proto);
-		printf("%pI4, ", &tmpx->addr.s_addr);
-		printf("%u-%u\n", tmpx->range.min, tmpx->range.max);
-	}
-}
-
-//In construction...
-/*
-bool pool4_contains(struct pool4_entry new, struct pool4_entry *entry)
-{
-	bool found = false;
-	int err;
-	struct list_hook *iter;
-	struct list_hook *tmp;
-	struct pool4_entry *tmp1;
-	struct pool4_entry *tmp2;
-
-	tmp1 = malloc(sizeof(struct pool4_entry));
-	if (!tmp1){
-		err = -ENOMEM;
-	} else {
-		err = 0;
-	}
-
-	tmp1->mark = new.mark;
-	tmp1->proto = new.proto;
-	tmp1->addr.s_addr = new.addr.s_addr;
-	tmp1->range.min = new.range.min;
-	tmp1->range.max = new.range.max;
-
-	list_for_each_safe(iter, tmp, &entry->list){
-		tmp2 = list_entry(iter, struct pool4_entry, list);
-		if (pool4_entry_equals(*tmp1, *tmp2)){
-			found = true;
-		}
-	}
-	return found;
-}
-*/
-=======
 bool pool4_contains(__u32 mark, __u8 proto, struct in_addr *addr,
 		struct port_range *range)
 {
-=======
->>>>>>> refs/remotes/origin/A.-Avalos
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry requested;
@@ -349,13 +181,9 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 	return offset ? -ESRCH : error;
 }
 
-int taddr4_count()
+static int taddr4_count()
 {
 	struct list_head *iter;
-<<<<<<< HEAD
-	struct pool4_mask mask;
-=======
->>>>>>> refs/remotes/origin/A.-Avalos
 	struct pool4_entry *entry;
 	unsigned int entries = 0;
 	unsigned int i;
@@ -426,19 +254,3 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 
 	return 0;
 }
-<<<<<<< HEAD
-
-
-
-
-
-
-
-
-
-
-
-
->>>>>>> refs/remotes/origin/A.-Avalos
-=======
->>>>>>> refs/remotes/origin/A.-Avalos
