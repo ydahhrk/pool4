@@ -54,19 +54,31 @@ int main()
 	one->mark = 1;
 	one->proto = 1;
 	one->addr.s_addr = cpu_to_be32(0xc0000201);
+<<<<<<< HEAD
 	one->range.min = 4;
 	one->range.max = 7;
+=======
+	one->range.min = 10;
+	one->range.max = 20;
+>>>>>>> refs/remotes/origin/Frutos
 
 	struct pool4_entry *two = malloc(sizeof(*two));
 	two->mark = 2;
 	two->proto = 2;
+<<<<<<< HEAD
 	two->addr.s_addr = cpu_to_be32(0xc0000232);
 	two->range.min = 100;
 	two->range.max = 100;
+=======
+	two->addr.s_addr = cpu_to_be32(0xc0000202);
+	two->range.min = 30;
+	two->range.max = 40;
+>>>>>>> refs/remotes/origin/Frutos
 
 	struct pool4_entry *three = malloc(sizeof(*three));
 	three->mark = 3;
 	three->proto = 3;
+<<<<<<< HEAD
 	three->addr.s_addr = cpu_to_be32(0xc0000280);
 	three->range.min = 253;
 	three->range.max = 256;
@@ -123,9 +135,32 @@ int main()
 	four->addr.s_addr = cpu_to_be32(0xc0000201);
 	four->range.min = 63;
 	four->range.max = 68;
+=======
+	three->addr.s_addr = cpu_to_be32(0xc0000201);
+	three->range.min = 50;
+	three->range.max = 60;
 
 
+	struct pool4_entry *four = malloc(sizeof(*four));
+	four->mark = 4;
+	four->proto = 4;
+	four->addr.s_addr = cpu_to_be32(0xc0000203);
+	four->range.min = 70;
+	four->range.max = 80;
+
+	//Adding 4 elements to the list: test_list
+	printf("Adding 4 elements to the list...\n\n");
+	pool4_add(one->mark, one->proto, one->addr, &one->range);
+
+	pool4_add(two->mark, two->proto, two->addr, &two->range);
+>>>>>>> refs/remotes/origin/Frutos
+
+
+<<<<<<< HEAD
 >>>>>>> refs/remotes/origin/A.-Avalos
+=======
+	pool4_add(four->mark, four->proto, four->addr, &four->range);
+>>>>>>> refs/remotes/origin/Frutos
 
 
 	//Adding 4 elements to the list
@@ -134,7 +169,16 @@ int main()
 
 	pool4_add(two->mark, two->proto, &two->addr, &two->range);
 
+<<<<<<< HEAD
 	pool4_add(three->mark, three->proto, &three->addr, &three->range);
+=======
+	domain.first->l3.s_addr = cpu_to_be32(0xc0000201);
+	domain.first->l4 = 55;
+	domain.step = 3;
+	domain.count = 4;
+	pool4_get_nth_taddr(&domain, 10, &mask);
+	printf("%s #%u\n\n\n", ip4_to_str(mask.l3.s_addr,addr), mask.l4);
+>>>>>>> refs/remotes/origin/Frutos
 
 	pool4_add(four->mark, four->proto, &four->addr, &four->range);
 

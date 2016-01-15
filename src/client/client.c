@@ -135,20 +135,21 @@ int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
 	return offset ? -ESRCH : error;
 }
 
-void addr6_iterations(struct in6_addr client){
-	if (!(client.s6_addr32[3] == MAXipv6)) {
-		client.s6_addr32[3]++;
-	}else if (!(client.s6_addr32[2] == MAXipv6)) {
-		client.s6_addr32[3] = cpu_to_be32(0x0);
-		client.s6_addr32[2]++;
-	}else if (!(client.s6_addr32[1] == MAXipv6)) {
-		client.s6_addr32[3] = cpu_to_be32(0x0);
-		client.s6_addr32[2] = cpu_to_be32(0x0);
-		client.s6_addr32[1]++;
-	}else if (!(client.s6_addr32[1] == MAXipv6)) {
-		client.s6_addr32[3] = cpu_to_be32(0x0);
-		client.s6_addr32[2] = cpu_to_be32(0x0);
-		client.s6_addr32[1] = cpu_to_be32(0X0);
+void addr6_iterations(struct in6_addr *client)
+{
+	if (!(client->s6_addr32[3] == MAXipv6)) {
+		client->s6_addr32[3]++;
+	}else if (!(client->s6_addr32[2] == MAXipv6)) {
+		client->s6_addr32[3] = cpu_to_be32(0x0);
+		client->s6_addr32[2]++;
+	}else if (!(client->s6_addr32[1] == MAXipv6)) {
+		client->s6_addr32[3] = cpu_to_be32(0x0);
+		client->s6_addr32[2] = cpu_to_be32(0x0);
+		client->s6_addr32[1]++;
+	}else if (!(client->s6_addr32[1] == MAXipv6)) {
+		client->s6_addr32[3] = cpu_to_be32(0x0);
+		client->s6_addr32[2] = cpu_to_be32(0x0);
+		client->s6_addr32[1] = cpu_to_be32(0X0);
 	}
 }
 
@@ -163,7 +164,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	int error = 0;
 	int i;
 	int total_clients = 0;
-	int client_index = 0;
+	int client_index;
 	int client_index_aux = 0;
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
@@ -171,46 +172,47 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 	}
 
+	offset = offset%total_clients;
+	client_index = offset;
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
 		*dummy = client->ipx.address;
-		//Saving the original value of the address
-		for (i = 0; i < get_addr6_count(&client->ipx); i++){
-			if (offset)
-				client_index++;
-			if (!offset) {
-				error = cb(dummy,arg);
-				if(error)
-					return error;
-				addr6_iterations(*dummy);
-			} else if (client_index == offset){
+		/*Saving the original value of the address */
+		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+			if (offset == 0) {
 				flag = true;
-				offset = 0;
+				error = cb(dummy, arg);
+				if (error)
+					return error;
+			} else {
+				offset--;
 			}
-
+			addr6_iterations(dummy);
 		}
+
 	}
+
 	if (flag){
 		list_for_each(iter, &client_hook){
 			client = list_entry(iter, struct ipv6_client, list_hook);
 			*dummy = client->ipx.address;
-			for (i = 0; i < get_addr6_count(&client->ipx); i++){
-				client_index_aux++;
-				if (client_index_aux <= client_index){
+			for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+				if (client_index_aux < client_index) {
 					error = cb(dummy,arg);
-					if(error)
+					if (error)
 						return error;
-					addr6_iterations(*dummy);
-				}
+					addr6_iterations(dummy);
+				} else
+					return error;
+				client_index_aux++;
 			}
 		}
 	}
-
-
 	return offset ? -ESRCH : error;
 
 }
 
+<<<<<<< HEAD
 int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 {
 	struct list_head *iter;
@@ -266,3 +268,5 @@ int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 
 	return 0;
 }
+=======
+>>>>>>> refs/remotes/origin/Frutos
