@@ -1,4 +1,8 @@
 #include "types.h"
+<<<<<<< HEAD
+#include "list.h"
+=======
+>>>>>>> refs/remotes/origin/A.-Avalos
 #include "pool4.h"
 
 
@@ -33,6 +37,8 @@ int cback(struct pool4_mask *mask, void *arg)
 				mask->port);
 	}
 
+<<<<<<< HEAD
+=======
 	if (mask->port == 64)
 		return 1; /* Interrumpir temprano. */
 
@@ -43,6 +49,7 @@ int main()
 {
 	pool4_init();
 
+>>>>>>> refs/remotes/origin/A.-Avalos
 	struct pool4_entry *one = malloc(sizeof(*one));
 	one->mark = 1;
 	one->proto = 1;
@@ -64,6 +71,52 @@ int main()
 	three->range.min = 253;
 	three->range.max = 256;
 
+<<<<<<< HEAD
+	//Adding 3 elements to the list: test_list
+	printf("Adding 3 elements to the list...\n\n");
+	pool4_add(one->mark, one->proto, one->addr, &one->range, &test_list);
+
+	pool4_add(two->mark, two->proto, two->addr, &two->range, &test_list);
+
+	pool4_add(three->mark, three->proto, three->addr, &three->range,
+			&test_list);
+
+	//Checking if list is empty...
+	printf("Checking if the list is empty:\n");
+	pool4_is_empty(&test_list);
+
+	//Printing the whole list...
+	printf("Printing the list...\n");
+	pool4_print_all(&test_list);
+	printf("\n");
+
+	//Removing structure 'one' and printing...
+	printf("Removing structure 'one' and printing list...\n");
+	pool4_rm(one->mark, one->proto, one->addr, &one->range, &test_list);
+	pool4_print_all(&test_list);
+	printf("\n");
+
+	//Removing structure 'two' and printing...
+	printf("Removing structure 'two' and printing list...\n");
+	pool4_rm(two->mark, two->proto, two->addr, &two->range, &test_list);
+	pool4_print_all(&test_list);
+	printf("\n");
+
+	//Adding again removed elements and printing...
+	printf("Adding again removed elements and printing...\n");
+	pool4_add(one->mark, one->proto, one->addr, &one->range, &test_list);
+	pool4_add(two->mark, two->proto, two->addr, &two->range, &test_list);
+	pool4_print_all(&test_list);
+	printf("\n");
+
+	//Flushing the list...
+	printf("Flushing the list...\n");
+	pool4_flush(&test_list);
+	pool4_print_all(&test_list);
+
+	//Checking if list is empty...
+	pool4_is_empty(&test_list);
+=======
 	struct pool4_entry *four = malloc(sizeof(*four));
 	four->mark = 4;
 	four->proto = 4;
@@ -72,6 +125,7 @@ int main()
 	four->range.max = 68;
 
 
+>>>>>>> refs/remotes/origin/A.-Avalos
 
 
 	//Adding 4 elements to the list
