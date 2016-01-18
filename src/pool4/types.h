@@ -1,3 +1,6 @@
+#ifndef TYPES_H_
+#define TYPES_H_
+
 #include <stdio.h>
 #include <stdint.h>
 #include "list.h"
@@ -61,3 +64,5 @@ static char *ip_to_str (unsigned int ip, char *buffer)
 #define	ESRCH 3	    /* No such process */
 
 typedef enum { false, true } bool;
+
+#endif

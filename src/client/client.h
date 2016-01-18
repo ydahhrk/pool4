@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "types.h"
+#include "..\pool4\types.h"
 
 #ifndef CLIENT_H_
 #define CLIENT_H_

@@ -39,6 +39,8 @@ int cback(struct pool4_mask *mask, void *arg)
 	return 0;
 }
 
+
+/*
 int main()
 {
 	pool4_init();
@@ -86,7 +88,7 @@ int main()
 
 	pool4_print_all();
 	printf("\n");
-	/*
+	/
 	//Checking if list is empty...
 	printf("Checking if the list is empty:\n");
 	pool4_is_empty();
@@ -148,7 +150,7 @@ int main()
 	pool4_is_empty();
 	*/
 
-
+	/*
 	int error;
 	int a = 12;
 
@@ -164,7 +166,7 @@ int main()
 	printf("-------------------------\n");
 
 
-	/*
+	/
 	a = 0;
 	printf("%d\n", a);
 	error = pool4_foreach_taddr4(cback, &a, 0);
@@ -173,6 +175,7 @@ int main()
 	printf("%d\n", a);
 	*/
 
+	/*
 	printf("\n");
 	a = 0;
 	error = pool4_foreach_taddr4(cback, NULL, 1027);
@@ -185,3 +188,4 @@ int main()
 
 	return error;
 }
+*/

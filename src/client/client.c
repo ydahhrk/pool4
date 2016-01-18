@@ -1,12 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "..\pool4\pool4.h"
+#include "..\pool4\types.h"
 #include "types.h"
-#include "list.h"
 #include "prefixes.h"
 #include "client.h"
 #include "errno.h"
 #include <math.h>
-#include "..\pool4\pool4.h"
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 
@@ -212,39 +212,27 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 }
 
-<<<<<<< HEAD
 int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 {
 	struct list_head *iter;
 	struct pool4_entry *entry;
-	struct ipv6_client ipv6_client;
 	struct ipv6_client *ipv6_listed;
 	int dom_size;
 	int ipv6_pos = 0;
 	int ports_pos = 0;
 	int counter = 0;
 	int i;
-	int clients = 0;
-	int masks = 0;
 
-	clients = client_count();
-	printf("%d\n\n", clients);
-	masks = taddr4_count();
-	printf("%d\n\n", masks);
-
-	dom_size = (masks / clients);
-	printf("%d\n\n", dom_size);
+	dom_size = (taddr4_count() / client_count());
 
 	if (client_count() > taddr4_count()) {
-		printf("There are more clients than entries");
+		printf("There are more clients than mask entries");
 		return 0;
 	}
 
-	ipv6_client.ipx.address = *client;
-
 	list_for_each(iter, &client_hook) {
 		ipv6_listed = list_entry(iter, struct ipv6_client, list_hook);
-		if (prefix6_equals(&ipv6_client.ipx, &ipv6_listed->ipx)) {
+		if (ipv6_addr_equal(client, &ipv6_listed->ipx.address)) {
 			break;
 		}
 		ipv6_pos++;
@@ -268,5 +256,3 @@ int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 
 	return 0;
 }
-=======
->>>>>>> refs/remotes/origin/Frutos

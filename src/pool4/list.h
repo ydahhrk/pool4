@@ -1,5 +1,5 @@
-#ifndef __LIST_H
-#define __LIST_H
+#ifndef LIST_H_
+#define LIST_H_
 
 /* This file is from Linux Kernel (include/linux/list.h)
  * and modified by simply removing hardware prefetching of list items.
@@ -264,4 +264,4 @@ for (pos = list_entry(pos->member.next, typeof(*pos), member);  \
               pos = list_entry(pos->member.next, typeof(*pos), member))
 
 
-#endif
+#endif /* LIST_H_ */

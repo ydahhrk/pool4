@@ -12,6 +12,7 @@ typedef __u32 __be32;
 typedef __u16 __be16;
 typedef __u64 __be64;
 
+/*
 typedef int bool;
 
 #ifndef false
@@ -21,6 +22,7 @@ typedef int bool;
 #ifndef true
 #define true 1
 #endif
+*/
 
 #define cpu_to_be32(x)	x
 #define kmalloc(x,y)		malloc(x)
@@ -52,14 +54,15 @@ struct ipv6_prefix {
 	__u8 len;
 };
 
+/*
 struct in_addr {
 	__be32 s_addr;
 };
 
 struct ipv4_transport_addr {
-	/** The layer-3 identifier. */
+	** The layer-3 identifier. *
 	struct in_addr l3;
-	/** The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id). */
+	** The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id). *
 	__u16 l4;
 };
 
@@ -68,5 +71,5 @@ struct client_mask_domain {
 	unsigned int step;
 	unsigned int count;
 };
-
+*/
 #endif
