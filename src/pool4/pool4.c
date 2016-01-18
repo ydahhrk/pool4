@@ -4,6 +4,7 @@
 #include "types.h"
 #include "list.h"
 #include "pool4.h"
+#include "errno.h"
 
 
 struct list_hook pool4_list;
@@ -184,8 +185,6 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 
 	struct list_hook *iter;
 	struct pool4_entry *pool4;
-	int error = 0;
-	int aux = 0;
 	bool flag = false;
 	int i;
 	n = n % domain->count;
@@ -197,14 +196,14 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 				|| flag) {
 			if (!flag) {
 				for (i = domain->first->l4;
-						i <= pool4->range.max;
-						i += domain->step) {
-					if (aux == n) {
+					i <= pool4->range.max;
+					i += domain->step) {
+					if (!n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
-						return error;
+						return 0;
 					}
-					aux++;
+					n--;
 				}
 				flag = true;
 			}
@@ -212,16 +211,16 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 				for (i = pool4->range.min;
 						i <= pool4->range.max;
 						i += domain->step) {
-					if (aux == n) {
+					if (!n) {
 						result->l3 = pool4->addr;
 						result->l4 = i;
-						return error;
-					}
-					aux++;
+						return 0;
+						}
+					n--;
 				}
 			}
-
 		}
 	}
-	return error;
+
+	return -ESRCH;
 }
