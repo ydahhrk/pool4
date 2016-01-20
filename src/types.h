@@ -1,155 +1,89 @@
-#ifndef _JOOL_COMMON_TYPES_H
-#define _JOOL_COMMON_TYPES_H
+#ifndef _LINUX_TYPES_H
+#define _LINUX_TYPES_H
 
-
-/**
- * @file
- * The core data types. Structures used all over the code.
- */
-
-#include <stdbool.h>
 #include <stdint.h>
-#include <string.h>
+#include <stdio.h>
 
-typedef unsigned char uint8_t;
-typedef unsigned int uint16_t;
-typedef unsigned long int uint32_t;
-typedef unsigned long long int uint64_t;
+typedef uint8_t __u8;
+typedef uint16_t __u16;
+typedef uint32_t __u32;
+typedef uint64_t __u64;
 
-struct in_addr {
-    unsigned long s_addr;  // load with inet_aton()
-};
+typedef __u32 __be32;
+typedef __u16 __be16;
+typedef __u64 __be64;
 
-/**
- * Network (layer 3) protocols Jool is supposed to support.
- * We do not use PF_INET, PF_INET6, AF_INET or AF_INET6 because I want the
- * compiler to pester me during defaultless switch'es. Also, the zero-based
- * index is convenient in the Translate Packet module.
- */
 
-typedef enum l3_protocol {
-	/** RFC 2460. */
-	L3PROTO_IPV6 = 0,
-	/** RFC 791. */
-	L3PROTO_IPV4 = 1,
-} l3_protocol;
+typedef int bool;
 
-/**
- * Transport (layer 4) protocols Jool is supposed to support.
- * We do not use IPPROTO_TCP and friends because I want the compiler to pester
- * me during defaultless switch'es. Also, the zero-based index is convenient in
- * the Translate Packet module.
- */
-typedef enum l4_protocol {
-	/** Signals the presence of a TCP header. */
-	L4PROTO_TCP = 0,
-	/** Signals the presence of a UDP header. */
-	L4PROTO_UDP = 1,
-	/**
-	 * Signals the presence of a ICMP header. Whether the header is ICMPv4
-	 * or ICMPv6 never matters.
-	 * We know that ICMP is not a transport protocol, but for all intents
-	 * and purposes, it behaves exactly like one in NAT64.
-	 */
-	L4PROTO_ICMP = 2,
-	/**
-	 * Stateless Jool should try to translate other protocols in a best
-	 * effort basis.
-	 * It will just copy layer 4 as is, and hope there's nothing to update.
-	 * Because of checksumming nonsense and whatnot, this might usually
-	 * fail, but whatever.
-	 */
-	L4PROTO_OTHER = 3,
-#define L4_PROTO_COUNT 4
-} l4_protocol;
+#ifndef false
+#define false 0
+#endif
 
-/**
- * A layer-3 (IPv4) identifier attached to a layer-4 identifier (TCP port, UDP
- * port or ICMP id).
- * Because they're paired all the time in this project.
- */
-struct ipv4_transport_addr {
-	/** The layer-3 identifier. */
-	struct in_addr l3;
-	/**
-	 * The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id).
-	 */
-	uint16_t l4;
-};
+#ifndef true
+#define true 1
+#endif
 
-static inline bool taddr4_equals(const struct ipv4_transport_addr *a1,
-		const struct ipv4_transport_addr *a2)
+
+#define cpu_to_be32(x)	x
+#define kmalloc(x,y)		malloc(x)
+#define kfree(x)		free(x)
+#define GFP_KERNEL		(__GFP_WAIT | __GFP_IO | __GFP_FS)
+#define INET_ADDRSTRLEN		(16)
+#define INET6_ADDRSTRLEN	(48)
+#define AF_INET6		(10)
+
+
+struct in6_addr
 {
-	return a1->l3.s_addr == a2->l3.s_addr && a2->l4 == a2->l4;
-}
+	union
+	{
+		__u8 u6_addr8[16];
+		__u16 u6_addr16[8];
+		__u32 u6_addr32[4];
+	} in6_u;
 
-/**
- * A layer-3 (IPv6) identifier attached to a layer-4 identifier (TCP port, UDP
- * port or ICMPv6 id).
- * Because they're paired all the time in this project.
- */
-struct ipv6_transport_addr {
-	/** The layer-3 identifier. */
-	struct in6_addr l3;
-	/**
-	 * The layer-4 identifier (Either the port (TCP or UDP) or the ICMP id).
-	 */
-	uint16_t l4;
+#define s6_addr in6_u.u6_addr8
+#define s6_addr16 in6_u.u6_addr16
+#define s6_addr32 in6_u.u6_addr32
 };
 
-/**
- * The network component of an IPv4 address.
- */
-struct ipv4_prefix {
-	/** IPv4 prefix. */
-	struct in_addr address;
-	/** Number of bits from "address" which represent the network. */
-	uint8_t len;
-};
-
-/**
- * The network component of a IPv6 address.
- */
 struct ipv6_prefix {
 	/** IPv6 prefix. */
 	struct in6_addr address;
 	/** Number of bits from "address" which represent the network. */
-	uint8_t len;
+	__u8 len;
+};
+
+
+struct in_addr {
+	__be32 s_addr;
+};
+
+struct ipv4_transport_addr {
+	struct in_addr l3;
+	__u16 l4;
+};
+
+char *ip4_to_str (unsigned int ip, char *buffer);
+
+
+struct client_mask_domain {
+	struct ipv4_transport_addr first;
+	unsigned int step;
+	unsigned int count;
 };
 
 struct port_range {
-	uint16_t min;
-	uint16_t max;
+		__u16 min;
+		__u16 max;
 };
 
-struct pool4_sample {
-	uint32_t mark;
-	uint8_t proto;
+struct pool4_mask {
+	__u32 mark;
+	__u8 proto;
 	struct in_addr addr;
-	struct port_range range;
+	__u16 port;
 };
 
-static inline bool port_range_equals(const struct port_range *r1,
-		const struct port_range *r2)
-{
-	return (r1->min == r2->min) && (r1->max == r2->max);
-}
-
-static inline bool port_range_touches(const struct port_range *r1,
-		const struct port_range *r2)
-{
-	return r1->max >= (r2->min - 1) && r1->min <= (r2->max + 1);
-}
-
-static inline bool port_range_contains(const struct port_range *range,
-		uint16_t port)
-{
-	return range->min <= port && port <= range->max;
-}
-
-static inline unsigned int port_range_count(const struct port_range *range)
-{
-	return range->max - range->min + 1U;
-}
-
-#endif /* _JOOL_COMMON_TYPES_H */
+#endif

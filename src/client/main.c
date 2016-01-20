@@ -6,6 +6,7 @@
  */
 
 #include "client.h"
+#include "..\pool4\pool4.h"
 
 #define cpu_to_be32(x) x
 #define be16_to_cpu(x) x
@@ -142,93 +143,130 @@ static int cb2(struct in6_addr *addr, void *arg)
 	(*index)++;
 	return error;
 }
+
 int main()
 {
 	client_init();
 
-	struct ipv6_prefix prefix;
-	int i = 1;
-	int error;
-	int count = 0;
+	struct ipv6_prefix prefix0;
+	struct ipv6_prefix prefix1;
+	struct ipv6_prefix prefix2;
+	//int i = 1;
+	int error = 0;
+	char addr[16];
 
-	/* 2001:db8::1 */
 
-	/* client_for_eachsample testing */
-	/*
-	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
-	prefix.address.s6_addr32[2] = cpu_to_be32(0x1);
-	prefix.address.s6_addr32[3] = cpu_to_be32(0);
-	prefix.len = 96;
-	client_add(&prefix);
+	//2001:db8::1
 
-	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
-	prefix.address.s6_addr32[2] = cpu_to_be32(0x2);
-	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+	//client_for_eachsample testing
+//	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
+//	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
+//	prefix.address.s6_addr32[2] = cpu_to_be32(0x1);
+//	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+//	prefix.len = 96;
+//	client_add(&prefix);
+//
+//	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
+//	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
+//	prefix.address.s6_addr32[2] = cpu_to_be32(0x2);
+//	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+//
+//	client_add(&prefix);
+//
+//	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
+//	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
+//	prefix.address.s6_addr32[2] = cpu_to_be32(0x3);
+//	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+//
+//	client_add(&prefix);
+//
+//	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
+//	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
+//	prefix.address.s6_addr32[2] = cpu_to_be32(0x4);
+//	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+//
+//	client_add(&prefix);
+//
+//	printf("%d\n", i);
+//	error =client_for_eachsample(cb, &i, NULL);
+//	if (error)
+//		return error;
+//	printf("%d\n", i);
+//
+//	prefix.address.s6_addr32[2] = cpu_to_be32(0x2);
+//
+//	error = client_for_eachsample(cb, NULL, &prefix);
+//	if(error)
+//		return error;
 
-	client_add(&prefix);
 
-	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
-	prefix.address.s6_addr32[2] = cpu_to_be32(0x3);
-	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+	//client_for_each testing
 
-	client_add(&prefix);
+	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
+	client_add(&prefix0);
 
-	prefix.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix.address.s6_addr32[1] = cpu_to_be32(0xdb8);
-	prefix.address.s6_addr32[2] = cpu_to_be32(0x4);
-	prefix.address.s6_addr32[3] = cpu_to_be32(0);
+	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
+	client_add(&prefix1);
 
-	client_add(&prefix);
+	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
+	client_add(&prefix2);
 
-	printf("%d\n", i);
-	error =client_for_eachsample(cb, &i, NULL);
+	pool4_init();
+
+	struct pool4_entry *one = malloc(sizeof(*one));
+	one->mark = 1;
+	one->proto = 1;
+	one->addr.s_addr = cpu_to_be32(0xc0000201);
+	one->range.min = 10;
+	one->range.max = 20;
+
+	struct pool4_entry *two = malloc(sizeof(*two));
+	two->mark = 2;
+	two->proto = 2;
+	two->addr.s_addr = cpu_to_be32(0xc0000202);
+	two->range.min = 10;
+	two->range.max = 20;
+
+	pool4_add(one->mark, one->proto, &one->addr, &one->range);
+
+	pool4_add(two->mark, two->proto, &two->addr, &two->range);
+
+	client_print_all();
+	printf("\n\n");
+
+	pool4_print_all();
+	printf("\n\n");
+
+	struct client_mask_domain domain;
+
+	error = get_mask_domain(&prefix0.address, &domain);
 	if (error)
 		return error;
-	printf("%d\n", i);
+	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
+			domain.first.l4, domain.step, domain.count);
 
-	prefix.address.s6_addr32[2] = cpu_to_be32(0x2);
-
-	error = client_for_eachsample(cb, NULL, &prefix);
-	if(error)
-		return error;
-	*/
-
-	/* client_for_each testing */
-
-	prefix.address.s6_addr32[0] = cpu_to_be32(0x20010db8);
-	prefix.address.s6_addr32[1] = cpu_to_be32(0x0);
-	prefix.address.s6_addr32[2] = cpu_to_be32(0x0);
-	prefix.address.s6_addr32[3] = cpu_to_be32(0xa00);
-	prefix.len = 126;
-	error = client_add(&prefix);
+	error = get_mask_domain(&prefix1.address, &domain);
 	if (error)
 		return error;
-;
-	prefix.address.s6_addr32[3] = cpu_to_be32(0xb00);
-	prefix.len = 127;
-	error = client_add(&prefix);
+	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
+			domain.first.l4, domain.step, domain.count);
+
+	error = get_mask_domain(&prefix2.address, &domain);
 	if (error)
 		return error;
+	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
+			domain.first.l4, domain.step, domain.count);
 
-	prefix.address.s6_addr32[3] = cpu_to_be32(0xc00);
-	prefix.len = 128;
-	error = client_add(&prefix);
-	if (error)
-		return error;
 
-	error = client_for_each(cb2, &count, 12);
-	if (error) {
-		printf("client_for_each() returned %d\n", error);
-		return error;
-	}
 
-	if (count != 7){
-		printf("Error: I was supposed to iterate over 7 entries\n");
-		return -1;
-	}
-
-	return 0;
+	return error;
 }
