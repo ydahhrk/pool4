@@ -214,14 +214,14 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 }
 
-int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
+int client_get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 {
 	struct list_head *iter;
 	struct ipv6_client *ipv6_listed;
 	int ipv6_pos = 0;
 	int error = 0;
 
-	if (client_count() > taddr4_count()) {
+	if (client_count() > pool4_taddr4_count()) {
 		printf("There are more clients than mask entries");
 		return 0;
 	}
@@ -234,7 +234,7 @@ int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 		ipv6_pos++;
 	}
 
-	error = taddr4_find_pos(ipv6_pos, result);
+	error = pool4_taddr4_find_pos(ipv6_pos, result);
 	if (error)
 		return error;
 

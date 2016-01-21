@@ -247,24 +247,24 @@ int main()
 	pool4_print_all();
 	printf("\n\n");
 
-	printf("Number of masks available: %u\n\n", taddr4_count());
+	printf("Number of masks available: %u\n\n", pool4_taddr4_count());
 
 
 	struct client_mask_domain domain;
 
-	error = get_mask_domain(&prefix0.address, &domain);
+	error = client_get_mask_domain(&prefix0.address, &domain);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 			domain.first.l4, domain.step, domain.count);
 
-	error = get_mask_domain(&prefix1.address, &domain);
+	error = client_get_mask_domain(&prefix1.address, &domain);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 			domain.first.l4, domain.step, domain.count);
 
-	error = get_mask_domain(&prefix2.address, &domain);
+	error = client_get_mask_domain(&prefix2.address, &domain);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),

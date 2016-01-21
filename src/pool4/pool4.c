@@ -182,7 +182,7 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 	return offset ? -ESRCH : error;
 }
 
-int taddr4_count()
+int pool4_taddr4_count()
 {
 	struct list_head *iter;
 	struct pool4_entry *entry;
@@ -198,7 +198,7 @@ int taddr4_count()
 	return entries;
 }
 
-int taddr4_find_pos(int ipv6_pos, struct client_mask_domain *result)
+int pool4_taddr4_find_pos(int ipv6_pos, struct client_mask_domain *result)
 {
 	struct list_head *iter;
 	struct pool4_entry *entry;
@@ -207,7 +207,7 @@ int taddr4_find_pos(int ipv6_pos, struct client_mask_domain *result)
 	int counter = 0;
 	int i;
 
-	dom_size = (taddr4_count() / client_count());
+	dom_size = (pool4_taddr4_count() / client_count());
 
 	list_for_each(iter, &pool4_list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
@@ -239,7 +239,7 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	int indx = 0;
 	unsigned int i;
 
-	entries = taddr4_count();
+	entries = pool4_taddr4_count();
 //	printf("%d entries\n\n", entries);
 	if (offset > entries) {
 		offset = offset % entries;
