@@ -39,6 +39,8 @@ int pool4_foreach_sample(int (*cb)(struct pool4_entry *, void *), void *arg,
 
 int taddr4_count();
 
+int taddr4_find_pos(int ipv6_pos, struct client_mask_domain *result);
+
 int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 		unsigned int offset);
 

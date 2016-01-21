@@ -5,6 +5,7 @@
 #include "../list.h"
 #include "../errno.h"
 #include "pool4.h"
+#include "../client/client.h"
 
 struct list_head pool4_list;
 
@@ -186,16 +187,45 @@ int taddr4_count()
 	struct list_head *iter;
 	struct pool4_entry *entry;
 	unsigned int entries = 0;
-	unsigned int i;
+	unsigned int ports = 0;
 
 	list_for_each(iter, &pool4_list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
-		for (i = entry->range.min; i <= entry->range.max; i++) {
-			entries++;
-		}
+		ports = entry->range.max - entry->range.min + 1;
+			entries = entries + ports;
 	}
 
 	return entries;
+}
+
+int taddr4_find_pos(int ipv6_pos, struct client_mask_domain *result)
+{
+	struct list_head *iter;
+	struct pool4_entry *entry;
+	int dom_size;
+	int ports_pos = 0;
+	int counter = 0;
+	int i;
+
+	dom_size = (taddr4_count() / client_count());
+
+	list_for_each(iter, &pool4_list) {
+		entry = list_entry(iter, struct pool4_entry, list_hook);
+		for(i = entry->range.min; i <= entry->range.max; i++) {
+			if (counter % dom_size == 0) {
+				if (ipv6_pos == ports_pos) {
+					result->first.l3 = entry->addr;
+					result->first.l4 = i;
+					result->step = 1;
+					result->count = dom_size;
+				}
+				ports_pos++;
+			}
+			counter++;
+		}
+	}
+
+	return 0;
 }
 
 int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
@@ -210,19 +240,20 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	unsigned int i;
 
 	entries = taddr4_count();
-	printf("%d entries\n\n", entries);
+//	printf("%d entries\n\n", entries);
 	if (offset > entries) {
 		offset = offset % entries;
 	}
 
+	//Iteration to apply cback to elements from offset to list end
 	list_for_each(iter, &pool4_list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
 			if (indx >= offset){
+				mask.mark = entry->mark;
+				mask.proto = entry->proto;
+				mask.addr.s_addr = entry->addr.s_addr;
+				mask.port = i;
 				error = cback(&mask, arg);
 				if (error) {
 					return error;
@@ -233,16 +264,17 @@ int pool4_foreach_taddr4(int (*cback)(struct pool4_mask *, void *), void *arg,
 	}
 	indx = 0;
 
+	//Iteration to apply cback to elements from first to offset - 1
 	list_for_each(iter, &pool4_list) {
 		if (offset == 0)
 			break;
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
 			if (indx < offset) {
+				mask.mark = entry->mark;
+				mask.proto = entry->proto;
+				mask.addr.s_addr = entry->addr.s_addr;
+				mask.port = i;
 				error = cback(&mask, arg);
 				if (error) {
 					return error;

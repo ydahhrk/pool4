@@ -216,45 +216,27 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 {
-//	struct list_head *iter;
-//	struct pool4_entry *entry;
-//	struct ipv6_client *ipv6_listed;
-//	int dom_size;
-//	int ipv6_pos = 0;
-//	int ports_pos = 0;
-//	int counter = 0;
-//	int i;
-//
-//	dom_size = (taddr4_count() / client_count());
-//
-//	if (client_count() > taddr4_count()) {
-//		printf("There are more clients than mask entries");
-//		return 0;
-//	}
-//
-//	list_for_each(iter, &client_hook) {
-//		ipv6_listed = list_entry(iter, struct ipv6_client, list_hook);
-//		if (ipv6_addr_equal(client, &ipv6_listed->ipx.address)) {
-//			break;
-//		}
-//		ipv6_pos++;
-//	}
-/*
-	list_for_each(iter, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list_hook);
-		for(i = entry->range.min; i <= entry->range.max; i++) {
-			if (counter % dom_size == 0) {
-				if (ipv6_pos == ports_pos) {
-					result->first.l3 = entry->addr;
-					result->first.l4 = i;
-					result->step = 1;
-					result->count = dom_size;
-				}
-				ports_pos++;
-			}
-			counter++;
-		}
+	struct list_head *iter;
+	struct ipv6_client *ipv6_listed;
+	int ipv6_pos = 0;
+	int error = 0;
+
+	if (client_count() > taddr4_count()) {
+		printf("There are more clients than mask entries");
+		return 0;
 	}
-*/
+
+	list_for_each(iter, &client_hook) {
+		ipv6_listed = list_entry(iter, struct ipv6_client, list_hook);
+		if (ipv6_addr_equal(client, &ipv6_listed->ipx.address)) {
+			break;
+		}
+		ipv6_pos++;
+	}
+
+	error = taddr4_find_pos(ipv6_pos, result);
+	if (error)
+		return error;
+
 	return 0;
 }

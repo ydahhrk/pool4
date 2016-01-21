@@ -70,7 +70,6 @@ int cback(struct pool4_mask *mask, void *arg)
 //	three->range.min = 253;
 //	three->range.max = 256;
 //
-//
 //	struct pool4_entry *four = malloc(sizeof(*four));
 //	four->mark = 4;
 //	four->proto = 4;
@@ -172,10 +171,10 @@ int cback(struct pool4_mask *mask, void *arg)
 //	pool4_is_empty();
 //
 //	int error;
-//	int a = 12;
+//	int a = 0;
 //
 //	printf("%d\n", a);
-//	error = pool4_foreach_sample(callb, &a, NULL);
+//	error = pool4_foreach_sample(callb, &a, 0);
 //	if (error)
 //		return error;
 //	printf("%d\n\n", a);
@@ -187,14 +186,21 @@ int cback(struct pool4_mask *mask, void *arg)
 //
 //
 //	a = 0;
+//
 //	printf("%d\n", a);
 //	error = pool4_foreach_taddr4(cback, &a, 0);
 //	if (error)
 //		return error;
 //	printf("%d\n", a);
 //
+//	printf("%d\n", a);
+//	error = pool4_foreach_taddr4(cback, NULL, 6);
+//	if (error)
+//		return error;
+//	printf("%d\n", a);
+//
+//
 //	printf("\n");
-//	a = 0;
 //	error = pool4_foreach_taddr4(cback, NULL, 1027);
 //	if (error)
 //		return error;

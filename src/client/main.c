@@ -144,6 +144,7 @@ static int cb2(struct in6_addr *addr, void *arg)
 	return error;
 }
 
+
 int main()
 {
 	client_init();
@@ -246,6 +247,9 @@ int main()
 	pool4_print_all();
 	printf("\n\n");
 
+	printf("Number of masks available: %u\n\n", taddr4_count());
+
+
 	struct client_mask_domain domain;
 
 	error = get_mask_domain(&prefix0.address, &domain);
@@ -270,3 +274,4 @@ int main()
 
 	return error;
 }
+
