@@ -86,4 +86,11 @@ struct pool4_mask {
 	__u16 port;
 };
 
+struct packet {
+	struct ipv6hdr *hdr;
+};
+
+struct ipv6hdr *pkt_ip6_hdr(struct packet *pkt);
+
+
 #endif

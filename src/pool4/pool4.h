@@ -46,4 +46,7 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 			unsigned int n,
 			struct ipv4_transport_addr *result);
 
+int ipv4_transport_addr(struct packet *packet);
+
+
 #endif /* POOL4_H_ */

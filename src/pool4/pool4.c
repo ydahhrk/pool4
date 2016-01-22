@@ -302,3 +302,10 @@ int pool4_get_nth_taddr(struct client_mask_domain *domain,
 
 	return -ESRCH;
 }
+
+int ipv4_transport_addr(struct packet *packet)
+{
+
+
+return 0;
+}
