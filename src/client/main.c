@@ -207,21 +207,25 @@ int main()
 	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
 	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
 	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
+	prefix0.len = 128;
 	client_add(&prefix0);
 
 	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
 	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
 	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
 	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
+	prefix1.len = 128;
 	client_add(&prefix1);
 
 	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
 	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
 	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
 	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
+	prefix2.len = 128;
 	client_add(&prefix2);
 
-	pool4_init();
+	struct pool4 *cpool4;
+	pool4_init(cpool4);
 
 	struct pool4_entry *one = malloc(sizeof(*one));
 	one->mark = 1;
@@ -237,34 +241,34 @@ int main()
 	two->range.min = 10;
 	two->range.max = 20;
 
-	pool4_add(one->mark, one->proto, &one->addr, &one->range);
+	pool4_add(cpool4, one->mark, one->proto, &one->addr, &one->range);
 
-	pool4_add(two->mark, two->proto, &two->addr, &two->range);
+	pool4_add(cpool4, two->mark, two->proto, &two->addr, &two->range);
 
-	client_print_all();
+	client_print_all(cpool4);
 	printf("\n\n");
 
-	pool4_print_all();
+	pool4_print_all(cpool4);
 	printf("\n\n");
 
-	printf("Number of masks available: %u\n\n", pool4_taddr4_count());
+	printf("Number of masks available: %u\n\n", pool4_count(cpool4));
 
 
 	struct client_mask_domain domain;
 
-	error = client_get_mask_domain(&prefix0.address, &domain);
+	error = client_get_mask_domain(&prefix0.address, &domain, 7);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 			domain.first.l4, domain.step, domain.count);
 
-	error = client_get_mask_domain(&prefix1.address, &domain);
+	error = client_get_mask_domain(&prefix1.address, &domain, 7);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 			domain.first.l4, domain.step, domain.count);
 
-	error = client_get_mask_domain(&prefix2.address, &domain);
+	error = client_get_mask_domain(&prefix2.address, &domain, 7);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
@@ -274,4 +278,3 @@ int main()
 
 	return error;
 }
-
