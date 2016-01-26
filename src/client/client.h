@@ -32,6 +32,8 @@ int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *), void *arg,
 int client_for_each(int (*cb)(struct in6_addr *, void *),
 		void *arg, unsigned int offset);
 
-int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result);
+int client_get_mask_domain(struct in6_addr *client,
+		struct client_mask_domain *result,
+		unsigned int masks_per_client);
 
 #endif /* CLIENT_H_ */

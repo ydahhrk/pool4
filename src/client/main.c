@@ -112,11 +112,11 @@ static int cb2(struct in6_addr *addr, void *arg)
 
 	switch (*index) {
 	case 0:
-		/* En la 1a iteraci贸n, la direcci贸n debe ser 2001:db8::b01. */
+		/* En la 1a iteraci髇, la direcci髇 debe ser 2001:db8::b01. */
 		error = assert_addr6(addr, 0xb01);
 		break;
 	case 1:
-		/* En 2a 1a iteraci贸n, la direcci贸n debe ser 2001:db8::c00. */
+		/* En 2a 1a iteraci髇, la direcci髇 debe ser 2001:db8::c00. */
 		error = assert_addr6(addr, 0xc00);
 		break;
 	case 2:
@@ -143,7 +143,8 @@ static int cb2(struct in6_addr *addr, void *arg)
 	(*index)++;
 	return error;
 }
-///*
+
+
 //int main()
 //{
 //	client_init();
@@ -154,7 +155,7 @@ static int cb2(struct in6_addr *addr, void *arg)
 //	//int i = 1;
 //	int error = 0;
 //	char addr[16];
-//*/
+//
 //
 //	//2001:db8::1
 //
@@ -201,26 +202,30 @@ static int cb2(struct in6_addr *addr, void *arg)
 //
 //
 //	//client_for_each testing
-///*
+//
 //	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
 //	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
 //	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
 //	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
+//	prefix0.len = 128;
 //	client_add(&prefix0);
 //
 //	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
 //	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
 //	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
 //	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
+//	prefix1.len = 128;
 //	client_add(&prefix1);
 //
 //	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
 //	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
 //	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
 //	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
+//	prefix2.len = 128;
 //	client_add(&prefix2);
 //
-//	pool4_init();
+//	struct pool4 *cpool4;
+//	pool4_init(cpool4);
 //
 //	struct pool4_entry *one = malloc(sizeof(*one));
 //	one->mark = 1;
@@ -236,31 +241,34 @@ static int cb2(struct in6_addr *addr, void *arg)
 //	two->range.min = 10;
 //	two->range.max = 20;
 //
-//	pool4_add(one->mark, one->proto, &one->addr, &one->range);
+//	pool4_add(cpool4, one->mark, one->proto, &one->addr, &one->range);
 //
-//	pool4_add(two->mark, two->proto, &two->addr, &two->range);
+//	pool4_add(cpool4, two->mark, two->proto, &two->addr, &two->range);
 //
-//	client_print_all();
+//	client_print_all(cpool4);
 //	printf("\n\n");
 //
-//	pool4_print_all();
+//	pool4_print_all(cpool4);
 //	printf("\n\n");
+//
+//	printf("Number of masks available: %u\n\n", pool4_count(cpool4));
+//
 //
 //	struct client_mask_domain domain;
 //
-//	error = get_mask_domain(&prefix0.address, &domain);
+//	error = client_get_mask_domain(&prefix0.address, &domain, 7);
 //	if (error)
 //		return error;
 //	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 //			domain.first.l4, domain.step, domain.count);
 //
-//	error = get_mask_domain(&prefix1.address, &domain);
+//	error = client_get_mask_domain(&prefix1.address, &domain, 7);
 //	if (error)
 //		return error;
 //	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 //			domain.first.l4, domain.step, domain.count);
 //
-//	error = get_mask_domain(&prefix2.address, &domain);
+//	error = client_get_mask_domain(&prefix2.address, &domain, 7);
 //	if (error)
 //		return error;
 //	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
@@ -270,4 +278,3 @@ static int cb2(struct in6_addr *addr, void *arg)
 //
 //	return error;
 //}
-//*/

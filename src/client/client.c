@@ -87,13 +87,18 @@ bool client_exist(struct ipv6_prefix *prefix)
 
 unsigned int client_count()
 {
-	struct list_head *iter;
-	unsigned int i = 0;
+        struct list_head *iter;
+        struct ipv6_client *client;
+        unsigned int i = 0;
 
-	list_for_each(iter, &client_hook){
-		i++;
-	}
-	return i;
+        list_for_each(iter, &client_hook) {
+                client = list_entry(iter, struct ipv6_client, list_hook);
+                i = i + get_addr6_count(&client->ipx);
+        }
+
+        return i;
+
+
 }
 
 
@@ -213,22 +218,18 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	return offset ? -ESRCH : error;
 
 }
-
-int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
-{
+//
+//int client_get_mask_domain(struct in6_addr *client,
+//		struct client_mask_domain *result,
+//		unsigned int masks_per_client)
+//{
 //	struct list_head *iter;
-//	struct pool4_entry *entry;
 //	struct ipv6_client *ipv6_listed;
-//	int dom_size;
 //	int ipv6_pos = 0;
-//	int ports_pos = 0;
-//	int counter = 0;
-//	int i;
+//	int error = 0;
 //
-//	dom_size = (taddr4_count() / client_count());
-//
-//	if (client_count() > taddr4_count()) {
-//		printf("There are more clients than mask entries");
+//	if (client_count() > pool4_count(pool4)) {
+//		printf("There are more clients than mask entries\n");
 //		return 0;
 //	}
 //
@@ -239,22 +240,10 @@ int get_mask_domain(struct in6_addr *client, struct client_mask_domain *result)
 //		}
 //		ipv6_pos++;
 //	}
-/*
-	list_for_each(iter, &pool4_list) {
-		entry = list_entry(iter, struct pool4_entry, list_hook);
-		for(i = entry->range.min; i <= entry->range.max; i++) {
-			if (counter % dom_size == 0) {
-				if (ipv6_pos == ports_pos) {
-					result->first.l3 = entry->addr;
-					result->first.l4 = i;
-					result->step = 1;
-					result->count = dom_size;
-				}
-				ports_pos++;
-			}
-			counter++;
-		}
-	}
-*/
-	return 0;
-}
+//
+//	error = pool4_taddr4_find_pos(pool4, ipv6_pos, result, masks_per_client);
+//	if (error)
+//		return error;
+//
+//	return 0;
+//}
