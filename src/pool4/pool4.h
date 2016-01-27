@@ -14,7 +14,9 @@ struct pool4_entry {
 	struct list_head list_hook;
 };
 
-struct pool4;
+struct pool4 {
+	struct list_head list;
+};
 
 void pool4_init(struct pool4 *pool4);
 
@@ -49,5 +51,6 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 
 int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 		unsigned int n, struct ipv4_transport_addr *result);
+struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool, struct pool4 *spool);
 
 #endif /* POOL4_H_ */

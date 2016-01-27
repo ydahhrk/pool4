@@ -7,10 +7,6 @@
 #include "pool4.h"
 #include "../client/client.h"
 
-struct pool4 {
-	struct list_head list;
-};
-
 //struct list_head pool4_list;
 
 void pool4_init(struct pool4 *pool4)
@@ -327,8 +323,18 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 	return -ESRCH;
 }
 
-int get_mask( struct packet *packet)
+struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
+		struct pool4 *spool)
 {
-	int error;
-	return 0;
+	struct ipv4_transport_addr dummy;
+
+	if (pool4_is_empty(cpool)) {
+		return get_mask(packet, spool, NULL);
+		//call again to use spool
+	}
+	if (true) {
+
+	}
+
+	return dummy;
 }
