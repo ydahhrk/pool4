@@ -16,7 +16,7 @@ struct pool4_entry {
 
 struct pool4;
 
-void pool4_init(struct pool4 *pool4);
+int pool4_init(struct pool4 *pool4);
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range);

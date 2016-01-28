@@ -13,9 +13,10 @@ struct pool4 {
 
 //struct list_head pool4_list;
 
-void pool4_init(struct pool4 *pool4)
+int pool4_init(struct pool4 *pool4)
 {
 	INIT_LIST_HEAD(&pool4->list);
+	return 0;
 }
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,

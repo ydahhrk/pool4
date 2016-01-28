@@ -225,7 +225,9 @@ int main()
 	client_add(&prefix2);
 
 	struct pool4 *cpool4;
-	pool4_init(cpool4);
+	error = pool4_init(cpool4);
+	if (error)
+		return error;
 
 	struct pool4_entry *one = malloc(sizeof(*one));
 	one->mark = 1;
@@ -256,19 +258,19 @@ int main()
 
 	struct client_mask_domain domain;
 
-	error = client_get_mask_domain(&prefix0.address, &domain, 7);
+	error = client_get_mask_domain(&prefix0.address, &domain, 7, cpool4);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 			domain.first.l4, domain.step, domain.count);
 
-	error = client_get_mask_domain(&prefix1.address, &domain, 7);
+	error = client_get_mask_domain(&prefix1.address, &domain, 7, cpool4);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),
 			domain.first.l4, domain.step, domain.count);
 
-	error = client_get_mask_domain(&prefix2.address, &domain, 7);
+	error = client_get_mask_domain(&prefix2.address, &domain, 7, cpool4);
 	if (error)
 		return error;
 	printf("%s:%u %u %u\n", ip4_to_str(domain.first.l3.s_addr, addr),

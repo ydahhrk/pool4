@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "../types.h"
+#include "../pool4/pool4.h"
 
 #ifndef CLIENT_H_
 #define CLIENT_H_
@@ -34,6 +35,6 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 int client_get_mask_domain(struct in6_addr *client,
 		struct client_mask_domain *result,
-		unsigned int masks_per_client);
+		unsigned int masks_per_client, struct pool4 *pool4);
 
 #endif /* CLIENT_H_ */

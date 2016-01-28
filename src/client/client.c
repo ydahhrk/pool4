@@ -221,7 +221,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 
 int client_get_mask_domain(struct in6_addr *client,
 		struct client_mask_domain *result,
-		unsigned int masks_per_client)
+		unsigned int masks_per_client, struct pool4 *pool4)
 {
 	struct list_head *iter;
 	struct ipv6_client *ipv6_listed;
@@ -241,7 +241,8 @@ int client_get_mask_domain(struct in6_addr *client,
 		ipv6_pos++;
 	}
 
-	error = pool4_taddr4_find_pos(pool4, ipv6_pos, result, masks_per_client);
+	error = pool4_taddr4_find_pos(pool4, ipv6_pos, result,
+			masks_per_client);
 	if (error)
 		return error;
 
