@@ -85,6 +85,8 @@ bool client_exist(struct ipv6_prefix *prefix)
 	return false;
 }
 
+
+
 unsigned int client_count()
 {
         struct list_head *iter;
@@ -156,6 +158,29 @@ void addr6_iterations(struct in6_addr *client)
 		client->s6_addr32[2] = cpu_to_be32(0x0);
 		client->s6_addr32[1] = cpu_to_be32(0X0);
 	}
+}
+
+int client_addr_exist(struct in6_addr *addr)
+{
+	struct list_head *iter;
+	struct ipv6_client *client;
+	struct in6_addr dummy;
+	int i = 0;
+
+	list_for_each(iter, &client_hook) {
+		client = list_entry(iter, struct ipv6_client, list_hook);
+		dummy = client->ipx.address;
+		/*Saving the original value of the address */
+		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+			if(addr->s6_addr32[0] == dummy.s6_addr32[0]
+				&& addr->s6_addr32[1] == dummy.s6_addr32[1]
+				&& addr->s6_addr32[2] == dummy.s6_addr32[2]
+				&& addr->s6_addr32[3] == dummy.s6_addr32[3])
+				return 0;
+			addr6_iterations(&dummy);
+		}
+	}
+	return -1;
 }
 
 int client_for_each(int (*cb)(struct in6_addr *, void *),

@@ -323,6 +323,9 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 	return -ESRCH;
 }
 
+/*This doesn't work! Still checking what to do with it.
+ * How to write the correct things.
+ */
 struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 		struct pool4 *spool)
 {
@@ -332,9 +335,23 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 		return get_mask(packet, spool, NULL);
 		//call again to use spool
 	}
-	if (true) {
-
+	/*check if pack addr does not exists in client db */
+	if (!(client_addr_exist(packet->hdr->saddr))) {
+		if (/*check if dynamic*/)
+			client_add(cpool); /*add client to db*/
+		else{
+			client_add();
+			return 0
+		}
 	}
 
+	if (/*check if all cpool4 masks are used*/) {
+		/*use spool4, but what if from the beggining it's using spool...*/
+	}
+
+	/*get_mask_domain() with the client that was created 	*/
+	/* get_nth_addr() send the client created and use it to search nth
+	 * but where to get nth
+	 * */
 	return dummy;
 }
