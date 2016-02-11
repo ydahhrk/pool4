@@ -1,7 +1,8 @@
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/version.h>
-
+#include <linux/slab.h>
+#include "pool4/pool4.h"
 
 //INT CALLB(STRUCT POOL4_ENTRY *ENTRY, VOID *ARG)
 //{

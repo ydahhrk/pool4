@@ -1,16 +1,14 @@
-#include "../types.h"
-#include "../prefixes.h"
-#include "../errno.h"
-#include "../pool4/pool4.h"
-#include "client.h"
-#include <math.h>
-#include <stddef.h>
+#include "client/client.h"
+#include "types.h"
+#include "prefixes.h"
+#include "pool4/pool4.h"
 #include <linux/types.h>
 #include <linux/in6.h>
 #include <linux/in.h>
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/list.h>
+#include <linux/slab.h>
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 
@@ -75,7 +73,7 @@ void client_flush()
 	}
 }
 
-int client_exist(struct ipv6_prefix *prefix)
+bool client_exist(struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
 	struct ipv6_client *client;
@@ -115,7 +113,7 @@ void client_print_all()
 	struct ipv6_client *obj_ptr;
 	list_for_each(iter, &client_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client , list_hook);
-		printf("Address: %x.%x.%x.%x\nLength:%u\n",
+		pr_debug("Address: %x.%x.%x.%x\nLength:%u\n",
 				obj_ptr->ipx.address.s6_addr32[0],
 				obj_ptr->ipx.address.s6_addr32[1],
 				obj_ptr->ipx.address.s6_addr32[2],

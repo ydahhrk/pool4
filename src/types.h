@@ -1,5 +1,6 @@
-#ifndef _LINUX_TYPES_H
-#define _LINUX_TYPES_H
+#ifndef _JOOL_TYPES_H
+#define _JOOL_TYPES_H
+
 #include <linux/types.h>
 #include <linux/in6.h>
 #include <linux/in.h>
@@ -17,9 +18,6 @@ struct ipv4_transport_addr {
 	struct in_addr l3;
 	__u16 l4;
 };
-
-char *ip4_to_str (unsigned int ip, char *buffer);
-
 
 struct client_mask_domain {
 	struct ipv4_transport_addr first;

@@ -1,14 +1,13 @@
-#include "../types.h"
-#include "../errno.h"
-#include "pool4.h"
-#include "../client/client.h"
-#include <stddef.h>
+#include "pool4/pool4.h"
+#include "types.h"
+#include "client/client.h"
 #include <linux/types.h>
+#include <linux/list.h>
 #include <linux/in6.h>
 #include <linux/in.h>
 #include <linux/kernel.h>
 #include <linux/version.h>
-#include "/usr/src/linux-headers-3.19.0-25/include/linux/slab.h"
+#include <linux/slab.h>
 
 void pool4_init(struct pool4 *pool4)
 {
@@ -90,7 +89,7 @@ int pool4_flush(struct pool4 *pool4)
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		list_del(iter);
-		free(entry);
+		kfree(entry);
 	}
 	return 0;
 }
@@ -112,14 +111,13 @@ void pool4_print_all(struct pool4 *pool4)
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry *entry;
-	char addr[16];
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
-		printf("%u, ", entry->mark);
-		printf("%u, ", entry->proto);
-		printf("%s, ", ip4_to_str(entry->addr.s_addr, addr));
-		printf("%u-%u\n", entry->range.min, entry->range.max);
+		pr_debug("%u, ", entry->mark);
+		pr_debug("%u, ", entry->proto);
+		pr_debug("%pI4, ", &entry->addr);
+		pr_debug("%u-%u\n", entry->range.min, entry->range.max);
 	}
 }
 
@@ -140,12 +138,12 @@ int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
-			printf("It is in the list.\n\n");
+			pr_debug("It is in the list.\n\n");
 			return 1;
 		}
 	}
 
-	printf("It is not in the list.\n\n");
+	pr_debug("It is not in the list.\n\n");
 	return 0;
 }
 

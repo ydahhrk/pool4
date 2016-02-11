@@ -6,7 +6,7 @@
  */
 
 #include "types.h"
-#include "errno.h"
+
 #ifndef PREFIXES_H_
 #define PREFIXES_H_
 

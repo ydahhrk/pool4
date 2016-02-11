@@ -1,7 +1,7 @@
 #ifndef POOL4_H_
 #define POOL4_H_
 
-#include "../types.h"
+#include "types.h"
 
 struct pool4_entry {
 	__u32 mark;
