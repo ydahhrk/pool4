@@ -1,10 +1,7 @@
 #ifndef POOL4_H_
 #define POOL4_H_
 
-#include <stdio.h>
-#include <stdlib.h>
 #include "../types.h"
-#include "../list.h"
 
 struct pool4_entry {
 	__u32 mark;
@@ -28,10 +25,8 @@ int pool4_rm(struct pool4 *pool4, __u32 mark, __u8 proto,
 
 int pool4_flush(struct pool4 *pool4);
 
-bool pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
+int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range);
-
-bool pool4_is_empty(struct pool4 *pool4);
 
 int pool4_count(struct pool4 *pool4);
 

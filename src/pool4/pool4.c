@@ -1,13 +1,14 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "../types.h"
-#include "../list.h"
 #include "../errno.h"
 #include "pool4.h"
 #include "../client/client.h"
-
-//struct list_head pool4_list;
+#include <stddef.h>
+#include <linux/types.h>
+#include <linux/in6.h>
+#include <linux/in.h>
+#include <linux/kernel.h>
+#include <linux/version.h>
+#include "/usr/src/linux-headers-3.19.0-25/include/linux/slab.h"
 
 void pool4_init(struct pool4 *pool4)
 {
@@ -18,7 +19,7 @@ int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
 {
 	struct pool4_entry *add;
-	add = malloc(sizeof(struct pool4_entry));
+	add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
 	if (!add) {
 		return -ENOMEM;
 	}
@@ -33,25 +34,25 @@ int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 	return 0;
 }
 
-static bool pool4_equals(struct pool4_entry *one,
+static int pool4_equals(struct pool4_entry *one,
 		struct pool4_entry *two)
 {
 	if (one->mark == two->mark && one->proto == two->proto &&
 			one->addr.s_addr == two->addr.s_addr &&
 			one->range.max == two->range.max &&
 			one->range.min == two->range.min) {
-		return true;
+		return 1;
 	} else {
-		return false;
+		return 0;
 	}
 }
 
-static bool pool4_compare(struct pool4_entry *one, struct pool4_entry *two)
+static int pool4_compare(struct pool4_entry *one, struct pool4_entry *two)
 {
 	if (one->proto == two->proto && one->addr.s_addr == two->addr.s_addr) {
-		return true;
+		return 1;
 	} else {
-		return false;
+		return 0;
 	}
 }
 
@@ -73,7 +74,7 @@ int pool4_rm(struct pool4 *pool4, __u32 mark, __u8 proto, struct in_addr *addr,
 		exist = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_equals(&rm, exist)) {
 			list_del(&exist->list_hook);
-			free(exist);
+			kfree(exist);
 		}
 	}
 
@@ -94,20 +95,20 @@ int pool4_flush(struct pool4 *pool4)
 	return 0;
 }
 
-bool pool4_is_empty(struct pool4 *pool4)
+int pool4_is_empty(struct pool4 *pool4)
 {
 	if (!list_empty(&pool4->list)){
-		printf("It is not empty.\n\n");
-		return false;
-	} else {
-		printf("It is empty.\n\n");
-		return true;
+		printk("It is not empty.\n\n");
+		return 0;
 	}
+	printk("It is empty.\n\n");
+	return 1;
+
 }
 
 void pool4_print_all(struct pool4 *pool4)
 {
-	printf("Elements in the list:\n\n");
+	printk("Elements in the list:\n\n");
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry *entry;
@@ -122,7 +123,7 @@ void pool4_print_all(struct pool4 *pool4)
 	}
 }
 
-bool pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
+int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
 {
 	struct list_head *iter;
@@ -140,12 +141,12 @@ bool pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
 			printf("It is in the list.\n\n");
-			return true;
+			return 1;
 		}
 	}
 
 	printf("It is not in the list.\n\n");
-	return false;
+	return 0;
 }
 
 int pool4_count(struct pool4 *pool4)
@@ -283,7 +284,7 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 
 	struct list_head *iter;
 	struct pool4_entry *entry;
-	bool flag = false;
+	int flag = 0;
 	int i;
 	n = n % domain->count;
 	list_for_each(iter, &pool4->list) {
@@ -303,7 +304,7 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 					}
 					n--;
 				}
-				flag = true;
+				flag = 1;
 			}
 			else{
 				for (i = entry->range.min;
@@ -349,10 +350,10 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 //	if (/*check if all cpool4 masks are used*/) {
 //		/*use spool4, but what if from the beggining it's using spool...*/
 //	}
-//
-//	/*get_mask_domain() with the client that was created 	*/
-//	/* get_nth_addr() send the client created and use it to search nth
-//	 * but where to get nth
-//	 * */
+
+	/*get_mask_domain() with the client that was created 	*/
+	/* get_nth_addr() send the client created and use it to search nth
+	 * but where to get nth
+	 * */
 //	return dummy;
 //}

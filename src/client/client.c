@@ -1,12 +1,16 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include "../types.h"
-#include "../list.h"
 #include "../prefixes.h"
 #include "../errno.h"
 #include "../pool4/pool4.h"
 #include "client.h"
 #include <math.h>
+#include <stddef.h>
+#include <linux/types.h>
+#include <linux/in6.h>
+#include <linux/in.h>
+#include <linux/kernel.h>
+#include <linux/module.h>
+#include <linux/list.h>
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 
@@ -33,7 +37,7 @@ int client_add(struct ipv6_prefix *prefix)
 	int error;
 	client = kmalloc(sizeof(*client), GFP_KERNEL);
 	if (!client) {
-		printf("Memory allocation error");
+		printk("Memory allocation error");
 		error = -ENOMEM;
 		return error;
 
@@ -71,18 +75,18 @@ void client_flush()
 	}
 }
 
-bool client_exist(struct ipv6_prefix *prefix)
+int client_exist(struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
 	struct ipv6_client *client;
 	list_for_each(iter, &client_hook) {
 		client = list_entry(iter, struct ipv6_client, list_hook);
 		if (prefix6_equals(prefix, &client->ipx)) {
-			return true;
+			return 1;
 		}
 
 	}
-	return false;
+	return 0;
 }
 
 
@@ -190,7 +194,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	struct list_head *iter;
 	struct ipv6_client *client;
 	struct in6_addr dummy;
-	bool flag = false;
+	int flag = 0;
 	int error = 0;
 	int i;
 	int total_clients = 0;
@@ -210,7 +214,7 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 		/*Saving the original value of the address */
 		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
 			if (offset == 0) {
-				flag = true;
+				flag = 1;
 				error = cb(&dummy, arg);
 				if (error){
 					return error;

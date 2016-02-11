@@ -1,0 +1,14 @@
+#CC=cgcc
+
+obj-m += jool_siit.o
+
+jool_common += pool4/pool4.o
+jool_common += client/client.o
+jool_common += errno.o
+jool_common += list.o
+jool_common += prefixes.o
+jool_common += types.o
+
+jool_siit += nf_hook.o
+
+jool_siit-objs += ${jool_common} ${jool_siit}
