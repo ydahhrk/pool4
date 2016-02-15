@@ -1,0 +1,10 @@
+#CC=cgcc
+
+ccflags-y := -I$(src)
+
+obj-m += jool_siit.o
+
+jool_siit-objs += pool4/pool4.o
+jool_siit-objs += client/client.o
+jool_siit-objs += types.o
+jool_siit-objs += nf_hook.o
