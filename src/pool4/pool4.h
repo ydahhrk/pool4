@@ -44,8 +44,10 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 		int (*cback)(struct pool4_mask *, void *), void *arg,
 		unsigned int offset);
 
-int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
+int pool4_get_nth_taddr(struct pool4 *pool4,
+		struct client_mask_domain *domain,
 		unsigned int n, struct ipv4_transport_addr *result);
-struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool, struct pool4 *spool);
 
+struct ipv4_transport_addr get_mask(struct packet *packet,
+		struct pool4 *cpool,struct pool4 *spool, struct client *client);
 #endif /* POOL4_H_ */

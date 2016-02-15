@@ -3,27 +3,36 @@
 
 #include "types.h"
 
-void client_init(void);
+struct ipv6_client{
+	struct ipv6_prefix ipx;
+	struct list_head list_hook;
+};
 
-int client_add(struct ipv6_prefix *prefix);
+struct client{
+	struct list_head list_hook;
+}
 
-void client_delete(struct ipv6_prefix *prefix);
+void client_init(struct client *client);
 
-void client_flush(void);
+int client_add(struct client *client, struct ipv6_prefix *prefix);
 
-bool client_exist(struct ipv6_prefix *prefix);
+void client_delete(struct client *client, struct ipv6_prefix *prefix);
 
-unsigned int client_count(void);
+void client_flush(struct client *client);
 
-void client_print_all(void);
+int client_exist(struct client *client, struct ipv6_prefix *prefix)
 
-int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *), void *arg,
+unsigned int client_count(struct client *client);
+
+void client_print_all(struct client *client);
+
+int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix *, void *), void *arg,
 		struct ipv6_prefix *offset);
 
-int client_for_each(int (*cb)(struct in6_addr *, void *),
+int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 		void *arg, unsigned int offset);
 
-int client_addr_exist(struct in6_addr *addr);
+int client_addr_exist(struct client *client, struct in6_addr *addr);
 
 int client_get_mask_domain(struct in6_addr *client,
 		struct client_mask_domain *result,

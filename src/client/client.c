@@ -12,10 +12,6 @@
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 
-struct ipv6_client{
-	struct ipv6_prefix ipx;
-	struct list_head list_hook;
-};
 
 struct list_head client_hook;
 
@@ -24,62 +20,58 @@ static unsigned int get_addr6_count(struct ipv6_prefix *prefix)
 	return 1 << (128-prefix->len);
 }
 
-void client_init()
+void client_init(struct client *client)
 {
-	INIT_LIST_HEAD(&client_hook);
+	INIT_LIST_HEAD(&client->list_hook);
 }
 
-int client_add(struct ipv6_prefix *prefix)
+int client_add(struct client *client, struct ipv6_prefix *prefix)
 {
-	struct ipv6_client *client;
-	int error;
-	client = kmalloc(sizeof(*client), GFP_KERNEL);
-	if (!client) {
-		printk("Memory allocation error");
-		error = -ENOMEM;
-		return error;
+	struct ipv6_client *add;
+	add = kmalloc(sizeof(struct ipv6_client), GFP_KERNEL);
+	if (!add) {
+		return -ENOMEM;
 
 	}
-	client->ipx = *prefix;
-	list_add_tail(&(client->list_hook), &(client_hook));
+	add->ipx = *prefix;
+	list_add_tail(&(add->list_hook), &(client->list_hook));
 	return 0;
 }
 
-void client_delete(struct ipv6_prefix *prefix)
+void client_delete(struct client *client, struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
-
-	struct ipv6_client *client;
-	list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
-		if (prefix6_equals(prefix, &client->ipx)) {
+	struct ipv6_client *exist;
+	list_for_each(iter, &client->list_hook) {
+		exist = list_entry(iter, struct ipv6_client, list_hook);
+		if (prefix6_equals(prefix, &exist->ipx)) {
 			list_del(&client->list_hook);
-			kfree(client);
+			kfree(exist);
 			return;
 		}
 	}
 }
 
-void client_flush()
+void client_flush(struct client *client)
 {
 	struct list_head *iter;
 	struct list_head *client_dummy;
 	struct ipv6_client *objPtr;
 
-	list_for_each_safe(iter, client_dummy, &client_hook) {
+	list_for_each_safe(iter, client_dummy, &client->list_hook) {
 		objPtr = list_entry(iter, struct ipv6_client , list_hook);
 		list_del(&objPtr->list_hook);
 		kfree(objPtr);
 	}
 }
 
-bool client_exist(struct ipv6_prefix *prefix)
+int client_exist(struct client *client, struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
-	struct ipv6_client *client;
-	list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
-		if (prefix6_equals(prefix, &client->ipx)) {
+	struct ipv6_client *exist;
+	list_for_each(iter, &client->list_hook) {
+		exist = list_entry(iter, struct ipv6_client, list_hook);
+		if (prefix6_equals(prefix, &exist->ipx)) {
 			return 1;
 		}
 
@@ -89,15 +81,15 @@ bool client_exist(struct ipv6_prefix *prefix)
 
 
 
-unsigned int client_count()
+unsigned int client_count(struct client *client)
 {
         struct list_head *iter;
-        struct ipv6_client *client;
+        struct ipv6_client *exist;
         unsigned int i = 0;
 
-        list_for_each(iter, &client_hook) {
-                client = list_entry(iter, struct ipv6_client, list_hook);
-                i = i + get_addr6_count(&client->ipx);
+        list_for_each(iter, &client->list_hook) {
+                exist = list_entry(iter, struct ipv6_client, list_hook);
+                i = i + get_addr6_count(&exist->ipx);
         }
 
         return i;
@@ -106,12 +98,12 @@ unsigned int client_count()
 }
 
 
-void client_print_all()
+void client_print_all(struct client *client)
 {
 	struct list_head *iter;
-
 	struct ipv6_client *obj_ptr;
-	list_for_each(iter, &client_hook) {
+
+	list_for_each(iter, &client->list_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client , list_hook);
 		pr_debug("Address: %x.%x.%x.%x\nLength:%u\n",
 				obj_ptr->ipx.address.s6_addr32[0],
@@ -122,22 +114,22 @@ void client_print_all()
 	}
 }
 
-int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
+int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix *, void *),
 		void *arg, struct ipv6_prefix *offset)
 {
 	struct list_head *iter;
-	struct ipv6_client *client;
+	struct ipv6_client *obj_ptr;
 	int error = 0;
 
-	list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
+	list_for_each(iter, &client->list_hook) {
+		obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
 
 		if (!offset) {
-			error = func(&client->ipx, arg);
+			error = func(&obj_ptr->ipx, arg);
 		if (error)
 			break;
 
-		} else if (prefix6_equals(offset, &client->ipx)) {
+		} else if (prefix6_equals(offset, &obj_ptr->ipx)) {
 		offset = NULL;
 		}
 	}
@@ -162,16 +154,16 @@ void addr6_iterations(struct in6_addr *client)
 	}
 }
 
-int client_addr_exist(struct in6_addr *addr)
+int client_addr_exist(struct client *client, struct in6_addr *addr)
 {
 	struct list_head *iter;
-	struct ipv6_client *client;
+	struct ipv6_client *obj_ptr;
 	struct in6_addr dummy;
 	int i = 0;
 
-	list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
-		dummy = client->ipx.address;
+	list_for_each(iter, &client->list_hook) {
+		obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
+		dummy = obj_ptr->ipx.address;
 		/*Saving the original value of the address */
 		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
 			if(addr->s6_addr32[0] == dummy.s6_addr32[0]
@@ -185,12 +177,12 @@ int client_addr_exist(struct in6_addr *addr)
 	return -1;
 }
 
-int client_for_each(int (*cb)(struct in6_addr *, void *),
+int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 		void *arg, unsigned int offset)
 {
 
 	struct list_head *iter;
-	struct ipv6_client *client;
+	struct ipv6_client *obj_ptr;
 	struct in6_addr dummy;
 	int flag = 0;
 	int error = 0;
@@ -198,19 +190,19 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	int total_clients = 0;
 	int client_index;
 	int client_index_aux = 0;
-	list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
-		total_clients = total_clients + get_addr6_count(&client->ipx);
+	list_for_each(iter, &client->list_hook) {
+		obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
+		total_clients = total_clients + get_addr6_count(&obj_ptr->ipx);
 
 	}
 
 	offset = offset%total_clients;
 	client_index = offset;
-	list_for_each(iter, &client_hook) {
-		client = list_entry(iter, struct ipv6_client, list_hook);
-		dummy = client->ipx.address;
+	list_for_each(iter, &client->list_hook) {
+		obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
+		dummy = obj_ptr->ipx.address;
 		/*Saving the original value of the address */
-		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+		for (i = 0; i < get_addr6_count(&obj_ptr->ipx); i++) {
 			if (offset == 0) {
 				flag = 1;
 				error = cb(&dummy, arg);
@@ -226,10 +218,10 @@ int client_for_each(int (*cb)(struct in6_addr *, void *),
 	}
 
 	if (flag){
-		list_for_each(iter, &client_hook){
-			client = list_entry(iter, struct ipv6_client, list_hook);
-			dummy = client->ipx.address;
-			for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+		list_for_each(iter, &client->list_hook){
+			obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
+			dummy = obj_ptr->ipx.address;
+			for (i = 0; i < get_addr6_count(&obj_ptr->ipx); i++) {
 				if (client_index_aux < client_index) {
 					error = cb(&dummy,arg);
 					if (error)

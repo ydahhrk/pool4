@@ -92,44 +92,44 @@
 
 static int __init nat64_init(void)
 {
-
-	printk("prueba");
+//
+//	printk("prueba");
 	int error = 0;
-	struct pool4 cpool;
-	struct pool4 spool;
-
-	pool4_init(&cpool);
-	pool4_init(&spool);
-
-	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 10;
-	one->range.max = 20;
-
-	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL );
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000202);
-	one->range.min = 30;
-	one->range.max = 40;
-
-	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 50;
-	one->range.max = 60;
-
-	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000203);
-	one->range.min = 70;
-	one->range.max = 80;
-
-	pool4_add(&cpool, one->mark, one->proto, &one->addr, &one->range);
+//	struct pool4 cpool;
+//	struct pool4 spool;
+//
+//	pool4_init(&cpool);
+//	pool4_init(&spool);
+//
+//	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
+//	one->mark = 1;
+//	one->proto = 1;
+//	one->addr.s_addr = cpu_to_be32(0xc0000201);
+//	one->range.min = 10;
+//	one->range.max = 20;
+//
+//	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL );
+//	one->mark = 1;
+//	one->proto = 1;
+//	one->addr.s_addr = cpu_to_be32(0xc0000202);
+//	one->range.min = 30;
+//	one->range.max = 40;
+//
+//	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
+//	one->mark = 1;
+//	one->proto = 1;
+//	one->addr.s_addr = cpu_to_be32(0xc0000201);
+//	one->range.min = 50;
+//	one->range.max = 60;
+//
+//	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
+//	one->mark = 1;
+//	one->proto = 1;
+//	one->addr.s_addr = cpu_to_be32(0xc0000203);
+//	one->range.min = 70;
+//	one->range.max = 80;
+//
+//	pool4_add(&cpool, one->mark, one->proto, &one->addr, &one->range);
 
 
 //	struct client_mask_domain domain;
