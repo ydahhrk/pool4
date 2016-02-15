@@ -1,12 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include "../types.h"
-#include "../list.h"
-#include "../prefixes.h"
-#include "../errno.h"
-#include "../pool4/pool4.h"
+#include <linux/slab.h>
 #include "client.h"
-#include <math.h>
+
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 
@@ -22,7 +16,7 @@ static unsigned int get_addr6_count(struct ipv6_prefix *prefix)
 	return 1 << (128-prefix->len);
 }
 
-void client_init()
+void client_init(void)
 {
 	INIT_LIST_HEAD(&client_hook);
 }
@@ -33,7 +27,7 @@ int client_add(struct ipv6_prefix *prefix)
 	int error;
 	client = kmalloc(sizeof(*client), GFP_KERNEL);
 	if (!client) {
-		printf("Memory allocation error");
+		printk("Memory allocation error");
 		error = -ENOMEM;
 		return error;
 
@@ -58,7 +52,7 @@ void client_delete(struct ipv6_prefix *prefix)
 	}
 }
 
-void client_flush()
+void client_flush(void)
 {
 	struct list_head *iter;
 	struct list_head *client_dummy;
@@ -80,36 +74,34 @@ bool client_exist(struct ipv6_prefix *prefix)
 		if (prefix6_equals(prefix, &client->ipx)) {
 			return true;
 		}
-
 	}
 	return false;
 }
 
 unsigned int client_count()
 {
-        struct list_head *iter;
-        struct ipv6_client *client;
-        unsigned int i = 0;
+	struct list_head *iter;
+	struct ipv6_client *client;
+	unsigned int i = 0;
 
-        list_for_each(iter, &client_hook) {
-                client = list_entry(iter, struct ipv6_client, list_hook);
-                i = i + get_addr6_count(&client->ipx);
-        }
+	list_for_each(iter, &client_hook) {
+		client = list_entry(iter, struct ipv6_client, list_hook);
+		i = i + get_addr6_count(&client->ipx);
+	}
 
-        return i;
+	return i;
 
 
 }
 
-
-void client_print_all()
+void client_print_all(void)
 {
 	struct list_head *iter;
 
 	struct ipv6_client *obj_ptr;
 	list_for_each(iter, &client_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client , list_hook);
-		printf("Address: %x.%x.%x.%x\nLength:%u\n",
+		printk("Address: %x.%x.%x.%x\nLength:%u\n",
 				obj_ptr->ipx.address.s6_addr32[0],
 				obj_ptr->ipx.address.s6_addr32[1],
 				obj_ptr->ipx.address.s6_addr32[2],
@@ -229,7 +221,7 @@ int client_get_mask_domain(struct in6_addr *client,
 	int error = 0;
 
 	if (client_count() > pool4_count(pool4)) {
-		printf("There are more clients than mask entries\n");
+		printk("There are more clients than mask entries\n");
 		return 0;
 	}
 

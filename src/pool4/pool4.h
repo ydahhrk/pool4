@@ -1,10 +1,11 @@
 #ifndef POOL4_H_
 #define POOL4_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include "../types.h"
-#include "../list.h"
+#include <stdbool.h>
+#include <linux/in.h>
+#include <linux/list.h>
+#include "types.h"
+
 
 struct pool4_entry {
 	__u32 mark;

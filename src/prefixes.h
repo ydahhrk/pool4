@@ -1,14 +1,10 @@
-/*
- * prefixes.h
- *
- *  Created on: Nov 19, 2015
- *      Author: cfrutos
- */
-
-#include "types.h"
-#include "errno.h"
 #ifndef PREFIXES_H_
 #define PREFIXES_H_
+
+#include <linux/in6.h>
+#include <stdbool.h>
+#include "errno.h"
+#include "types.h"
 
 static inline bool ipv6_addr_equal(const struct in6_addr *a1, const struct in6_addr *a2)
 {
@@ -38,6 +34,7 @@ bool prefix6_equals(const struct ipv6_prefix *expected, const struct ipv6_prefix
 
 	return true;
 }
+
 /*
 int prefix6_validate(struct ipv6_prefix *prefix)
 {

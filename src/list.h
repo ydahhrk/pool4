@@ -2,13 +2,6 @@
 #define _LINUX_LIST_H
 
 /*
-#include <linux/types.h>
-#include <linux/stddef.h>
-#include <linux/poison.h>
-#include <linux/const.h>
-#include <linux/kernel.h>
-*/
-/*
  * Simple doubly linked list implementation.
  *
  * Some of the internal functions ("__xxx") are useful when
@@ -22,18 +15,6 @@
 
 #define LIST_HEAD(name) \
 	struct list_head name = LIST_HEAD_INIT(name)
-
-struct list_head {
-        struct list_head *next, *prev;
-};
-
-struct hlist_head {
-         struct hlist_node *first;
-};
-
-struct hlist_node {
-	struct hlist_node *next, **pprev;
-};
 
 static inline void INIT_LIST_HEAD(struct list_head *list)
 {
@@ -357,7 +338,7 @@ static inline void list_splice_tail_init(struct list_head *list,
 
 
 
-#define offsetof(TYPE, MEMBER)  ((size_t)&((TYPE *)0)->MEMBER)
+//#define offsetof(TYPE, MEMBER)  ((size_t)&((TYPE *)0)->MEMBER)
 
 #define container_of(ptr, type, member) ({                      \
          const typeof( ((type *)0)->member ) *__mptr = (ptr);    \

@@ -1,17 +1,13 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "../types.h"
-#include "../list.h"
-#include "../errno.h"
+#include <linux/slab.h>
+#include <linux/list.h>
+#include "errno.h"
 #include "pool4.h"
-#include "../client/client.h"
+#include "types.h"
+
 
 struct pool4 {
 	struct list_head list;
 };
-
-//struct list_head pool4_list;
 
 int pool4_init(struct pool4 *pool4)
 {
@@ -23,7 +19,7 @@ int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
 {
 	struct pool4_entry *add;
-	add = malloc(sizeof(struct pool4_entry));
+	add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
 	if (!add) {
 		return -ENOMEM;
 	}
@@ -78,7 +74,7 @@ int pool4_rm(struct pool4 *pool4, __u32 mark, __u8 proto, struct in_addr *addr,
 		exist = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_equals(&rm, exist)) {
 			list_del(&exist->list_hook);
-			free(exist);
+			kfree(exist);
 		}
 	}
 
@@ -94,7 +90,7 @@ int pool4_flush(struct pool4 *pool4)
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		list_del(iter);
-		free(entry);
+		kfree(entry);
 	}
 	return 0;
 }
@@ -102,28 +98,28 @@ int pool4_flush(struct pool4 *pool4)
 bool pool4_is_empty(struct pool4 *pool4)
 {
 	if (!list_empty(&pool4->list)){
-		printf("It is not empty.\n\n");
+		printk("It is not empty.\n\n");
 		return false;
 	} else {
-		printf("It is empty.\n\n");
+		printk("It is empty.\n\n");
 		return true;
 	}
 }
 
 void pool4_print_all(struct pool4 *pool4)
 {
-	printf("Elements in the list:\n\n");
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry *entry;
 	char addr[16];
+	printk("Elements in the list:\n\n");
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
-		printf("%u, ", entry->mark);
-		printf("%u, ", entry->proto);
-		printf("%s, ", ip4_to_str(entry->addr.s_addr, addr));
-		printf("%u-%u\n", entry->range.min, entry->range.max);
+		printk("%u, ", entry->mark);
+		printk("%u, ", entry->proto);
+		printk("%s, ", ip4_to_str(entry->addr.s_addr, addr));
+		printk("%u-%u\n", entry->range.min, entry->range.max);
 	}
 }
 
@@ -144,12 +140,12 @@ bool pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
-			printf("It is in the list.\n\n");
+			printk("It is in the list.\n\n");
 			return true;
 		}
 	}
 
-	printf("It is not in the list.\n\n");
+	printk("It is not in the list.\n\n");
 	return false;
 }
 

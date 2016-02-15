@@ -1,13 +1,5 @@
-/*
- * errno.h
- *
- *  Created on: Dec 21, 2015
- *      Author: cfrutos
- */
-
 #ifndef ERRNO_H_
 #define ERRNO_H_
-
 
 /*
  * Error numbers.
@@ -17,6 +9,7 @@
  * of the descriptions returned by strerror do not obviously match
  * their error naming.
  */
+
 #define EPERM		1	/* Operation not permitted */
 #define	ENOFILE		2	/* No such file or directory */
 #define	ENOENT		2
@@ -53,13 +46,13 @@
 #define	EDOM		33	/* Domain error (math functions) */
 #define	ERANGE		34	/* Result too large (possibly too small) */
 /* 35 - Unknown Error */
-#define	EDEADLOCK	36	/* Resource deadlock avoided (non-Cyg) */
-#define	EDEADLK		36
+//#define	EDEADLOCK	36	/* Resource deadlock avoided (non-Cyg) */
+//#define	EDEADLK		36
 /* 37 - Unknown Error */
-#define	ENAMETOOLONG	38	/* Filename too long (91 in Cyg?) */
-#define	ENOLCK		39	/* No locks available (46 in Cyg?) */
-#define	ENOSYS		40	/* Function not implemented (88 in Cyg?) */
-#define	ENOTEMPTY	41	/* Directory not empty (90 in Cyg?) */
-#define	EILSEQ		42	/* Illegal byte sequence */
+//#define	ENAMETOOLONG	38	/* Filename too long (91 in Cyg?) */
+//#define	ENOLCK		39	/* No locks available (46 in Cyg?) */
+//#define	ENOSYS		40	/* Function not implemented (88 in Cyg?) */
+//#define	ENOTEMPTY	41	/* Directory not empty (90 in Cyg?) */
+//#define	EILSEQ		42	/* Illegal byte sequence */
 
 #endif /* ERRNO_H_ */

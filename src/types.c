@@ -6,3 +6,4 @@ char *ip4_to_str (unsigned int ip, char *buffer)
 			(ip >> 8) & 0xff, ip & 0xff);
 	return buffer;
 }
+
