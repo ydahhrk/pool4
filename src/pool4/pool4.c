@@ -15,9 +15,10 @@ void pool4_init(struct pool4 *pool4)
 	INIT_LIST_HEAD(&pool4->list);
 }
 
+static int dynamic_assigment = 1;
+
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
-{
 	struct pool4_entry *add;
 	add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
 	if (!add) {
@@ -333,17 +334,23 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 {
 	struct ipv4_transport_addr dummy;
 	if (pool4_is_empty(cpool)) {
+		if(spool == NULL)
+			return 0; // the original spool is also empty and it just ends
 		return get_mask(packet, spool, NULL);
 //		//call again to use spool
 	}
 //	/*check if pack addr does not exists in client db */
 	if (!(client_addr_exist(client, packet->hdr->saddr))) {
-		if (/*check if dynamic*/)
-			client_add(cpool); /*add client to db*/
+		if (dynamic_assigment)
+			client_add(*cpool); /*add client to db*/
 		else{
-			return 0
+			if(pool4_is_empty(*spool)
+					return NULL;
+
+			//use spool
 
 		}
+		return NULL;
 	}
 //
 //	if (/*check if all cpool4 masks are used*/) {
