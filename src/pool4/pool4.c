@@ -330,24 +330,30 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
  */
 
 struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
-	struct pool4 *spool, struct client *client)
+	struct pool4 *spool, struct client *client, int masks_per_client)
 {
-	struct ipv4_transport_addr dummy;
+	struct client_mask_domain *result = kmalloc(sizeof(*result),
+			GFP_KERNEL);
+	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient),
+			GFP_KERNEL);
+
+	struct client_mask_domain *result;
+	struct ipv4_transport_addr *dummy;
+	int error;
 	if (pool4_is_empty(cpool)) {
 		if(spool == NULL)
 			return 0; // the original spool is also empty and it just ends
 		return get_mask(packet, spool, NULL);
-//		//call again to use spool
+
 	}
 //	/*check if pack addr does not exists in client db */
 	if (!(client_addr_exist(client, packet->hdr->saddr))) {
-		if (dynamic_assigment)
-			client_add(*cpool); /*add client to db*/
-		else{
-			if(pool4_is_empty(*spool)
-					return NULL;
-
-			//use spool
+		if (dynamic_assigment) {
+			dummyClient->address = packet->hdr->saddr;
+			dummyClient->len = 128;
+			client_add(*client, *dummyClient); /*add client to db*/
+		}
+		else {
 
 		}
 		return NULL;
@@ -356,6 +362,15 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 //	if (/*check if all cpool4 masks are used*/) {
 //		/*use spool4, but what if from the beggining it's using spool...*/
 //	}
+	error = client_get_mask_domain(*client, *cpool, packet->hdr->saddr,
+			*result, masks_per_client);
+	if (!error)
+		return NULL;
+
+	error = pool4_get_nth_taddr(*cpool, *result, 5,
+			*dummy);
+	if (!error)
+		return NULL;
 
 	/*get_mask_domain() with the client that was created 	*/
 	/* get_nth_addr() send the client created and use it to search nth
