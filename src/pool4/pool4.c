@@ -340,9 +340,11 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	struct client_mask_domain *result;
 	struct ipv4_transport_addr *dummy;
 	int error;
-	if (pool4_is_empty(cpool)) {
+	if (pool4_is_empty(*cpool)) {
+		if (pool4_is_empty(*spool))
+			return NULL;
 		if(spool == NULL)
-			return 0; // the original spool is also empty and it just ends
+			return NULL; // the original spool is also empty and it just ends
 		return get_mask(packet, spool, NULL);
 
 	}
@@ -354,9 +356,8 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 			client_add(*client, *dummyClient); /*add client to db*/
 		}
 		else {
-
+			return NULL;
 		}
-		return NULL;
 	}
 //
 //	if (/*check if all cpool4 masks are used*/) {
