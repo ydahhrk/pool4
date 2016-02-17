@@ -19,8 +19,7 @@ static int dynamic_assigment = 1;
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
-	struct pool4_entry *add;
-	add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
+	struct pool4_entry *add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
 	if (!add) {
 		return -ENOMEM;
 	}
@@ -340,29 +339,45 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	struct client_mask_domain *result;
 	struct ipv4_transport_addr *dummy;
 	int error;
+/*
+ * checks is cpool is available, otherwise calls the same function with spool
+ *  as cpool
+ *
+ */
 	if (pool4_is_empty(*cpool)) {
 		if (pool4_is_empty(*spool))
 			return NULL;
 		if(spool == NULL)
-			return NULL; // the original spool is also empty and it just ends
+			return NULL;
 		return get_mask(packet, spool, NULL);
 
 	}
-//	/*check if pack addr does not exists in client db */
+	/*check if pack addr does not exists in client db, if so it adds it
+	 * if it exists it just skips the instruction
+	 *  */
 	if (!(client_addr_exist(client, packet->hdr->saddr))) {
 		if (dynamic_assigment) {
 			dummyClient->address = packet->hdr->saddr;
 			dummyClient->len = 128;
-			client_add(*client, *dummyClient); /*add client to db*/
+			client_add(*client, *dummyClient);
 		}
 		else {
 			return NULL;
 		}
 	}
-//
+
+/*MISSING THIS IMPORTANT PART
+ * kind of lost.
+`*/
 //	if (/*check if all cpool4 masks are used*/) {
 //		/*use spool4, but what if from the beggining it's using spool...*/
 //	}
+
+	/* get_mask_domain with the client that was created/requested
+	 * after that get the nth pool4 address, the nth is set to 5 just
+	 * to use any number.
+	 */
+
 	error = client_get_mask_domain(*client, *cpool, packet->hdr->saddr,
 			*result, masks_per_client);
 	if (!error)
@@ -373,9 +388,5 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	if (!error)
 		return NULL;
 
-	/*get_mask_domain() with the client that was created 	*/
-	/* get_nth_addr() send the client created and use it to search nth
-	 * but where to get nth
-	 * */
 	return dummy;
 }
