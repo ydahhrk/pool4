@@ -237,9 +237,9 @@ int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 	return offset ? -ESRCH : error;
 
 }
-/*
+
 int client_get_mask_domain(struct client *client, struct pool4 *pool4,
-		struct in6_addr *client,
+		struct in6_addr *addr,
 		struct client_mask_domain *result,
 		unsigned int masks_per_client)
 {
@@ -255,7 +255,7 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	list_for_each(iter, &client->list_hook) {
 		ipv6_listed = list_entry(iter, struct ipv6_client, list_hook);
-		if (ipv6_addr_equal(client, &ipv6_listed->ipx.address)) {
+		if (ipv6_addr_equal(addr, &ipv6_listed->ipx.address)) {
 			break;
 		}
 		ipv6_pos++;
@@ -267,4 +267,4 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	return 0;
 }
-*/
+

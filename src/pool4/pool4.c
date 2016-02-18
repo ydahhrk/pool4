@@ -11,12 +11,13 @@
 #include <linux/version.h>
 #include <linux/slab.h>
 
+struct client;
+static int dynamic_assigment = 1;
+
 void pool4_init(struct pool4 *pool4)
 {
 	INIT_LIST_HEAD(&pool4->list);
 }
-
-//static int dynamic_assigment = 1;
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
@@ -329,63 +330,59 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
  */
 
 
-//struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
-//	struct pool4 *spool, struct client *client, int masks_per_client)
-//{
-//	struct client_mask_domain *result;
-//	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient),
-//			GFP_KERNEL);
-//
-//	struct client_mask_domain *result;
-//	struct ipv4_transport_addr *dummy;
-//	int error;
-//	masks_per_client = get_random_int();
-///*
-// * checks is cpool is available, otherwise calls the same function with spool
-// *  as cpool
-// *
-// */
-//	if (pool4_is_empty(*cpool)) {
-//		if (pool4_is_empty(*spool))
-//			return NULL; // cpool and spool are empty, cant do anything
-//		return get_mask(packet, spool, NULL, *client, masks_per_client);
-//
+struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
+	struct pool4 *spool, struct client *client, unsigned int masks_per_client)
+{
+	struct client_mask_domain *result;
+	struct ipv6_prefix *dummyClient;
+	struct ipv4_transport_addr *dummy;
+	int error;
+	masks_per_client = get_random_int();
+/*
+ * checks is cpool is available, otherwise calls the same function with spool
+ *  as cpool
+ *
+ */
+	if (pool4_is_empty(cpool)) {
+		if (pool4_is_empty(spool))
+			return *dummy; // cpool and spool are empty, cant do anything
+		return get_mask(packet, spool, cpool, client, masks_per_client);
+
+	}
+	/*check if pack addr does not exists in client db, if it does not  it adds it
+	 * if it exists it just skips the instruction
+	 *  */
+	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
+		if (dynamic_assigment) { //if its dynamic it enters if not it finishes.
+			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+			dummyClient->len = 128;
+			client_add(client, dummyClient);
+		}
+		else {
+			return *dummy;
+		}
+	}
+
+/*MISSING THIS IMPORTANT PART
+ * kind of lost.
+`*/
+//	if (/*check if all cpool4 masks are used*/) {
+//		/*use spool4, but what if from the beggining it's using spool...*/
 //	}
-//	/*check if pack addr does not exists in client db, if it does not  it adds it
-//	 * if it exists it just skips the instruction
-//	 *  */
-//	if (!(client_addr_exist(client, packet->hdr->saddr))) {
-//		if (dynamic_assigment) { //if its dynamic it enters if not it finishes.
-//			dummyClient->address = packet->hdr->saddr;
-//			dummyClient->len = 128;
-//			client_add(*client, *dummyClient);
-//		}
-//		else {
-//			return NULL;
-//		}
-//	}
-//
-///*MISSING THIS IMPORTANT PART
-// * kind of lost.
-//`*/
-////	if (/*check if all cpool4 masks are used*/) {
-////		/*use spool4, but what if from the beggining it's using spool...*/
-////	}
-//
-//	/* get_mask_domain with the client that was created/requested
-//	 * after that get the nth pool4 address, the nth is set to 5 just
-//	 * to use any number.
-//	 */
-//
-//	error = client_get_mask_domain(*client, *cpool, packet->hdr->saddr,
-//			*result, masks_per_client);
-//	if (!error)
-//		return NULL;
-//
-//	error = pool4_get_nth_taddr(*cpool, *result, 5,
-//			*dummy);
-//	if (!error)
-//		return NULL;
-//
-//	return dummy;
-//}
+
+	/* get_mask_domain with the client that was created/requested
+	 * after that get the nth pool4 address, the nth is set to 5 just
+	 * to use any number.
+	 */
+
+	error = client_get_mask_domain(client, cpool, packet->hdr->saddr, result, masks_per_client);
+	if (!error)
+		return NULL;
+
+	error = pool4_get_nth_taddr(*cpool, *result, 5,
+			*dummy);
+	if (!error)
+		return NULL;
+
+	return dummy;
+}

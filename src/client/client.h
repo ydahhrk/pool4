@@ -34,8 +34,8 @@ int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 
 int client_addr_exist(struct client *client, struct in6_addr *addr);
 
-/*int client_get_mask_domain(struct client *client, struct in6_addr *client,
+int client_get_mask_domain(struct client *client, struct in6_addr *addr,
 		struct client_mask_domain *result,
 		unsigned int masks_per_client);
-*/
+
 #endif /* CLIENT_H_ */
