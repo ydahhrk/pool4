@@ -16,10 +16,11 @@ void pool4_init(struct pool4 *pool4)
 	INIT_LIST_HEAD(&pool4->list);
 }
 
-static int dynamic_assigment = 1;
+//static int dynamic_assigment = 1;
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
+{
 	struct pool4_entry *add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
 	if (!add) {
 		return -ENOMEM;
@@ -109,9 +110,7 @@ int pool4_is_empty(struct pool4 *pool4)
 
 void pool4_print_all(struct pool4 *pool4)
 {
-	printk("Elements in the list:\n\n");
-	struct list_head *iter;
-	struct list_head *tmp;
+	struct list_head *tmp, *iter;
 	struct pool4_entry *entry;
 
 	list_for_each_safe(iter, tmp, &pool4->list) {

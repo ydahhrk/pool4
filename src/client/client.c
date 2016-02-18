@@ -6,7 +6,6 @@
 #include <linux/in6.h>
 #include <linux/in.h>
 #include <linux/kernel.h>
-#include <linux/module.h>
 #include <linux/list.h>
 #include <linux/slab.h>
 
@@ -65,11 +64,12 @@ void client_flush(struct client *client)
 	}
 }
 
+
 int client_exist(struct client *client, struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
 	struct ipv6_client *exist;
-	list_for_each(iter, &client->list_hook) {
+	list_for_each(iter, &client->list_hook){
 		exist = list_entry(iter, struct ipv6_client, list_hook);
 		if (prefix6_equals(prefix, &exist->ipx)) {
 			return 1;
@@ -165,7 +165,7 @@ int client_addr_exist(struct client *client, struct in6_addr *addr)
 		obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
 		dummy = obj_ptr->ipx.address;
 		/*Saving the original value of the address */
-		for (i = 0; i < get_addr6_count(&client->ipx); i++) {
+		for (i = 0; i < get_addr6_count(&obj_ptr->ipx); i++) {
 			if(addr->s6_addr32[0] == dummy.s6_addr32[0]
 				&& addr->s6_addr32[1] == dummy.s6_addr32[1]
 				&& addr->s6_addr32[2] == dummy.s6_addr32[2]
@@ -237,7 +237,7 @@ int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 	return offset ? -ESRCH : error;
 
 }
-
+/*
 int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 		struct in6_addr *client,
 		struct client_mask_domain *result,
@@ -267,3 +267,4 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	return 0;
 }
+*/
