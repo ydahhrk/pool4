@@ -11,6 +11,7 @@ struct ipv6_client{
 struct client{
 	struct list_head list_hook;
 };
+struct pool4;
 
 void client_init(struct client *client);
 
@@ -34,7 +35,7 @@ int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 
 int client_addr_exist(struct client *client, struct in6_addr *addr);
 
-int client_get_mask_domain(struct client *client, struct in6_addr *addr,
+int client_get_mask_domain(struct client *client, struct pool4 *pool4, struct in6_addr *addr,
 		struct client_mask_domain *result,
 		unsigned int masks_per_client);
 

@@ -333,9 +333,9 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	struct pool4 *spool, struct client *client, unsigned int masks_per_client)
 {
-	struct client_mask_domain *result;
-	struct ipv6_prefix *dummyClient;
-	struct ipv4_transport_addr *dummy;
+	struct client_mask_domain result;
+	struct ipv6_prefix dummyClient;
+	struct ipv4_transport_addr dummy;
 	int error;
 	masks_per_client = get_random_int();
 /*
@@ -345,7 +345,7 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
  */
 	if (pool4_is_empty(cpool)) {
 		if (pool4_is_empty(spool))
-			return *dummy; // cpool and spool are empty, cant do anything
+			return dummy; // cpool and spool are empty, cant do anything
 		return get_mask(packet, spool, cpool, client, masks_per_client);
 
 	}
@@ -354,12 +354,12 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	 *  */
 	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
 		if (dynamic_assigment) { //if its dynamic it enters if not it finishes.
-			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
-			dummyClient->len = 128;
-			client_add(client, dummyClient);
+			dummyClient.address.in6_u = packet->hdr->saddr.in6_u;
+			dummyClient.len = 128;
+			client_add(client, &dummyClient);
 		}
 		else {
-			return *dummy;
+			return dummy;
 		}
 	}
 
@@ -375,14 +375,13 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	 * to use any number.
 	 */
 
-	error = client_get_mask_domain(client, cpool, packet->hdr->saddr, result, masks_per_client);
+	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr, &result, masks_per_client);
 	if (!error)
-		return NULL;
+		return dummy;
 
-	error = pool4_get_nth_taddr(*cpool, *result, 5,
-			*dummy);
+	error = pool4_get_nth_taddr(cpool, &result, 5, &dummy);
 	if (!error)
-		return NULL;
+		return dummy;
 
 	return dummy;
 }
