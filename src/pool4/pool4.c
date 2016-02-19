@@ -374,7 +374,6 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 	 * after that get the nth pool4 address, the nth is set to 5 just
 	 * to use any number.
 	 */
-
 	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr, &result, masks_per_client);
 	if (!error)
 		return dummy;
