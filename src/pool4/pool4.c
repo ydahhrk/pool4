@@ -363,17 +363,6 @@ struct ipv4_transport_addr get_mask(struct packet *packet, struct pool4 *cpool,
 		}
 	}
 
-/*MISSING THIS IMPORTANT PART
- * kind of lost.
-`*/
-//	if (/*check if all cpool4 masks are used*/) {
-//		/*use spool4, but what if from the beggining it's using spool...*/
-//	}
-
-	/* get_mask_domain with the client that was created/requested
-	 * after that get the nth pool4 address, the nth is set to 5 just
-	 * to use any number.
-	 */
 	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr, &result, masks_per_client);
 	if (!error)
 		return dummy;
