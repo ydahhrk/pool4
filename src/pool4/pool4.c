@@ -343,7 +343,6 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 	struct ipv6_prefix dummyClient;
 	struct ipv4_transport_addr dummy;
 	int error;
-	int n = get_random_int();
 	int flagS = 0;
 /*
  * checks is cpool is available, otherwise calls the same function with spool
@@ -379,7 +378,7 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 
 		}
 		else if (mask_remains(/* spool BIB function*/)){
-			//will use spool
+			flagS = 1;//will use spool
 		}
 		else {
 			return -ENOMEM;// will be changed but here will never work.
@@ -394,13 +393,23 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 		}
 	}
 
-	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr, &result, masks_per_client);
-	if (!error)
-		return 0;
-
-	error = pool4_get_nth_taddr(cpool, &result, 5, &dummy);
-	if (!error)
-		return 0;
-
+	if (!flagS){
+		error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
+				&result_mask, masks_per_client);
+		if (!error)
+			return 0;
+		error = pool4_get_nth_taddr(cpool, &result, 5, &dummy);
+			if (!error)
+				return 0;
+	}
+	else{
+		error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
+				&result_mask, masks_per_client);
+			if (!error)
+				return 0;
+		error = pool4_get_nth_taddr(spool, &result, 5, &dummy);
+			if (!error)
+				return 0;
+	}
 	return 0;
 }
