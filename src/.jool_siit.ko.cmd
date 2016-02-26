@@ -1,1 +1,0 @@
-cmd_/home/aavalos/pool4/src/jool_siit.ko := ld -r -m elf_x86_64 -T ./scripts/module-common.lds --build-id  -o /home/aavalos/pool4/src/jool_siit.ko /home/aavalos/pool4/src/jool_siit.o /home/aavalos/pool4/src/jool_siit.mod.o

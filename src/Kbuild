@@ -1,6 +1,7 @@
 #CC=cgcc
 
 ccflags-y := -I$(src)
+ccflags-y += -Wfatal-errors
 
 obj-m += jool_siit.o
 

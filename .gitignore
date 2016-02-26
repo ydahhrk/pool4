@@ -30,6 +30,10 @@
 
 # Debug files
 *.dSYM/
+*.cmd
+*.mod
+*.order
+*.mod.c
 
 # Eclipse files
 .cproject
@@ -37,3 +41,10 @@
 .settings
 
 /Debug/
+
+# Git
+*.orig
+
+# Backup files
+*~
+

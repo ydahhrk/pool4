@@ -114,7 +114,6 @@ void pool4_print_all(struct pool4 *pool4)
 {
 	struct list_head *tmp, *iter;
 	struct pool4_entry *entry;
-	char addr[16];
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
@@ -261,7 +260,7 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	}
 	indx = 0;
 
-	list_for_each(iter, &pool4_list) {
+	list_for_each(iter, &pool4->list) {
 		if (offset == 0)
 			break;
 		entry = list_entry(iter, struct pool4_entry, list_hook);
@@ -380,10 +379,10 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 	}
 
 	if (!flagS) {
-		if (mask_remains(/*cpool BIB function*/)) {
+		if (mask_remains(cpool)) {
 
 		}
-		else if (mask_remains(/* spool BIB function*/)){
+		else if (mask_remains(spool)){
 			flagS = 1;//will use spool
 		}
 		else {
@@ -391,7 +390,7 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 		}
 	}
 	else{
-		if (mask_remains(/*spoolBIB function*/)){
+		if (mask_remains(spool)){
 					//will use spool
 				}
 		else {

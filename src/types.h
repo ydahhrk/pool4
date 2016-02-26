@@ -1,8 +1,9 @@
-#ifndef _LINUX_TYPES_H
-#define _LINUX_TYPES_H
+#ifndef _JOOL_TYPES_H
+#define _JOOL_TYPES_H
 
 #include <linux/types.h>
 #include <linux/in6.h>
+#include <linux/in.h>
 
 struct ipv6_prefix {
 	/** IPv6 prefix. */
