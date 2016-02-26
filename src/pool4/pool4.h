@@ -16,7 +16,7 @@ struct pool4 {
 	struct list_head list;
 };
 
-void pool4_init(struct pool4 *pool4);
+int pool4_init(struct pool4 *pool4);
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range);
@@ -28,6 +28,8 @@ int pool4_flush(struct pool4 *pool4);
 
 int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range);
+
+bool pool4_is_empty(struct pool4 *pool4);
 
 int pool4_count(struct pool4 *pool4);
 

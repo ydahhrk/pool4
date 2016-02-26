@@ -14,9 +14,10 @@
 struct client;
 static int dynamic_assigment = 1;
 
-void pool4_init(struct pool4 *pool4)
+int pool4_init(struct pool4 *pool4)
 {
 	INIT_LIST_HEAD(&pool4->list);
+	return 0;
 }
 
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
@@ -113,6 +114,7 @@ void pool4_print_all(struct pool4 *pool4)
 {
 	struct list_head *tmp, *iter;
 	struct pool4_entry *entry;
+	char addr[16];
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
@@ -151,6 +153,7 @@ int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 
 int pool4_count(struct pool4 *pool4)
 {
+
 	struct list_head *iter;
 	struct pool4_entry *entry;
 	unsigned int entries = 0;
@@ -239,6 +242,10 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	list_for_each(iter, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
+			mask.mark = entry->mark;
+			mask.proto = entry->proto;
+			mask.addr.s_addr = entry->addr.s_addr;
+			mask.port = i;
 			if (indx >= offset){
 				mask.mark = entry->mark;
 				mask.proto = entry->proto;
@@ -254,17 +261,16 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	}
 	indx = 0;
 
-	//Iteration to apply cback to elements from first to offset - 1
-	list_for_each(iter, &pool4->list) {
+	list_for_each(iter, &pool4_list) {
 		if (offset == 0)
 			break;
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
+			mask.mark = entry->mark;
+			mask.proto = entry->proto;
+			mask.addr.s_addr = entry->addr.s_addr;
+			mask.port = i;
 			if (indx < offset) {
-				mask.mark = entry->mark;
-				mask.proto = entry->proto;
-				mask.addr.s_addr = entry->addr.s_addr;
-				mask.port = i;
 				error = cback(&mask, arg);
 				if (error) {
 					return error;

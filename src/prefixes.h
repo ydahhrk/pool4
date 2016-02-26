@@ -1,10 +1,3 @@
-/*
- * prefixes.h
- *
- *  Created on: Nov 19, 2015
- *      Author: cfrutos
- */
-
 #include "types.h"
 
 #ifndef PREFIXES_H_
@@ -38,6 +31,7 @@ bool prefix6_equals(const struct ipv6_prefix *expected, const struct ipv6_prefix
 
 	return true;
 }
+
 /*
 int prefix6_validate(struct ipv6_prefix *prefix)
 {

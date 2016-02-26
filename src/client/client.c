@@ -1,16 +1,19 @@
-#include "client/client.h"
-#include "types.h"
-#include "prefixes.h"
-#include "pool4/pool4.h"
-#include <linux/types.h>
-#include <linux/in6.h>
-#include <linux/in.h>
-#include <linux/kernel.h>
-#include <linux/list.h>
-#include <linux/slab.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include "../types.h"
+#include "../list.h"
+#include "../prefixes.h"
+#include "../errno.h"
+#include "../pool4/pool4.h"
+#include "client.h"
+#include <math.h>
 
 #define MAXipv6		cpu_to_be32(0xffffffff)
 
+struct ipv6_client{
+	struct ipv6_prefix ipx;
+	struct list_head list_hook;
+};
 
 struct list_head client_hook;
 
@@ -114,7 +117,7 @@ void client_print_all(struct client *client)
 	}
 }
 
-int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix *, void *),
+int client_for_eachsample(int (*func)(struct ipv6_prefix *, void *),
 		void *arg, struct ipv6_prefix *offset)
 {
 	struct list_head *iter;
@@ -182,9 +185,9 @@ int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 {
 
 	struct list_head *iter;
-	struct ipv6_client *obj_ptr;
+	struct ipv6_client *client;
 	struct in6_addr dummy;
-	int flag = 0;
+	bool flag = false;
 	int error = 0;
 	int i;
 	int total_clients = 0;
