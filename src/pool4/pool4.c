@@ -330,7 +330,7 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 	return -ESRCH;
 }
 
-int mask_remains(struct pool4_entry *entry)
+int mask_remains(struct pool4 *pool)
 {
 	return 1;
 }
@@ -344,9 +344,8 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 		struct pool4 *spool, struct client *client, struct ipv4_transport_addr *result
 		,unsigned int masks_per_client)
 {
-	struct client_mask_domain result_mask;
-	struct ipv6_prefix dummyClient;
-	struct ipv4_transport_addr dummy;
+	struct client_mask_domain *result_mask = kmalloc(sizeof(*result_mask), GFP_KERNEL);
+	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient), GFP_KERNEL);
 	int error;
 	int flagS = 0;
 /*
@@ -366,16 +365,16 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 	if(!flagS){
 		if (!(client_addr_exist(client, &packet->hdr->saddr))) {
 			if (dynamic_assigment) { //if its dynamic it enters
-				dummyClient.address.in6_u = packet->hdr->saddr.in6_u;
-				dummyClient.len = 128;
-				client_add(client, &dummyClient);
+				dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+				dummyClient->len = 128;
+				client_add(client, dummyClient);
 			}
 		}
 	}
 	else{
-		dummyClient.address.in6_u = packet->hdr->saddr.in6_u;
-		dummyClient.len = 128;
-		client_add(client, &dummyClient);
+		dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+		dummyClient->len = 128;
+		client_add(client, dummyClient);
 	}
 
 	if (!flagS) {
@@ -400,19 +399,19 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 
 	if (!flagS){
 		error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
-				&result_mask, masks_per_client);
+				result_mask, masks_per_client);
 		if (!error)
 			return 0;
-		error = pool4_get_nth_taddr(cpool, &result, 5, &dummy);
+		error = pool4_get_nth_taddr(cpool, result_mask, 5,result);
 			if (!error)
 				return 0;
 	}
 	else{
 		error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
-				&result_mask, masks_per_client);
+				result_mask, masks_per_client);
 			if (!error)
 				return 0;
-		error = pool4_get_nth_taddr(spool, &result, 5, &dummy);
+		error = pool4_get_nth_taddr(spool, result_mask, 5, result);
 			if (!error)
 				return 0;
 	}
