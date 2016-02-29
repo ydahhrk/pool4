@@ -93,8 +93,8 @@
 static int __init nat64_init(void)
 {
 //
-//	printk("prueba");
 	int error = 0;
+	printk("prueba");
 //	struct pool4 cpool;
 //	struct pool4 spool;
 //

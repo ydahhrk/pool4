@@ -339,6 +339,36 @@ int mask_remains(struct pool4 *pool)
  * How to write the correct things.
  */
 
+static int get_mask_spool(struct packet *packet, struct pool4 *spool,
+		struct client *client, struct ipv4_transport_addr *result
+		,unsigned int masks_per_client, struct ipv6_prefix *dummyClient,
+		struct client_mask_domain *result_mask)
+{
+	int error;
+	if(pool4_is_empty(spool))
+		return 0;
+
+	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
+			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+			dummyClient->len = 128;
+			client_add(client, dummyClient);
+	}
+
+	if(mask_remains(spool)) {
+		return  get_mask_spool(packet, spool, client,result, masks_per_client);
+	}
+
+	error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
+			result_mask, masks_per_client);
+	if (!error)
+		return  0;
+
+	error = pool4_get_nth_taddr(spool, result_mask, 5,result);
+	if (!error)
+		return  0;
+
+	return 1;
+}
 
 int get_mask(struct packet *packet, struct pool4 *cpool,
 		struct pool4 *spool, struct client *client, struct ipv4_transport_addr *result
@@ -353,67 +383,47 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
  *  as cpool
  *
  */
-	if (pool4_is_empty(cpool)) {
-		if (pool4_is_empty(spool))
-			return 0; // cpool and spool are empty, cant do anything
-		else
-			flagS =1;
-	}
+	if (pool4_is_empty(cpool))
+			return  get_mask_spool(packet, spool, client,result, masks_per_client,
+					dummyClient, result_mask);
+	//get_mask_from_spool(spool)
+
 	/*check if pack addr does not exists in client db, if it does not  it adds it
 	 * if it exists it just skips the instruction
 	 *  */
-	if(!flagS){
+
 		if (!(client_addr_exist(client, &packet->hdr->saddr))) {
 			if (dynamic_assigment) { //if its dynamic it enters
 				dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
 				dummyClient->len = 128;
 				client_add(client, dummyClient);
 			}
+			else
+				return  get_mask_spool(packet, spool, client,result, masks_per_client,
+									dummyClient, result_mask);
 		}
-	}
-	else{
-		dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
-		dummyClient->len = 128;
-		client_add(client, dummyClient);
-	}
 
-	if (!flagS) {
 		if (mask_remains(cpool)) {
 
 		}
-		else if (mask_remains(spool)){
-			flagS = 1;//will use spool
+		else if(mask_remains(spool)) {
+			return  get_mask_spool(packet, spool, client,result, masks_per_client,
+								dummyClient, result_mask);
 		}
-		else {
+		else
 			return -ENOMEM;// will be changed but here will never work.
-		}
-	}
-	else{
-		if (mask_remains(spool)){
-					//will use spool
-				}
-		else {
-			return -ENOMEM;
-		}
-	}
 
-	if (!flagS){
+
 		error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
 				result_mask, masks_per_client);
 		if (!error)
-			return 0;
+			return  get_mask_spool(packet, spool, client,result, masks_per_client,
+								dummyClient, result_mask);
+
 		error = pool4_get_nth_taddr(cpool, result_mask, 5,result);
-			if (!error)
-				return 0;
-	}
-	else{
-		error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
-				result_mask, masks_per_client);
-			if (!error)
-				return 0;
-		error = pool4_get_nth_taddr(spool, result_mask, 5, result);
-			if (!error)
-				return 0;
-	}
+		if (!error)
+			return  get_mask_spool(packet, spool, client,result, masks_per_client,
+								dummyClient, result_mask);
+
 	return 0;
 }
