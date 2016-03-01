@@ -355,7 +355,7 @@ static int get_mask_spool(struct packet *packet, struct pool4 *spool,
 	}
 
 	if(mask_remains(spool)) {
-		return  get_mask_spool(packet, spool, client,result, masks_per_client);
+		return  0;
 	}
 
 	error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
@@ -403,15 +403,14 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 									dummyClient, result_mask);
 		}
 
+
 		if (mask_remains(cpool)) {
 
 		}
-		else if(mask_remains(spool)) {
+		else
 			return  get_mask_spool(packet, spool, client,result, masks_per_client,
 								dummyClient, result_mask);
-		}
-		else
-			return -ENOMEM;// will be changed but here will never work.
+
 
 
 		error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
