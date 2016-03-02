@@ -23,7 +23,8 @@ int pool4_init(struct pool4 *pool4)
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
 {
-	struct pool4_entry *add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
+	struct pool4_entry *add = kmalloc(sizeof(struct pool4_entry),
+			GFP_KERNEL);
 	if (!add) {
 		return -ENOMEM;
 	}
@@ -102,26 +103,31 @@ int pool4_flush(struct pool4 *pool4)
 int pool4_is_empty(struct pool4 *pool4)
 {
 	if (!list_empty(&pool4->list)){
-		printk("It is not empty.\n\n");
+		pr_info("It is not empty.\n\n");
 		return 0;
 	}
-	printk("It is empty.\n\n");
+	pr_info("It is empty.\n\n");
 	return 1;
 
 }
 
-void pool4_print_all(struct pool4 *pool4)
+int pool4_print_all(struct pool4 *pool4)
 {
-	struct list_head *tmp, *iter;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry *entry;
+	char addr[16];
+	printk("Elements in the list:\n\n");
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
-		pr_debug("%u, ", entry->mark);
-		pr_debug("%u, ", entry->proto);
-		pr_debug("%pI4, ", &entry->addr);
-		pr_debug("%u-%u\n", entry->range.min, entry->range.max);
+		printk("%u, ", entry->mark);
+		printk("%u, ", entry->proto);
+		printk("%s, ", ip4_to_str(entry->addr.s_addr, addr));
+		printk("%u-%u\n", entry->range.min, entry->range.max);
 	}
+
+	return 0;
 }
 
 int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
@@ -141,12 +147,12 @@ int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
-			pr_debug("It is in the list.\n\n");
+			pr_info("It is in the list.\n\n");
 			return 1;
 		}
 	}
 
-	pr_debug("It is not in the list.\n\n");
+	pr_info("It is not in the list.\n\n");
 	return 0;
 }
 
@@ -232,7 +238,6 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	unsigned int i;
 
 	entries = pool4_count(pool4);
-//	printf("%d entries\n\n", entries);
 	if (offset > entries) {
 		offset = offset % entries;
 	}
@@ -241,10 +246,6 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	list_for_each(iter, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
 			if (indx >= offset){
 				mask.mark = entry->mark;
 				mask.proto = entry->proto;
@@ -260,16 +261,17 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	}
 	indx = 0;
 
+	//Iteration to apply cback to elements from first to offset - 1
 	list_for_each(iter, &pool4->list) {
 		if (offset == 0)
 			break;
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
 			if (indx < offset) {
+				mask.mark = entry->mark;
+				mask.proto = entry->proto;
+				mask.addr.s_addr = entry->addr.s_addr;
+				mask.port = i;
 				error = cback(&mask, arg);
 				if (error) {
 					return error;

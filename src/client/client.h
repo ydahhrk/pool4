@@ -11,21 +11,22 @@ struct ipv6_client{
 struct client{
 	struct list_head list_hook;
 };
+
 struct pool4;
 
-void client_init(struct client *client);
+int client_init(struct client *client);
 
 int client_add(struct client *client, struct ipv6_prefix *prefix);
 
-void client_delete(struct client *client, struct ipv6_prefix *prefix);
+int client_delete(struct client *client, struct ipv6_prefix *prefix);
 
-void client_flush(struct client *client);
+int client_flush(struct client *client);
 
 //int client_exist(struct client *client, struct ipv6_prefix *prefix)
 
 unsigned int client_count(struct client *client);
 
-void client_print_all(struct client *client);
+int client_print_all(struct client *client);
 
 int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix *
 		, void *), void *arg, struct ipv6_prefix *offset);

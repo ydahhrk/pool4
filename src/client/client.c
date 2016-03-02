@@ -15,9 +15,10 @@ static unsigned int get_addr6_count(struct ipv6_prefix *prefix)
 	return 1 << (128-prefix->len);
 }
 
-void client_init(struct client *client)
+int client_init(struct client *client)
 {
 	INIT_LIST_HEAD(&client->list_hook);
+	return 0;
 }
 
 int client_add(struct client *client, struct ipv6_prefix *prefix)
@@ -33,7 +34,7 @@ int client_add(struct client *client, struct ipv6_prefix *prefix)
 	return 0;
 }
 
-void client_delete(struct client *client, struct ipv6_prefix *prefix)
+int client_delete(struct client *client, struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
 	struct ipv6_client *exist;
@@ -42,12 +43,14 @@ void client_delete(struct client *client, struct ipv6_prefix *prefix)
 		if (prefix6_equals(prefix, &exist->ipx)) {
 			list_del(&client->list_hook);
 			kfree(exist);
-			return;
+			return 0;
 		}
 	}
+
+	return 0;
 }
 
-void client_flush(struct client *client)
+int client_flush(struct client *client)
 {
 	struct list_head *iter;
 	struct list_head *client_dummy;
@@ -58,6 +61,8 @@ void client_flush(struct client *client)
 		list_del(&objPtr->list_hook);
 		kfree(objPtr);
 	}
+
+	return 0;
 }
 
 
@@ -94,20 +99,22 @@ unsigned int client_count(struct client *client)
 }
 
 
-void client_print_all(struct client *client)
+int client_print_all(struct client *client)
 {
 	struct list_head *iter;
 	struct ipv6_client *obj_ptr;
 
 	list_for_each(iter, &client->list_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client , list_hook);
-		pr_debug("Address: %x.%x.%x.%x\nLength:%u\n",
+		pr_info("Address: %x.%x.%x.%x\nLength:%u\n",
 				obj_ptr->ipx.address.s6_addr32[0],
 				obj_ptr->ipx.address.s6_addr32[1],
 				obj_ptr->ipx.address.s6_addr32[2],
 				obj_ptr->ipx.address.s6_addr32[3],
 				obj_ptr->ipx.len);
 	}
+
+	return 0;
 }
 
 int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix *,

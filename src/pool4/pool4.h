@@ -4,6 +4,8 @@
 //#include "types.h"
 #include "client/client.h"
 
+//printk("Testing 4");
+
 struct pool4_entry {
 	__u32 mark;
 	__u8 proto;
@@ -33,7 +35,7 @@ int pool4_is_empty(struct pool4 *pool4);
 
 int pool4_count(struct pool4 *pool4);
 
-void pool4_print_all(struct pool4 *pool4);
+int pool4_print_all(struct pool4 *pool4);
 
 int pool4_foreach_sample(struct pool4 *pool4,
 		int (*cb)(struct pool4_entry *, void *), void *arg,
