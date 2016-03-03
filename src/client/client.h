@@ -11,6 +11,7 @@ struct ipv6_client{
 struct client{
 	struct list_head list_hook;
 };
+
 struct pool4;
 
 void client_init(struct client *client);
