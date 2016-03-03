@@ -364,8 +364,18 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 
 int mask_domain_for_each(struct client_mask_domain *mask_domain, struct pool4 *pool4)
 {
-	return 0;
+	struct list_head *iter;
+	struct pool4_entry *dummy;
+	int error = 0;
+
+
+	list_for_each(iter, &pool4->list) {
+		dummy = list_entry(iter, struct pool4_entry, list_hook);
+
+
 	}
+	return 0;
+}
 
 
 static int get_mask_spool(struct packet *packet, struct pool4 *spool,
