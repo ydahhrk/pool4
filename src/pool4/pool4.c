@@ -336,11 +336,13 @@ int mask_remains(struct pool4 *pool)
 }
 
 
-int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *pool4)
+int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *pool4, int n)
 {
 	struct list_head *iter;
 	struct pool4_entry *dummy;
 	int error = 0;
+	int i;
+	unsigned int count = mask_domain->count;
 
 
 	list_for_each(iter, &pool4->list) {
@@ -354,10 +356,14 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 			 */
 			if ((dummy->range.min < mask_domain->first.l4) &&
 					(dummy->range.max > mask_domain->first.l4)) {
+				for (i = n;
+						i <= dummy->range.max;
+						i += mask_domain->step) {
+
+				}
 				return 1;
 			}
 		}
-
 	}
 	return 0;
 	}
@@ -371,7 +377,6 @@ int mask_domain_for_each(struct client_mask_domain *mask_domain, struct pool4 *p
 
 	list_for_each(iter, &pool4->list) {
 		dummy = list_entry(iter, struct pool4_entry, list_hook);
-
 
 	}
 	return 0;
