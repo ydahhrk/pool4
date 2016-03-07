@@ -335,6 +335,10 @@ int mask_remains(struct pool4 *pool)
 	return 1;
 }
 
+int bibdb_contains4(const struct ipv4_transport_addr *addr){
+	return 1;
+}
+
 
 int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *pool4, int n)
 {
@@ -356,10 +360,18 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 			 */
 			if ((dummy->range.min < mask_domain->first.l4) &&
 					(dummy->range.max > mask_domain->first.l4)) {
-				for (i = n;
+				for (i = dummy->range.min;
 						i <= dummy->range.max;
 						i += mask_domain->step) {
+					if (n != 0) {
+						n--;
+					}
+					else {
+						if (!(bibdb_contains4(mask_domain->first, dummy->proto))){
+							return 0;
+						}
 
+					}
 				}
 				return 1;
 			}
