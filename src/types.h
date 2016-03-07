@@ -12,8 +12,6 @@ struct ipv6_prefix {
 	__u8 len;
 };
 
-
-
 struct ipv4_transport_addr {
 	struct in_addr l3;
 	__u16 l4;

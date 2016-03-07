@@ -28,16 +28,16 @@ unsigned int client_count(struct client *client);
 
 int client_print_all(struct client *client);
 
-int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix *
-		, void *), void *arg, struct ipv6_prefix *offset);
+int client_for_eachsample(struct client *client, int (*func)(struct ipv6_prefix
+		*, void *), void *arg, struct ipv6_prefix *offset);
 
 int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 		void *arg, unsigned int offset);
 
 int client_addr_exist(struct client *client, struct in6_addr *addr);
 
-int client_get_mask_domain(struct client *client, struct pool4 *pool4, struct in6_addr *addr,
-		struct client_mask_domain *result,
+int client_get_mask_domain(struct client *client, struct pool4 *pool4,
+		struct in6_addr *addr, struct client_mask_domain *result,
 		unsigned int masks_per_client);
 
 #endif /* CLIENT_H_ */

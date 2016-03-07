@@ -1,10 +1,7 @@
 #ifndef POOL4_H_
 #define POOL4_H_
 
-//#include "types.h"
 #include "client/client.h"
-
-//printk("Testing 4");
 
 struct pool4_entry {
 	__u32 mark;
@@ -54,7 +51,8 @@ int pool4_get_nth_taddr(struct pool4 *pool4,
 		unsigned int n, struct ipv4_transport_addr *result);
 
 int get_mask(struct packet *packet, struct pool4 *cpool,
-		struct pool4 *spool, struct client *client, struct ipv4_transport_addr *result
-		,unsigned int masks_per_client);
+		struct pool4 *spool, struct client *client,
+		struct ipv4_transport_addr *result,
+		unsigned int masks_per_client);
 
 #endif /* POOL4_H_ */

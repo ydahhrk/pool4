@@ -116,15 +116,13 @@ int pool4_print_all(struct pool4 *pool4)
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry *entry;
-	char addr[16];
-	printk("Elements in the list:\n\n");
+	pr_info("Elements in the list:\n\n");
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
-		printk("%u, ", entry->mark);
-		printk("%u, ", entry->proto);
-		printk("%s, ", ip4_to_str(entry->addr.s_addr, addr));
-		printk("%u-%u\n", entry->range.min, entry->range.max);
+		pr_info("%u %u %pI4 %u-%u\n", entry->mark, entry->proto,
+				&entry->addr, entry->range.min,
+				entry->range.max);
 	}
 
 	return 0;
