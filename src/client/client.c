@@ -41,7 +41,7 @@ int client_delete(struct client *client, struct ipv6_prefix *prefix)
 	list_for_each(iter, &client->list_hook) {
 		exist = list_entry(iter, struct ipv6_client, list_hook);
 		if (prefix6_equals(prefix, &exist->ipx)) {
-			list_del(&client->list_hook);
+			list_del(&exist->list_hook);
 			kfree(exist);
 			return 0;
 		}

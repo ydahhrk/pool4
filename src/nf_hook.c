@@ -146,12 +146,10 @@ static int __init nat64_init(void)
 	client_print_all(&client);
 	pr_info("\n\n");
 
-//	client_delete does not work, it compiles fine but throws an error when
-//	running...
-//	pr_info("Deleting one element in client and printing: \n");
-//	client_delete(&client, prefix0);
-//	client_print_all(&client);
-//	pr_info("\n\n");
+	pr_info("Deleting one element in client and printing: \n");
+	client_delete(&client, prefix0);
+	client_print_all(&client);
+	pr_info("\n\n");
 
 	pr_info("Flushing client and printing: \n");
 	client_flush(&client);
@@ -370,14 +368,14 @@ static int __init nat64_init(void)
 	pr_info("\n\n");
 
 	pr_info("Testing pool4_get_nth_taddr...\n");
-	error = pool4_get_nth_taddr(&cpool, &domain, 0, &result);
+	error = pool4_get_nth_taddr(&cpool, &domain, 2, &result);
 	if (error)
 		return error;
 	pr_info("%pI4: %u", &result.l3, result.l4);
 	pr_info("\n\n");
 
 	pr_info("Testing get_mask...\n");
-	error = get_mask(&packet, &cpool, &spool, &client, &result, 7);
+	error = get_mask(&packet, &cpool, &spool, &client, &result, 2);
 	if (error)
 		return error;
 	pr_info("%pI4: %u", &result.l3, result.l4);
