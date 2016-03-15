@@ -345,17 +345,14 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 {
 	struct list_head *iter;
 	struct pool4_entry *dummy;
-	int error = 0;
 	int i;
-	unsigned int count = mask_domain->count;
-
 
 	list_for_each(iter, &pool4->list) {
 		dummy = list_entry(iter, struct pool4_entry, list_hook);
 		/*
 		 * Checks if address exists in pool4
 		 */
-		if (dummy->addr.s_addr == mask_domain->first.l3) {
+		if (dummy->addr.s_addr == mask_domain->first.l3.s_addr) {
 			/*
 			 * Checks if mask_domain address exists in the port range
 			 */
@@ -368,7 +365,7 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 						n--;
 					}
 					else {
-						if (!(bibdb_contains4(mask_domain->first, dummy->proto))) {
+						if (!(bibdb_contains4(&mask_domain->first))) {
 							result->l3 = mask_domain->first.l3;
 							result->l4 = mask_domain->first.l4;
 							return 1;
@@ -423,7 +420,6 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 	struct client_mask_domain *result_mask = kmalloc(sizeof(*result_mask), GFP_KERNEL);
 	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient), GFP_KERNEL);
 	int error;
-	int flagS = 0;
 /*
  * checks is cpool is available, otherwise calls the same function with spool
  *  as cpool
