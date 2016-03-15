@@ -89,7 +89,7 @@ int callback(struct in6_addr *addr, void *arg)
 }
 
 
-static int __init nat64_init(void)
+static int nat64_init(void)
 {
 
 	int error = 0;
@@ -385,7 +385,7 @@ static int __init nat64_init(void)
 
 }
 
-static void __exit nat64_exit(void)
+static void nat64_exit(void)
 {
 
 }
