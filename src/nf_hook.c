@@ -381,6 +381,20 @@ static int nat64_init(void)
 	pr_info("%pI4: %u", &result.l3, result.l4);
 	pr_info("\n\n");
 
+	pr_info("Testing get_mask...\n");
+	error = get_mask(&packet, &cpool, &spool, &client, &result, 3);
+	if (error)
+		return error;
+	pr_info("%pI4: %u", &result.l3, result.l4);
+	pr_info("\n\n");
+
+	pr_info("Testing get_mask...\n");
+	error = get_mask(&packet, &cpool, &spool, &client, &result, 0);
+	if (error)
+		return error;
+	pr_info("%pI4: %u", &result.l3, result.l4);
+	pr_info("\n\n");
+
 	return error;
 
 }
