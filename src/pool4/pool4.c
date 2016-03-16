@@ -204,6 +204,11 @@ int pool4_taddr4_find_pos(struct pool4 *pool4, int ipv6_pos,
 	int counter = 0;
 	int i;
 
+	if(masks_per_client == 0) {
+		pr_info("Number of masks per client given is invalid.\n");
+		return 0;
+	}
+
 	list_for_each(iter, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for(i = entry->range.min; i <= entry->range.max; i++) {

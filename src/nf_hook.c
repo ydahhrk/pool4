@@ -394,7 +394,7 @@ static int nat64_init(void)
 
 	pr_info("Testing get_mask...\n");
 	pool4_print_all(&cpool);
-	error = get_mask(&packet, &cpool, &spool, &client, &result2, 1);
+	error = get_mask(&packet, &cpool, &spool, &client, &result2, 0);
 	if (error)
 		return error;
 	pr_info("%pI4: %u", &result2.l3, result2.l4);
