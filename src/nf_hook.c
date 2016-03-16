@@ -101,7 +101,8 @@ static int nat64_init(void)
 	struct client client;
 
 	struct client_mask_domain domain;
-	struct ipv4_transport_addr result;
+	struct ipv4_transport_addr result1;
+	struct ipv4_transport_addr result2;
 
 	struct packet packet;
 
@@ -368,31 +369,35 @@ static int nat64_init(void)
 	pr_info("\n\n");
 
 	pr_info("Testing pool4_get_nth_taddr...\n");
-	error = pool4_get_nth_taddr(&cpool, &domain, 2, &result);
+	pool4_print_all(&cpool);
+	error = pool4_get_nth_taddr(&cpool, &domain, 3, &result1);
 	if (error)
 		return error;
-	pr_info("%pI4: %u", &result.l3, result.l4);
+	pr_info("%pI4: %u", &result1.l3, result1.l4);
 	pr_info("\n\n");
 
 	pr_info("Testing get_mask...\n");
-	error = get_mask(&packet, &cpool, &spool, &client, &result, 2);
+	pool4_print_all(&cpool);
+	error = get_mask(&packet, &cpool, &spool, &client, &result2, 2);
 	if (error)
 		return error;
-	pr_info("%pI4: %u", &result.l3, result.l4);
+	pr_info("%pI4: %u", &result2.l3, result2.l4);
 	pr_info("\n\n");
 
 	pr_info("Testing get_mask...\n");
-	error = get_mask(&packet, &cpool, &spool, &client, &result, 3);
+	pool4_print_all(&cpool);
+	error = get_mask(&packet, &cpool, &spool, &client, &result2, 3);
 	if (error)
 		return error;
-	pr_info("%pI4: %u", &result.l3, result.l4);
+	pr_info("%pI4: %u", &result2.l3, result2.l4);
 	pr_info("\n\n");
 
 	pr_info("Testing get_mask...\n");
-	error = get_mask(&packet, &cpool, &spool, &client, &result, 0);
+	pool4_print_all(&cpool);
+	error = get_mask(&packet, &cpool, &spool, &client, &result2, 1);
 	if (error)
 		return error;
-	pr_info("%pI4: %u", &result.l3, result.l4);
+	pr_info("%pI4: %u", &result2.l3, result2.l4);
 	pr_info("\n\n");
 
 	return error;
