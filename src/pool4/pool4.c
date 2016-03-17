@@ -23,7 +23,8 @@ int pool4_init(struct pool4 *pool4)
 int pool4_add(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
 {
-	struct pool4_entry *add = kmalloc(sizeof(struct pool4_entry), GFP_KERNEL);
+	struct pool4_entry *add = kmalloc(sizeof(struct pool4_entry),
+			GFP_KERNEL);
 	if (!add) {
 		return -ENOMEM;
 	}
@@ -102,26 +103,29 @@ int pool4_flush(struct pool4 *pool4)
 int pool4_is_empty(struct pool4 *pool4)
 {
 	if (!list_empty(&pool4->list)){
-		printk("It is not empty.\n\n");
+		pr_info("It is not empty.\n\n");
 		return 0;
 	}
-	printk("It is empty.\n\n");
+	pr_info("It is empty.\n\n");
 	return 1;
 
 }
 
-void pool4_print_all(struct pool4 *pool4)
+int pool4_print_all(struct pool4 *pool4)
 {
-	struct list_head *tmp, *iter;
+	struct list_head *iter;
+	struct list_head *tmp;
 	struct pool4_entry *entry;
+	pr_info("Elements in the list:\n\n");
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
-		pr_debug("%u, ", entry->mark);
-		pr_debug("%u, ", entry->proto);
-		pr_debug("%pI4, ", &entry->addr);
-		pr_debug("%u-%u\n", entry->range.min, entry->range.max);
+		pr_info("%u %u %pI4 %u-%u\n", entry->mark, entry->proto,
+				&entry->addr, entry->range.min,
+				entry->range.max);
 	}
+
+	return 0;
 }
 
 int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
@@ -141,12 +145,12 @@ int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
-			pr_debug("It is in the list.\n\n");
+			pr_info("It is in the list.\n\n");
 			return 1;
 		}
 	}
 
-	pr_debug("It is not in the list.\n\n");
+	pr_info("It is not in the list.\n\n");
 	return 0;
 }
 
@@ -200,6 +204,11 @@ int pool4_taddr4_find_pos(struct pool4 *pool4, int ipv6_pos,
 	int counter = 0;
 	int i;
 
+	if(masks_per_client == 0) {
+		pr_info("Number of masks per client given is invalid.\n");
+		return 0;
+	}
+
 	list_for_each(iter, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for(i = entry->range.min; i <= entry->range.max; i++) {
@@ -232,7 +241,6 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	unsigned int i;
 
 	entries = pool4_count(pool4);
-//	printf("%d entries\n\n", entries);
 	if (offset > entries) {
 		offset = offset % entries;
 	}
@@ -241,10 +249,6 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	list_for_each(iter, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
 			if (indx >= offset){
 				mask.mark = entry->mark;
 				mask.proto = entry->proto;
@@ -260,16 +264,17 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	}
 	indx = 0;
 
+	//Iteration to apply cback to elements from first to offset - 1
 	list_for_each(iter, &pool4->list) {
 		if (offset == 0)
 			break;
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		for (i = entry->range.min; i <= entry->range.max; i++) {
-			mask.mark = entry->mark;
-			mask.proto = entry->proto;
-			mask.addr.s_addr = entry->addr.s_addr;
-			mask.port = i;
 			if (indx < offset) {
+				mask.mark = entry->mark;
+				mask.proto = entry->proto;
+				mask.addr.s_addr = entry->addr.s_addr;
+				mask.port = i;
 				error = cback(&mask, arg);
 				if (error) {
 					return error;
@@ -345,17 +350,14 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 {
 	struct list_head *iter;
 	struct pool4_entry *dummy;
-	int error = 0;
 	int i;
-	unsigned int count = mask_domain->count;
-
 
 	list_for_each(iter, &pool4->list) {
 		dummy = list_entry(iter, struct pool4_entry, list_hook);
 		/*
 		 * Checks if address exists in pool4
 		 */
-		if (dummy->addr.s_addr == mask_domain->first.l3) {
+		if (dummy->addr.s_addr == mask_domain->first.l3.s_addr) {
 			/*
 			 * Checks if mask_domain address exists in the port range
 			 */
@@ -368,7 +370,7 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 						n--;
 					}
 					else {
-						if (!(bibdb_contains4(mask_domain->first, dummy->proto))) {
+						if (!(bibdb_contains4(&mask_domain->first))) {
 							result->l3 = mask_domain->first.l3;
 							result->l4 = mask_domain->first.l4;
 							return 1;
@@ -423,7 +425,6 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 	struct client_mask_domain *result_mask = kmalloc(sizeof(*result_mask), GFP_KERNEL);
 	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient), GFP_KERNEL);
 	int error;
-	int flagS = 0;
 /*
  * checks is cpool is available, otherwise calls the same function with spool
  *  as cpool
