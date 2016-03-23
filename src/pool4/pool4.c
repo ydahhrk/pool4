@@ -335,14 +335,18 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 	return -ESRCH;
 }
 
+
 int mask_remains(struct pool4 *pool)
 {
 	return 1;
 }
 
+
 int bibdb_contains4(const struct ipv4_transport_addr *addr){
 	return 1;
 }
+
+
 
 
 int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *pool4, int n,
@@ -377,8 +381,6 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 						}
 						else
 							return 0;
-
-
 					}
 				}
 				return 0;
@@ -387,6 +389,8 @@ int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *p
 	}
 	return 0;
 	}
+
+
 
 static int get_mask_spool(struct packet *packet, struct pool4 *spool,
 		struct client *client, struct ipv4_transport_addr *result
