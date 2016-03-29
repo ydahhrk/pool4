@@ -44,5 +44,4 @@ struct packet {
 
 struct ipv6hdr *pkt_ip6_hdr(struct packet *pkt);
 
-
 #endif

@@ -2,8 +2,9 @@
 #include <linux/module.h>
 #include <linux/version.h>
 #include <linux/slab.h>
-#include "pool4/pool4.h"
 #include <stdbool.h>
+#include "pool4/pool4.h"
+#include "unit_test.h"
 
 int callb(struct pool4_entry *entry, void *arg)
 {
@@ -89,6 +90,8 @@ int callback(struct in6_addr *addr, void *arg)
 	return 0;
 }
 
+// Test functions...
+
 static void init(struct pool4 *cpool, struct pool4 *spool,
 			struct client *client)
 {
@@ -105,10 +108,12 @@ static void end(struct pool4 *cpool, struct pool4 *spool,
 	client_flush(client);
 }
 
-static bool add_test(struct pool4 *cpool, struct pool4 *spool,
+static int add_test(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
+
+	/* Creating elements for pool4 and client... */
 
 	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
 	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
@@ -117,9 +122,6 @@ static bool add_test(struct pool4 *cpool, struct pool4 *spool,
 	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
 	struct pool4_entry *six = kmalloc(sizeof(*two), GFP_KERNEL);
 	struct pool4_entry *seven = kmalloc(sizeof(*three), GFP_KERNEL);
-	struct pool4_entry *eight = kmalloc(sizeof(*four), GFP_KERNEL);
-	struct pool4_entry *nine = kmalloc(sizeof(*two), GFP_KERNEL);
-	struct pool4_entry *ten = kmalloc(sizeof(*three), GFP_KERNEL);
 
 	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
 	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
@@ -171,24 +173,6 @@ static bool add_test(struct pool4 *cpool, struct pool4 *spool,
 	seven->range.min = 253;
 	seven->range.max = 256;
 
-	eight->mark = 8;
-	eight->proto = 8;
-	eight->addr.s_addr = cpu_to_be32(0xc0000208);
-	eight->range.min = 63;
-	eight->range.max = 68;
-
-	nine->mark = 9;
-	nine->proto = 9;
-	nine->addr.s_addr = cpu_to_be32(0xc0000209);
-	nine->range.min = 23;
-	nine->range.max = 29;
-
-	ten->mark = 10;
-	ten->proto = 10;
-	ten->addr.s_addr = cpu_to_be32(0xc0000210);
-	ten->range.min = 70;
-	ten->range.max = 99;
-
 	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
 	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
 	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
@@ -237,7 +221,7 @@ static bool add_test(struct pool4 *cpool, struct pool4 *spool,
 			&one->addr, &one->range), "add IPv4 test");
 	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, two->mark, two->proto,
 			&two->addr, &two->range), "add IPv4 test");
-	success &= ASSERT_INT(-EEXIS, pool4_add(cpool, three->mark,
+	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, three->mark,
 			three->proto, &three->addr, &three->range),
 			"add IPv4 test");
 	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, four->mark, four->proto,
@@ -249,13 +233,8 @@ static bool add_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, seven->mark,
 			seven->proto, &seven->addr, &seven->range),
 			"add IPv4 test");
-	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, eight->mark,
-			eight->proto, &eight->addr, &eight->range),
-			"add IPv4 test");
-	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, nine->mark, nine->proto,
-			&nine->addr, &nine->range), "add IPv4 test");
-	success &= ASSERT_INT(-EEXIST, pool4_add(cpool, ten->mark, ten->proto,
-			&ten->addr, &ten->range), "add IPv4 test");
+	if (!success)
+		return false;
 
 	// Adding 7 elements to client database...
 
@@ -273,6 +252,8 @@ static bool add_test(struct pool4 *cpool, struct pool4 *spool,
 			"add IPv6 test");
 	success &= ASSERT_INT(-EINVAL, client_add(client, prefix6),
 			"add IPv6 test");
+	if (!success)
+		return false;
 
 	return success;
 }
@@ -280,10 +261,146 @@ static bool add_test(struct pool4 *cpool, struct pool4 *spool,
 static bool remove_test(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
+	bool success = true;
 
+	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
+	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
+	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
+	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
+	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
+	struct pool4_entry *six = kmalloc(sizeof(*two), GFP_KERNEL);
+	struct pool4_entry *seven = kmalloc(sizeof(*three), GFP_KERNEL);
+
+	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
+	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
+	struct ipv6_prefix *prefix2 = kmalloc(sizeof(*prefix2), GFP_KERNEL);
+	struct ipv6_prefix *prefix3 = kmalloc(sizeof(*prefix3), GFP_KERNEL);
+	struct ipv6_prefix *prefix4 = kmalloc(sizeof(*prefix4), GFP_KERNEL);
+	struct ipv6_prefix *prefix5 = kmalloc(sizeof(*prefix5), GFP_KERNEL);
+	struct ipv6_prefix *prefix6 = kmalloc(sizeof(*prefix6), GFP_KERNEL);
+
+	one->mark = 1;
+	one->proto = 1;
+	one->addr.s_addr = cpu_to_be32(0xc0000201);
+	one->range.min = 4;
+	one->range.max = 7;
+
+	two->mark = 2;
+	two->proto = 2;
+	two->addr.s_addr = cpu_to_be32(0xc0000202);
+	two->range.min = 6;
+	two->range.max = 8;
+
+	three->mark = 3;
+	three->proto = 3;
+	three->addr.s_addr = cpu_to_be32(0xc0000203);
+	three->range.min = 100;
+	three->range.max = 100;
+
+	four->mark = 4;
+	four->proto = 4;
+	four->addr.s_addr = cpu_to_be32(0xc0000204);
+	four->range.min = 30;
+	four->range.max = 256;
+
+	five->mark = 5;
+	five->proto = 5;
+	five->addr.s_addr = cpu_to_be32(0xc0000205);
+	five->range.min = 4;
+	five->range.max = 7;
+
+	six->mark = 6;
+	six->proto = 6;
+	six->addr.s_addr = cpu_to_be32(0xc0000206);
+	six->range.min = 100;
+	six->range.max = 100;
+
+	seven->mark = 7;
+	seven->proto = 7;
+	seven->addr.s_addr = cpu_to_be32(0xc0000207);
+	seven->range.min = 253;
+	seven->range.max = 256;
+
+	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
+	prefix0->len = 128;
+
+	prefix1->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix1->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix1->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix1->address.s6_addr32[3] = cpu_to_be32(0x0001);
+	prefix1->len = 128;
+
+	prefix2->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix2->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix2->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix2->address.s6_addr32[3] = cpu_to_be32(0x0002);
+	prefix2->len = 128;
+
+	prefix3->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix3->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix3->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix3->address.s6_addr32[3] = cpu_to_be32(0x0003);
+	prefix3->len = 128;
+
+	prefix4->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix4->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix4->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
+	prefix4->len = 128;
+
+	prefix5->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix5->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix5->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix5->address.s6_addr32[3] = cpu_to_be32(0x0004);
+	prefix5->len = 128;
+
+	prefix6->address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix6->address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix6->address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix6->address.s6_addr32[3] = cpu_to_be32(0x0006);
+	prefix6->len = 128;
+
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, one->mark, one->proto,
+			&one->addr, &one->range), "pool4_rm test");
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, two->mark, two->proto,
+			&two->addr, &two->range), "pool4_rm test");
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, three->mark, three->proto,
+			&three->addr, &three->range), "pool_rm test");
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, four->mark, four->proto,
+			&four->addr, &four->range), "pool4_rm test");
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, five->mark, five->proto,
+			&five->addr, &five->range), "pool4_rm test");
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, six->mark, six->proto,
+			&six->addr, &six->range), "pool4_rm test");
+	success &= ASSERT_INT(-EINVAL, pool4_rm(cpool, seven->mark, seven->proto,
+			&seven->addr, &seven->range), "pool4_rm test");
+	if (!success)
+		return false;
+
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix0),
+			"client_delete test");
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix1),
+			"client_delete test");
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix2),
+			"client_delete test");
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix3),
+			"client_delete test");
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix4),
+			"client_delete test");
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix5),
+			"client_delete test");
+	success &= ASSERT_INT(-EINVAL, client_delete(client, prefix6),
+			"client_delete test");
+	if (!success)
+		return false;
+
+	return success;
 }
 
-
+//static bool count_test()
 
 
 
