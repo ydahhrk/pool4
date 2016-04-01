@@ -106,6 +106,7 @@ int pool4_is_empty(struct pool4 *pool4)
 		pr_info("It is not empty.\n\n");
 		return 0;
 	}
+
 	pr_info("It is empty.\n\n");
 	return 1;
 
