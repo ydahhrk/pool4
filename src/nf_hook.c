@@ -1297,7 +1297,7 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool,
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success = ASSERT_INT(-ESRCH, pool4_get_nth_taddr(cpool, &domain, 3,
+	success = ASSERT_INT(0, pool4_get_nth_taddr(cpool, &domain, 3,
 			&result), "get nth taddr");
 //	if (success)
 //		return false;
