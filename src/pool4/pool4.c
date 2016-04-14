@@ -103,11 +103,11 @@ int pool4_flush(struct pool4 *pool4)
 int pool4_is_empty(struct pool4 *pool4)
 {
 	if (!list_empty(&pool4->list)){
-		pr_info("It is not empty.\n\n");
+//		pr_info("It is not empty.\n\n");
 		return 0;
 	}
 
-	pr_info("It is empty.\n\n");
+//	pr_info("It is empty.\n\n");
 	return 1;
 
 }
@@ -117,7 +117,7 @@ int pool4_print_all(struct pool4 *pool4)
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry *entry;
-	pr_info("Elements in the list:\n\n");
+	pr_info("Elements in the list:\n");
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
