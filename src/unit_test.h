@@ -85,7 +85,7 @@ void end_full(void);
 	CALL_TEST(test_function, test_name)											\
 	end_function
 #define END_TESTS \
-	pr_info("Finished. Runs: %d; Errors: %d", test_counter, failure_counter); \
+	pr_info("Finished. Runs: %d; Errors: %d\n\n", test_counter, failure_counter); \
 	return (failure_counter > 0) ? -EINVAL : 0;
 
 
