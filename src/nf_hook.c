@@ -517,26 +517,23 @@ static bool count_test(struct pool4 *cpool, struct pool4 *spool,
 	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
 	prefix4->len = 128;
 
-	success &= pool4_add(cpool, one->mark, one->proto, &one->addr,
-			&one->range);
-	success &= pool4_add(cpool, two->mark, two->proto, &two->addr,
-			&two->range);
-	success &= pool4_add(cpool, three->mark, three->proto, &three->addr,
-			&three->range);
-	success &= pool4_add(cpool, four->mark, four->proto, &four->addr,
-			&four->range);
-	success &= pool4_add(cpool, five->mark, five->proto, &five->addr,
-			&five->range);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_add(cpool, one->mark, one->proto,
+			&one->addr, &one->range), "add one test");
+	success &= ASSERT_INT(0, pool4_add(cpool, two->mark, two->proto,
+			&two->addr, &two->range), "add two test");
+	success &= ASSERT_INT(0, pool4_add(cpool, three->mark,
+			three->proto, &three->addr, &three->range),
+			"add three test");
+	success &= ASSERT_INT(0, pool4_add(cpool, four->mark, four->proto,
+			&four->addr, &four->range), "add four test");
+	success &= ASSERT_INT(0, pool4_add(cpool, five->mark, five->proto,
+			&five->addr, &five->range), "add five test");
 
-	success &= client_add(client, prefix0);
-	success &= client_add(client, prefix1);
-	success &= client_add(client, prefix2);
-	success &= client_add(client, prefix3);
-	success &= client_add(client, prefix4);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
+	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
+	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
+	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
+	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
 
 	pool4_is_empty(cpool);
 
@@ -544,7 +541,7 @@ static bool count_test(struct pool4 *cpool, struct pool4 *spool,
 
 	client_entries = client_count(client);
 
-	return true;
+	return success;
 }
 
 static bool print_all_test(struct pool4 *cpool, struct pool4 *spool,
@@ -624,36 +621,29 @@ static bool print_all_test(struct pool4 *cpool, struct pool4 *spool,
 	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
 	prefix4->len = 128;
 
-	success &= pool4_add(cpool, one->mark, one->proto, &one->addr,
-			&one->range);
-	success &= pool4_add(cpool, two->mark, two->proto, &two->addr,
-			&two->range);
-	success &= pool4_add(cpool, three->mark, three->proto, &three->addr,
-			&three->range);
-	success &= pool4_add(cpool, four->mark, four->proto, &four->addr,
-			&four->range);
-	success &= pool4_add(cpool, five->mark, five->proto, &five->addr,
-			&five->range);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_add(cpool, one->mark, one->proto,
+			&one->addr, &one->range), "add one test");
+	success &= ASSERT_INT(0, pool4_add(cpool, two->mark, two->proto,
+			&two->addr, &two->range), "add two test");
+	success &= ASSERT_INT(0, pool4_add(cpool, three->mark,
+			three->proto, &three->addr, &three->range),
+			"add three test");
+	success &= ASSERT_INT(0, pool4_add(cpool, four->mark, four->proto,
+			&four->addr, &four->range), "add four test");
+	success &= ASSERT_INT(0, pool4_add(cpool, five->mark, five->proto,
+			&five->addr, &five->range), "add five test");
 
-	success &= client_add(client, prefix0);
-	success &= client_add(client, prefix1);
-	success &= client_add(client, prefix2);
-	success &= client_add(client, prefix3);
-	success &= client_add(client, prefix4);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
+	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
+	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
+	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
+	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
 
-	success &= pool4_print_all(cpool);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_print_all(cpool), "print pool4 test");
 
-	success &= client_print_all(client);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_print_all(client), "print client test");
 
-	return true;
+	return success;
 }
 
 static bool entry_exist_test(struct pool4 *cpool, struct pool4 *spool,
@@ -733,26 +723,23 @@ static bool entry_exist_test(struct pool4 *cpool, struct pool4 *spool,
 	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
 	prefix4->len = 128;
 
-	success &= pool4_add(cpool, one->mark, one->proto, &one->addr,
-			&one->range);
-	success &= pool4_add(cpool, two->mark, two->proto, &two->addr,
-			&two->range);
-	success &= pool4_add(cpool, three->mark, three->proto, &three->addr,
-			&three->range);
-	success &= pool4_add(cpool, four->mark, four->proto, &four->addr,
-			&four->range);
-	success &= pool4_add(cpool, five->mark, five->proto, &five->addr,
-			&five->range);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_add(cpool, one->mark, one->proto,
+			&one->addr, &one->range), "add one test");
+	success &= ASSERT_INT(0, pool4_add(cpool, two->mark, two->proto,
+			&two->addr, &two->range), "add two test");
+	success &= ASSERT_INT(0, pool4_add(cpool, three->mark,
+			three->proto, &three->addr, &three->range),
+			"add three test");
+	success &= ASSERT_INT(0, pool4_add(cpool, four->mark, four->proto,
+			&four->addr, &four->range), "add four test");
+	success &= ASSERT_INT(0, pool4_add(cpool, five->mark, five->proto,
+			&five->addr, &five->range), "add five test");
 
-	success &= client_add(client, prefix0);
-	success &= client_add(client, prefix1);
-	success &= client_add(client, prefix2);
-	success &= client_add(client, prefix3);
-	success &= client_add(client, prefix4);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
+	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
+	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
+	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
+	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
 
 	success &= pool4_contains(cpool, one->mark, one->proto, &one->addr,
 			&one->range);
@@ -760,16 +747,15 @@ static bool entry_exist_test(struct pool4 *cpool, struct pool4 *spool,
 			&two->range);
 	success &= pool4_contains(cpool, three->mark, three->proto,
 			&three->addr, &three->range);
-	if (success)
-		return false;
 
-	success &= client_addr_exist(client, &prefix0->address);
-	success &= client_addr_exist(client, &prefix1->address);
-	success &= client_addr_exist(client, &prefix2->address);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_addr_exist(client, &prefix0->address),
+			"exist prefix0 test");
+	success &= ASSERT_INT(0, client_addr_exist(client, &prefix1->address),
+			"exist prefix1 test");
+	success &= ASSERT_INT(0, client_addr_exist(client, &prefix2->address),
+			"exist prefix2 test");
 
-	return true;
+	return success;
 }
 
 static bool foreach_sample_test(struct pool4 *cpool, struct pool4 *spool,
@@ -871,32 +857,28 @@ static bool foreach_sample_test(struct pool4 *cpool, struct pool4 *spool,
 	/* pool4_foreach_sample test */
 
 	pr_info("%d\n", a);
-	success &= pool4_foreach_sample(cpool, callb, &a, NULL);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_foreach_sample(cpool, callb, &a, NULL),
+			"pool4 for each sample, offset = NULL");
 	pr_info("%d\n", a);
 	pr_info("\n");
 
-	success &= pool4_foreach_sample(cpool, callb, NULL, two);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_foreach_sample(cpool, callb, NULL, two),
+			"pool4 for each sample, offset with value");
 	pr_info("\n");
 
 	/* client_foreach_sample test */
 
 	pr_info("%d\n", a);
-	success &= client_for_eachsample(client, cb, &a, NULL);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_for_eachsample(client, cb, &a, NULL),
+			"client for each sample, offset = NULL");
 	pr_info("%d\n", a);
 	pr_info("\n");
 
-	success &= client_for_eachsample(client, cb, NULL, prefix1);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_for_eachsample(client, cb, NULL, prefix1),
+			"client for each sample, offset with value");
 	pr_info("\n");
 
-	return true;
+	return success;
 }
 
 static bool for_each_test(struct pool4 *cpool, struct pool4 *spool,
@@ -998,33 +980,29 @@ static bool for_each_test(struct pool4 *cpool, struct pool4 *spool,
 	/* pool4_foreach_taddr4 test */
 
 	pr_info("%d\n", a);
-	success = pool4_foreach_taddr4(cpool, cback, &a, 0);
-	if (success)
-		return false;
+	success = ASSERT_INT(0, pool4_foreach_taddr4(cpool, cback, &a, 0),
+			"pool4 for each taddr4, offset = 0");
 	pr_info("%d\n", a);
 	pr_info("\n");
 
-	success = pool4_foreach_taddr4(cpool, cback, NULL, 6);
-	if (success)
-		return false;
+	success = ASSERT_INT(0, pool4_foreach_taddr4(cpool, cback, NULL, 6),
+			"pool4 for each taddr4, offset = 6");
 
 	/* client_for_each test */
 
 	a = 12;
 
 	pr_info("%d\n", a);
-	success = client_for_each(client, callback, &a, 0);
-	if (success)
-		return false;
+	success = ASSERT_INT(0, client_for_each(client, callback, &a, 0),
+			"client for each, offset = 0");
 	pr_info("%d\n", a);
 	pr_info("\n");
 
-	success = client_for_each(client, callback, NULL, 2);
-	if (success)
-		return false;
+	success = ASSERT_INT(0, client_for_each(client, callback, NULL, 2),
+			"client for each, offset = 2");
 	pr_info("\n");
 
-	return true;
+	return success;
 }
 
 static bool client_get_mask_domain_test(struct pool4 *cpool,
@@ -1125,28 +1103,20 @@ static bool client_get_mask_domain_test(struct pool4 *cpool,
 
 	/* Testing client_get_mask_domain */
 
-	success &= pool4_print_all(cpool);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_print_all(cpool), "print all test");
 
-	success &= client_get_mask_domain(client, cpool, &prefix0->address,
-			&domain, 7);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_get_mask_domain(client, cpool,
+			&prefix0->address, &domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= client_get_mask_domain(client, cpool, &prefix1->address,
-			&domain, 7);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_get_mask_domain(client, cpool,
+			&prefix1->address, &domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= client_get_mask_domain(client, cpool, &prefix2->address,
-			&domain, 7);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_get_mask_domain(client, cpool,
+			&prefix2->address, &domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 	pr_info("\n\n");
@@ -1251,17 +1221,13 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool,
 	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
 	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
 
-	success &= pool4_print_all(cpool);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, pool4_print_all(cpool), "print all test");
 	pr_info("\n\n");
 
 	/* pool4_get_nth_taddr test */
 
-	success &= client_get_mask_domain(client, cpool, &prefix0->address,
-				&domain, 7);
-	if (success)
-		return false;
+	success &= ASSERT_INT(0, client_get_mask_domain(client, cpool,
+			&prefix0->address, &domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
@@ -1516,7 +1482,6 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 static int nat64_init(void)
 {
 
-	int error = 0;
 	struct pool4 cpool;
 	struct pool4 spool;
 	struct client client;
@@ -1532,31 +1497,31 @@ static int nat64_init(void)
 	INIT_CALL_END(init(&cpool, &spool, &client),
 			count_test(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "count functions");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			print_all_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "print functions");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			entry_exist_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "entry exist functions");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			foreach_sample_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "for each sample test");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			for_each_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "for each test");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			client_get_mask_domain_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "get mask domain test");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			pool4_get_nth_taddr_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "get nth taddr test");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			get_mask_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "get mask test");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			print_all_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "print functions");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			entry_exist_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "entry exist functions");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			foreach_sample_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "for each sample test");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			for_each_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "for each test");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			client_get_mask_domain_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "get mask domain test");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			pool4_get_nth_taddr_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "get nth taddr test");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			get_mask_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "get mask test");
 
 	END_TESTS;
 
-	return error;
+	return 0;
 }
 
 static void nat64_exit(void)

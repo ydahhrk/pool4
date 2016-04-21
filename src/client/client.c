@@ -252,7 +252,7 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 	int error = 0;
 
 	if (client_count(client) > pool4_count(pool4)) {
-		printk("There are more clients than mask entries\n");
+		pr_info("There are more clients than mask entries\n");
 		return 0;
 	}
 
