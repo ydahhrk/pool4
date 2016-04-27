@@ -86,21 +86,17 @@ int callback(struct in6_addr *addr, void *arg)
 
 // Test functions...
 
-static bool get_valid_nth_taddr(struct pool4 *pool4,
-		struct client_mask_domain *domain, unsigned int n,
-		struct ipv4_transport_addr *result)
+static bool is_valid_taddr(struct pool4 *cpool, struct in_addr *addr)
 {
 	bool valid_taddr = true;
 	struct pool4_entry *listed;
 	struct list_head *iter;
 	struct list_head *tmp;
 
-	pool4_get_nth_taddr(pool4, domain, n, result);
-
-	list_for_each_safe(iter, tmp, &pool4->list)
+	list_for_each_safe(iter, tmp, &cpool->list)
 	{
 		listed = list_entry(iter, struct pool4_entry, list_hook);
-		if (listed->addr.s_addr == result->l3.s_addr)
+		if (listed->addr.s_addr == addr->s_addr)
 			return valid_taddr;
 	}
 
@@ -128,7 +124,7 @@ static void end(struct pool4 *cpool, struct pool4 *spool, struct client *client)
 	client_flush(client);
 }
 
-static int add_test(struct pool4 *cpool, struct pool4 *spool,
+static int add_entries(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -274,7 +270,7 @@ static int add_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool remove_test(struct pool4 *cpool, struct pool4 *spool,
+static bool remove_entries(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -449,7 +445,7 @@ static bool remove_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool count_test(struct pool4 *cpool, struct pool4 *spool,
+static bool count_addr(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -561,7 +557,7 @@ static bool count_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool print_all_test(struct pool4 *cpool, struct pool4 *spool,
+static bool print_all_addr(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -668,7 +664,7 @@ static bool print_all_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool entry_exist_test(struct pool4 *cpool, struct pool4 *spool,
+static bool addr_exist(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -785,7 +781,7 @@ static bool entry_exist_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool foreach_sample_test(struct pool4 *cpool, struct pool4 *spool,
+static bool foreach_sample(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -914,7 +910,7 @@ static bool foreach_sample_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool for_each_test(struct pool4 *cpool, struct pool4 *spool,
+static bool for_each_addr(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
@@ -1043,8 +1039,8 @@ static bool for_each_test(struct pool4 *cpool, struct pool4 *spool,
 	return success;
 }
 
-static bool client_get_mask_domain_test(struct pool4 *cpool,
-		struct pool4 *spool, struct client *client)
+static bool client_get_mask_domain_test(struct pool4 *cpool, struct pool4 *spool,
+		struct client *client)
 {
 	bool success = true;
 	struct client_mask_domain domain;
@@ -1318,7 +1314,7 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 //	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
 //			&result), "Asking for the 3rd taddr...");
 	pr_info("%pI4: %u", &result.l3, result.l4);
-	pr_info("\n\n");
+	pr_info("\n");
 
 	/* With given values in example */
 
@@ -1482,15 +1478,33 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0, client_print_all(client), "print all test");
 	pr_info("\n");
 
+	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet->hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet->hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet->hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0001);
+
 	success &= ASSERT_INT(0,
 			get_mask(packet, cpool, spool, client, &result, 7),
 			"get mask test");
 	pr_info("%pI4: %u\n", &result.l3, result.l4);
 
+	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
+			"valid addr");
+
+	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0db8);
+	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0000);
+	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2002);
+
 	success &= ASSERT_INT(0,
 			get_mask(packet, cpool, spool, client, &result, 8),
 			"get mask test");
 	pr_info("%pI4: %u\n", &result.l3, result.l4);
+
+	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0db8);
+	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0000);
+	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2003);
 
 	success &= ASSERT_INT(0,
 			get_mask(packet, cpool, spool, client, &result, 5),
@@ -1510,32 +1524,32 @@ static int nat64_init(void)
 	START_TESTS("pool4 test");
 
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			add_test(&cpool, &spool, &client),
+			add_entries(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "add functions");
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			remove_test(&cpool, &spool, &client),
+			remove_entries(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "remove functions");
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			count_test(&cpool, &spool, &client),
+			count_addr(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "count functions");
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			print_all_test(&cpool, &spool, &client),
+			print_all_addr(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "print functions");
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			entry_exist_test(&cpool, &spool, &client),
+			addr_exist(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "entry exist functions");
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			foreach_sample_test(&cpool, &spool, &client),
-			end(&cpool, &spool, &client), "for each sample test");
+			foreach_sample(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "for each sample");
 	INIT_CALL_END(init(&cpool, &spool, &client),
-			for_each_test(&cpool, &spool, &client),
-			end(&cpool, &spool, &client), "for each test");
+			for_each_addr(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "for each addr");
 	INIT_CALL_END(init(&cpool, &spool, &client),
 			client_get_mask_domain_test(&cpool, &spool, &client),
-			end(&cpool, &spool, &client), "get mask domain test");
+			end(&cpool, &spool, &client), "get mask domain");
 	INIT_CALL_END(init(&cpool, &spool, &client),
 			pool4_get_nth_taddr_test(&cpool, &spool, &client),
-			end(&cpool, &spool, &client), "get nth taddr test");
+			end(&cpool, &spool, &client), "get nth taddr");
 	INIT_CALL_END(init(&cpool, &spool, &client),
 			get_mask_test(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "get mask test");
