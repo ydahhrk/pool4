@@ -7,6 +7,24 @@
 #include "pool4/pool4.h"
 #include "unit_test.h"
 
+// Global variables
+
+struct pool4_entry one;
+struct pool4_entry two;
+struct pool4_entry three;
+struct pool4_entry four;
+struct pool4_entry five;
+struct pool4_entry six;
+struct pool4_entry seven;
+
+struct ipv6_prefix prefix0;
+struct ipv6_prefix prefix1;
+struct ipv6_prefix prefix2;
+struct ipv6_prefix prefix3;
+struct ipv6_prefix prefix4;
+struct ipv6_prefix prefix5;
+struct ipv6_prefix prefix6;
+
 int callb(struct pool4_entry *entry, void *arg)
 {
 	int *arg_int = arg;
@@ -114,7 +132,37 @@ static bool init(struct pool4 *cpool, struct pool4 *spool,
 	if (success)
 		return false;
 
-	return true;
+	one.mark = 1;
+	one.proto = 1;
+	one.addr.s_addr = cpu_to_be32(0xc0000201);
+	one.range.min = 4;
+	one.range.max = 7;
+
+	two.mark = 2;
+	two.proto = 2;
+	two.addr.s_addr = cpu_to_be32(0xc0000202);
+	two.range.min = 6;
+	two.range.max = 8;
+
+	three.mark = 3;
+	three.proto = 3;
+	three.addr.s_addr = cpu_to_be32(0xc0000203);
+	three.range.min = 100;
+	three.range.max = 100;
+
+	four->mark = 4;
+	four->proto = 4;
+	four->addr.s_addr = cpu_to_be32(0xc0000204);
+	four->range.min = 65;
+	four->range.max = 256;
+
+	five->mark = 5;
+	five->proto = 5;
+	five->addr.s_addr = cpu_to_be32(0xc0000205);
+	five->range.min = 4;
+	five->range.max = 7;
+
+	return success;
 }
 
 static void end(struct pool4 *cpool, struct pool4 *spool, struct client *client)
@@ -1374,8 +1422,7 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 {
 	bool success = true;
 	struct ipv4_transport_addr result;
-
-	struct packet *packet = kmalloc(sizeof(*packet), GFP_KERNEL);
+	struct packet packet;
 
 	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
 	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
@@ -1478,38 +1525,44 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0, client_print_all(client), "print all test");
 	pr_info("\n");
 
-	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
-	packet->hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
-	packet->hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
-	packet->hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0001);
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0001);
 
 	success &= ASSERT_INT(0,
-			get_mask(packet, cpool, spool, client, &result, 7),
+			get_mask(&packet, cpool, spool, client, &result, 1),
 			"get mask test");
 	pr_info("%pI4: %u\n", &result.l3, result.l4);
 
 	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
 			"valid addr");
 
-	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2001);
-	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0db8);
-	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0000);
-	packet->hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2002);
+	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0db8);
+	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0000);
+	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2000);
 
 	success &= ASSERT_INT(0,
-			get_mask(packet, cpool, spool, client, &result, 8),
+			get_mask(&packet, cpool, spool, client, &result, 8),
 			"get mask test");
 	pr_info("%pI4: %u\n", &result.l3, result.l4);
 
-	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
-	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0db8);
-	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0000);
-	packet->hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2003);
+	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
+			"valid addr");
+
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2003);
 
 	success &= ASSERT_INT(0,
-			get_mask(packet, cpool, spool, client, &result, 5),
+			get_mask(&packet, cpool, spool, client, &result, 5),
 			"get mask test");
 	pr_info("%pI4: %u\n\n", &result.l3, result.l4);
+
+	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
+			"valid addr");
 
 	return success;
 }
