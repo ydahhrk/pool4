@@ -265,6 +265,8 @@ static bool remove_entries(struct pool4 *cpool, struct pool4 *spool,
 {
 	bool success = true;
 
+	/* Removing 5 elements from cpool... */
+
 	success &= ASSERT_INT(0,
 			pool4_rm(cpool, one.mark, one.proto, &one.addr,
 					&one.range), "pool4_rm test");
@@ -282,7 +284,7 @@ static bool remove_entries(struct pool4 *cpool, struct pool4 *spool,
 					&five.range), "pool4_rm test");
 
 	success &= ASSERT_INT(0, pool4_print_all(cpool), "print test");
-//	pr_info("\n");
+	pr_info("\n");
 
 	/* Removing 5 elements from client... */
 
@@ -298,6 +300,7 @@ static bool remove_entries(struct pool4 *cpool, struct pool4 *spool,
 			"client_delete test");
 
 	success &= ASSERT_INT(0, client_print_all(client), "print test");
+	pr_info("\n");
 
 	return success;
 }
@@ -315,8 +318,8 @@ static bool count_addr(struct pool4 *cpool, struct pool4 *spool,
 	cpool_addrs = pool4_count(cpool);
 	client_addrs = client_count(client);
 
-	pr_info("Addresses in cpool: %d\n", cpool_addrs);
-	pr_info("Addresses in client: %d", client_addrs);
+	pr_info("\nAddresses in cpool: %d\n", cpool_addrs);
+	pr_info("Addresses in client: %d\n\n", client_addrs);
 
 	return success;
 }
@@ -326,9 +329,11 @@ static bool print_all_addr(struct pool4 *cpool, struct pool4 *spool,
 {
 	bool success = true;
 
+	pr_info("\n");
 	success &= ASSERT_INT(0, pool4_print_all(cpool), "print pool4 test");
 
 	success &= ASSERT_INT(0, client_print_all(client), "print client test");
+	pr_info("\n");
 
 	return success;
 }
@@ -338,6 +343,7 @@ static bool addr_exist(struct pool4 *cpool, struct pool4 *spool,
 {
 	bool success = true;
 
+	pr_info("\n");
 	success &= pool4_contains(cpool, one.mark, one.proto, &one.addr,
 			&one.range);
 	success &= pool4_contains(cpool, two.mark, two.proto, &two.addr,
@@ -361,110 +367,15 @@ static bool foreach_sample(struct pool4 *cpool, struct pool4 *spool,
 	bool success = true;
 	int a = 12;
 
-	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
-	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
-	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
-	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
-	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
-
-	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
-	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
-	struct ipv6_prefix *prefix2 = kmalloc(sizeof(*prefix2), GFP_KERNEL);
-	struct ipv6_prefix *prefix3 = kmalloc(sizeof(*prefix3), GFP_KERNEL);
-	struct ipv6_prefix *prefix4 = kmalloc(sizeof(*prefix4), GFP_KERNEL);
-
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 4;
-	one->range.max = 7;
-
-	two->mark = 2;
-	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000202);
-	two->range.min = 6;
-	two->range.max = 8;
-
-	three->mark = 3;
-	three->proto = 3;
-	three->addr.s_addr = cpu_to_be32(0xc0000203);
-	three->range.min = 100;
-	three->range.max = 100;
-
-	four->mark = 4;
-	four->proto = 4;
-	four->addr.s_addr = cpu_to_be32(0xc0000204);
-	four->range.min = 30;
-	four->range.max = 256;
-
-	five->mark = 5;
-	five->proto = 5;
-	five->addr.s_addr = cpu_to_be32(0xc0000205);
-	five->range.min = 4;
-	five->range.max = 7;
-
-	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
-	prefix0->len = 128;
-
-	prefix1->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1->address.s6_addr32[3] = cpu_to_be32(0x0001);
-	prefix1->len = 128;
-
-	prefix2->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2->address.s6_addr32[3] = cpu_to_be32(0x0002);
-	prefix2->len = 128;
-
-	prefix3->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3->address.s6_addr32[3] = cpu_to_be32(0x0003);
-	prefix3->len = 128;
-
-	prefix4->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix4->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix4->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
-	prefix4->len = 128;
-
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, one->mark, one->proto, &one->addr,
-					&one->range), "add one test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, two->mark, two->proto, &two->addr,
-					&two->range), "add two test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, three->mark, three->proto,
-					&three->addr, &three->range),
-			"add three test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, four->mark, four->proto, &four->addr,
-					&four->range), "add four test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, five->mark, five->proto, &five->addr,
-					&five->range), "add five test");
-
-	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
-	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
-	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
-	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
-	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
-
 	/* pool4_foreach_sample test */
 
-	pr_info("%d\n", a);
+	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(0, pool4_foreach_sample(cpool, callb, &a, NULL),
 			"pool4 for each sample, offset = NULL");
 	pr_info("%d\n", a);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0, pool4_foreach_sample(cpool, callb, NULL, two),
+	success &= ASSERT_INT(0, pool4_foreach_sample(cpool, callb, NULL, &two),
 			"pool4 for each sample, offset with value");
 	pr_info("\n");
 
@@ -477,7 +388,7 @@ static bool foreach_sample(struct pool4 *cpool, struct pool4 *spool,
 	pr_info("\n");
 
 	success &= ASSERT_INT(0,
-			client_for_eachsample(client, cb, NULL, prefix1),
+			client_for_eachsample(client, cb, NULL, &prefix1),
 			"client for each sample, offset with value");
 	pr_info("\n");
 
@@ -490,104 +401,9 @@ static bool for_each_addr(struct pool4 *cpool, struct pool4 *spool,
 	bool success = true;
 	int a = 0;
 
-	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
-	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
-	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
-	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
-	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
-
-	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
-	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
-	struct ipv6_prefix *prefix2 = kmalloc(sizeof(*prefix2), GFP_KERNEL);
-	struct ipv6_prefix *prefix3 = kmalloc(sizeof(*prefix3), GFP_KERNEL);
-	struct ipv6_prefix *prefix4 = kmalloc(sizeof(*prefix4), GFP_KERNEL);
-
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 4;
-	one->range.max = 7;
-
-	two->mark = 2;
-	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000202);
-	two->range.min = 6;
-	two->range.max = 8;
-
-	three->mark = 3;
-	three->proto = 3;
-	three->addr.s_addr = cpu_to_be32(0xc0000203);
-	three->range.min = 100;
-	three->range.max = 100;
-
-	four->mark = 4;
-	four->proto = 4;
-	four->addr.s_addr = cpu_to_be32(0xc0000204);
-	four->range.min = 65;
-	four->range.max = 256;
-
-	five->mark = 5;
-	five->proto = 5;
-	five->addr.s_addr = cpu_to_be32(0xc0000205);
-	five->range.min = 4;
-	five->range.max = 7;
-
-	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
-	prefix0->len = 128;
-
-	prefix1->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1->address.s6_addr32[3] = cpu_to_be32(0x0001);
-	prefix1->len = 128;
-
-	prefix2->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2->address.s6_addr32[3] = cpu_to_be32(0x0002);
-	prefix2->len = 128;
-
-	prefix3->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3->address.s6_addr32[3] = cpu_to_be32(0x0003);
-	prefix3->len = 128;
-
-	prefix4->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix4->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix4->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
-	prefix4->len = 128;
-
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, one->mark, one->proto, &one->addr,
-					&one->range), "add one test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, two->mark, two->proto, &two->addr,
-					&two->range), "add two test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, three->mark, three->proto,
-					&three->addr, &three->range),
-			"add three test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, four->mark, four->proto, &four->addr,
-					&four->range), "add four test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, five->mark, five->proto, &five->addr,
-					&five->range), "add five test");
-
-	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
-	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
-	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
-	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
-	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
-
 	/* pool4_foreach_taddr4 test */
 
-	pr_info("%d\n", a);
+	pr_info("\n%d\n", a);
 	success = ASSERT_INT(0, pool4_foreach_taddr4(cpool, cback, &a, 0),
 			"pool4 for each taddr4, offset = 0");
 	pr_info("%d\n", a);
@@ -600,7 +416,7 @@ static bool for_each_addr(struct pool4 *cpool, struct pool4 *spool,
 
 	a = 12;
 
-	pr_info("%d\n", a);
+	pr_info("\n%d\n", a);
 	success = ASSERT_INT(0, client_for_each(client, callback, &a, 0),
 			"client for each, offset = 0");
 	pr_info("%d\n", a);
@@ -619,124 +435,30 @@ static bool client_get_mask_domain_test(struct pool4 *cpool, struct pool4 *spool
 	bool success = true;
 	struct client_mask_domain domain;
 
-	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
-	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
-	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
-	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
-	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
-
-	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
-	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
-	struct ipv6_prefix *prefix2 = kmalloc(sizeof(*prefix2), GFP_KERNEL);
-	struct ipv6_prefix *prefix3 = kmalloc(sizeof(*prefix3), GFP_KERNEL);
-	struct ipv6_prefix *prefix4 = kmalloc(sizeof(*prefix4), GFP_KERNEL);
-
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 4;
-	one->range.max = 7;
-
-	two->mark = 2;
-	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000202);
-	two->range.min = 6;
-	two->range.max = 8;
-
-	three->mark = 3;
-	three->proto = 3;
-	three->addr.s_addr = cpu_to_be32(0xc0000203);
-	three->range.min = 100;
-	three->range.max = 100;
-
-	four->mark = 4;
-	four->proto = 4;
-	four->addr.s_addr = cpu_to_be32(0xc0000204);
-	four->range.min = 65;
-	four->range.max = 256;
-
-	five->mark = 5;
-	five->proto = 5;
-	five->addr.s_addr = cpu_to_be32(0xc0000205);
-	five->range.min = 4;
-	five->range.max = 7;
-
-	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
-	prefix0->len = 128;
-
-	prefix1->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1->address.s6_addr32[3] = cpu_to_be32(0x0001);
-	prefix1->len = 128;
-
-	prefix2->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2->address.s6_addr32[3] = cpu_to_be32(0x0002);
-	prefix2->len = 128;
-
-	prefix3->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3->address.s6_addr32[3] = cpu_to_be32(0x0003);
-	prefix3->len = 128;
-
-	prefix4->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix4->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix4->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
-	prefix4->len = 128;
-
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, one->mark, one->proto, &one->addr,
-					&one->range), "add one test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, two->mark, two->proto, &two->addr,
-					&two->range), "add two test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, three->mark, three->proto,
-					&three->addr, &three->range),
-			"add three test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, four->mark, four->proto, &four->addr,
-					&four->range), "add four test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, five->mark, five->proto, &five->addr,
-					&five->range), "add five test");
-
-	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
-	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
-	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
-	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
-	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
-
 	/* Testing client_get_mask_domain */
 
+	pr_info("\n");
 	success &= ASSERT_INT(0, pool4_print_all(cpool), "print all test");
-	pr_info("\n\n");
+	pr_info("\n");
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix0->address,
+			client_get_mask_domain(client, cpool, &prefix0.address,
 					&domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix1->address,
+			client_get_mask_domain(client, cpool, &prefix1.address,
 					&domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix2->address,
+			client_get_mask_domain(client, cpool, &prefix6.address,
 					&domain, 7), "get mask domain test");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
-	pr_info("\n\n");
+	pr_info("\n");
 
 	return success;
 }
@@ -748,108 +470,14 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	struct client_mask_domain domain;
 	struct ipv4_transport_addr result;
 
-	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
-	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
-	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
-	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
-	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
-
-	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
-	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
-	struct ipv6_prefix *prefix2 = kmalloc(sizeof(*prefix2), GFP_KERNEL);
-	struct ipv6_prefix *prefix3 = kmalloc(sizeof(*prefix3), GFP_KERNEL);
-	struct ipv6_prefix *prefix4 = kmalloc(sizeof(*prefix4), GFP_KERNEL);
-
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 4;
-	one->range.max = 7;
-
-	two->mark = 2;
-	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000202);
-	two->range.min = 6;
-	two->range.max = 8;
-
-	three->mark = 3;
-	three->proto = 3;
-	three->addr.s_addr = cpu_to_be32(0xc0000203);
-	three->range.min = 100;
-	three->range.max = 100;
-
-	four->mark = 4;
-	four->proto = 4;
-	four->addr.s_addr = cpu_to_be32(0xc0000204);
-	four->range.min = 65;
-	four->range.max = 256;
-
-	five->mark = 5;
-	five->proto = 5;
-	five->addr.s_addr = cpu_to_be32(0xc0000205);
-	five->range.min = 4;
-	five->range.max = 7;
-
-	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
-	prefix0->len = 128;
-
-	prefix1->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1->address.s6_addr32[3] = cpu_to_be32(0x0001);
-	prefix1->len = 128;
-
-	prefix2->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2->address.s6_addr32[3] = cpu_to_be32(0x0002);
-	prefix2->len = 128;
-
-	prefix3->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3->address.s6_addr32[3] = cpu_to_be32(0x0003);
-	prefix3->len = 128;
-
-	prefix4->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix4->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix4->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
-	prefix4->len = 128;
-
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, one->mark, one->proto, &one->addr,
-					&one->range), "add one test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, two->mark, two->proto, &two->addr,
-					&two->range), "add two test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, three->mark, three->proto,
-					&three->addr, &three->range),
-			"add three test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, four->mark, four->proto, &four->addr,
-					&four->range), "add four test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, five->mark, five->proto, &five->addr,
-					&five->range), "add five test");
-
-	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
-	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
-	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
-	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
-	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
-
+	pr_info("\n");
 	success &= ASSERT_INT(0, pool4_print_all(cpool), "print all test");
 	pr_info("\n\n");
 
 	/* pool4_get_nth_taddr test */
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix0->address,
+			client_get_mask_domain(client, cpool, &prefix0.address,
 					&domain, 7), "get mask domain test");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
@@ -863,7 +491,7 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	pr_info("\n\n");
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix1->address,
+			client_get_mask_domain(client, cpool, &prefix1.address,
 					&domain, 7), "get mask domain test");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
@@ -877,7 +505,7 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	pr_info("\n\n");
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix2->address,
+			client_get_mask_domain(client, cpool, &prefix2.address,
 					&domain, 7), "get mask domain test");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
@@ -896,38 +524,39 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	pool4_flush(cpool);
 	client_flush(client);
 
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 10;
-	one->range.max = 20;
+	one.mark = 1;
+	one.proto = 1;
+	one.addr.s_addr = cpu_to_be32(0xc0000201);
+	one.range.min = 10;
+	one.range.max = 20;
 
-	two->mark = 2;
-	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000202);
-	two->range.min = 10;
-	two->range.max = 20;
+	two.mark = 2;
+	two.proto = 2;
+	two.addr.s_addr = cpu_to_be32(0xc0000202);
+	two.range.min = 10;
+	two.range.max = 20;
 
-	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
-	prefix0->len = 128;
+	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
+	prefix0.len = 128;
 
 	success &= ASSERT_INT(0,
-			pool4_add(cpool, one->mark, one->proto, &one->addr,
-					&one->range), "add one test");
+			pool4_add(cpool, one.mark, one.proto, &one.addr,
+					&one.range), "add one test");
 	success &= ASSERT_INT(0,
-			pool4_add(cpool, two->mark, two->proto, &two->addr,
-					&two->range), "add two test");
+			pool4_add(cpool, two.mark, two.proto, &two.addr,
+					&two.range), "add two test");
 
-	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
+	success &= ASSERT_INT(0, client_add(client, &prefix0), "add 0 test");
 
+	pr_info("\n");
 	success &= ASSERT_INT(0, pool4_print_all(cpool), "print all test");
 	pr_info("\n");
 
 	success &= ASSERT_INT(0,
-			client_get_mask_domain(client, cpool, &prefix0->address,
+			client_get_mask_domain(client, cpool, &prefix0.address,
 					&domain, 7), "get mask domain test");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
@@ -950,145 +579,55 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 	struct ipv4_transport_addr result;
 	struct packet packet;
 
-	struct pool4_entry *one = kmalloc(sizeof(*one), GFP_KERNEL);
-	struct pool4_entry *two = kmalloc(sizeof(*two), GFP_KERNEL);
-	struct pool4_entry *three = kmalloc(sizeof(*three), GFP_KERNEL);
-	struct pool4_entry *four = kmalloc(sizeof(*four), GFP_KERNEL);
-	struct pool4_entry *five = kmalloc(sizeof(*one), GFP_KERNEL);
-
-	struct ipv6_prefix *prefix0 = kmalloc(sizeof(*prefix0), GFP_KERNEL);
-	struct ipv6_prefix *prefix1 = kmalloc(sizeof(*prefix1), GFP_KERNEL);
-	struct ipv6_prefix *prefix2 = kmalloc(sizeof(*prefix2), GFP_KERNEL);
-	struct ipv6_prefix *prefix3 = kmalloc(sizeof(*prefix3), GFP_KERNEL);
-	struct ipv6_prefix *prefix4 = kmalloc(sizeof(*prefix4), GFP_KERNEL);
-
-	one->mark = 1;
-	one->proto = 1;
-	one->addr.s_addr = cpu_to_be32(0xc0000201);
-	one->range.min = 4;
-	one->range.max = 7;
-
-	two->mark = 2;
-	two->proto = 2;
-	two->addr.s_addr = cpu_to_be32(0xc0000202);
-	two->range.min = 6;
-	two->range.max = 8;
-
-	three->mark = 3;
-	three->proto = 3;
-	three->addr.s_addr = cpu_to_be32(0xc0000203);
-	three->range.min = 100;
-	three->range.max = 100;
-
-	four->mark = 4;
-	four->proto = 4;
-	four->addr.s_addr = cpu_to_be32(0xc0000204);
-	four->range.min = 65;
-	four->range.max = 256;
-
-	five->mark = 5;
-	five->proto = 5;
-	five->addr.s_addr = cpu_to_be32(0xc0000205);
-	five->range.min = 4;
-	five->range.max = 7;
-
-	prefix0->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0->address.s6_addr32[3] = cpu_to_be32(0x0000);
-	prefix0->len = 128;
-
-	prefix1->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1->address.s6_addr32[3] = cpu_to_be32(0x0001);
-	prefix1->len = 128;
-
-	prefix2->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2->address.s6_addr32[3] = cpu_to_be32(0x0002);
-	prefix2->len = 128;
-
-	prefix3->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3->address.s6_addr32[3] = cpu_to_be32(0x0003);
-	prefix3->len = 128;
-
-	prefix4->address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix4->address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix4->address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix4->address.s6_addr32[3] = cpu_to_be32(0x0004);
-	prefix4->len = 128;
-
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, one->mark, one->proto, &one->addr,
-					&one->range), "add one test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, two->mark, two->proto, &two->addr,
-					&two->range), "add two test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, three->mark, three->proto,
-					&three->addr, &three->range),
-			"add three test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, four->mark, four->proto, &four->addr,
-					&four->range), "add four test");
-	success &= ASSERT_INT(0,
-			pool4_add(cpool, five->mark, five->proto, &five->addr,
-					&five->range), "add five test");
-
-	success &= ASSERT_INT(0, client_add(client, prefix0), "add 0 test");
-	success &= ASSERT_INT(0, client_add(client, prefix1), "add 1 test");
-	success &= ASSERT_INT(0, client_add(client, prefix2), "add 2 test");
-	success &= ASSERT_INT(0, client_add(client, prefix3), "add 3 test");
-	success &= ASSERT_INT(0, client_add(client, prefix4), "add 4 test");
-
 	success &= ASSERT_INT(0, pool4_print_all(cpool), "print all test");
 	pr_info("\n");
 
 	success &= ASSERT_INT(0, client_print_all(client), "print all test");
 	pr_info("\n");
 
-	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
-	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
-	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
-	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0001);
+	packet.hdr->saddr.in6_u.u6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.in6_u.u6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.in6_u.u6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.in6_u.u6_addr32[3] = cpu_to_be32(0x0001);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, cpool, spool, client, &result, 1),
-			"get mask test");
-	pr_info("%pI4: %u\n", &result.l3, result.l4);
+	pr_info("%x.%x.%x.%x", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
-			"valid addr");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, cpool, spool, client, &result, 1),
+//			"get mask test");
+//	pr_info("%pI4: %u\n", &result.l3, result.l4);
+//
+//	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
+//			"valid addr");
 
-	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2001);
-	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0db8);
-	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x0000);
-	packet.hdr->daddr.s6_addr32[0] = cpu_to_be32(0x2000);
-
-	success &= ASSERT_INT(0,
-			get_mask(&packet, cpool, spool, client, &result, 8),
-			"get mask test");
-	pr_info("%pI4: %u\n", &result.l3, result.l4);
-
-	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
-			"valid addr");
-
-	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
-	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0db8);
-	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0000);
-	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2003);
-
-	success &= ASSERT_INT(0,
-			get_mask(&packet, cpool, spool, client, &result, 5),
-			"get mask test");
-	pr_info("%pI4: %u\n\n", &result.l3, result.l4);
-
-	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
-			"valid addr");
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0db8);
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0000);
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2000);
+//
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, cpool, spool, client, &result, 8),
+//			"get mask test");
+//	pr_info("%pI4: %u\n", &result.l3, result.l4);
+//
+//	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
+//			"valid addr");
+//
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0db8);
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x0000);
+//	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2003);
+//
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, cpool, spool, client, &result, 5),
+//			"get mask test");
+//	pr_info("%pI4: %u\n\n", &result.l3, result.l4);
+//
+//	success &= ASSERT_BOOL(true, is_valid_taddr(cpool, &result.l3),
+//			"valid addr");
 
 	return success;
 }
@@ -1114,24 +653,23 @@ static int nat64_init(void)
 	INIT_CALL_END(init(&cpool, &spool, &client),
 			addr_exist(&cpool, &spool, &client),
 			end(&cpool, &spool, &client), "entry exist functions");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			foreach_sample(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "for each sample");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			for_each_addr(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "for each addr");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			client_get_mask_domain_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "get mask domain");
-//	INIT_CALL_END(init(&cpool, &spool, &client),
-//			pool4_get_nth_taddr_test(&cpool, &spool, &client),
-//			end(&cpool, &spool, &client), "get nth taddr");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			foreach_sample(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "for each sample");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			for_each_addr(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "for each addr");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			client_get_mask_domain_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "get mask domain");
+	INIT_CALL_END(init(&cpool, &spool, &client),
+			pool4_get_nth_taddr_test(&cpool, &spool, &client),
+			end(&cpool, &spool, &client), "get nth taddr");
 //	INIT_CALL_END(init(&cpool, &spool, &client),
 //			get_mask_test(&cpool, &spool, &client),
 //			end(&cpool, &spool, &client), "get mask test");
 
-	END_TESTS
-	;
+	END_TESTS;
 
 	return 0;
 }
