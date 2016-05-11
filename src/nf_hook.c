@@ -606,7 +606,7 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
 	bool success = true;
-	struct ipv4_transport_addr result;
+	struct ipv4_transport_addr mask;
 	struct packet packet;
 
 	pr_info("\n");
@@ -621,26 +621,83 @@ static bool get_mask_test(struct pool4 *cpool, struct pool4 *spool,
 			return -ENOMEM;
 		}
 
-	packet.hdr->saddr = prefix6.address;
-
-	success &= ASSERT_INT(0,
-			get_mask(&packet, cpool, spool, client, &result, 1),
-			"get mask test");
-	pr_info("%pI4: %u\n\n", &result.l3, result.l4);
-
 	packet.hdr->saddr = prefix0.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
 	success &= ASSERT_INT(0,
-			get_mask(&packet, cpool, spool, client, &result, 8),
+			get_mask(&packet, cpool, spool, client, &mask, 10),
 			"get mask test");
-	pr_info("%pI4: %u\n\n", &result.l3, result.l4);
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	packet.hdr->saddr = prefix1.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
+
+	success &= ASSERT_INT(0,
+			get_mask(&packet, cpool, spool, client, &mask, 3),
+			"get mask test");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix2.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
 	success &= ASSERT_INT(0,
-			get_mask(&packet, cpool, spool, client, &result, 5),
+			get_mask(&packet, cpool, spool, client, &mask, 11),
 			"get mask test");
-	pr_info("%pI4: %u\n\n", &result.l3, result.l4);
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	packet.hdr->saddr = prefix3.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
+
+	success &= ASSERT_INT(0,
+			get_mask(&packet, cpool, spool, client, &mask, 5),
+			"get mask test");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	packet.hdr->saddr = prefix4.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
+
+	success &= ASSERT_INT(0,
+			get_mask(&packet, cpool, spool, client, &mask, 12),
+			"get mask test");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	packet.hdr->saddr = prefix5.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
+
+	success &= ASSERT_INT(0,
+			get_mask(&packet, cpool, spool, client, &mask, 2),
+			"get mask test");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	packet.hdr->saddr = prefix6.address;
+	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+			packet.hdr->saddr.in6_u.u6_addr32[1],
+			packet.hdr->saddr.in6_u.u6_addr32[2],
+			packet.hdr->saddr.in6_u.u6_addr32[3]);
+
+	success &= ASSERT_INT(0,
+			get_mask(&packet, cpool, spool, client, &mask, 4),
+			"get mask test");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
 
 	kfree(packet.hdr);
 	return success;

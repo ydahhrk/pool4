@@ -457,9 +457,13 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 
 		error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
 				result_mask, masks_per_client);
-		if (!error)
-			return  get_mask_spool(packet, spool, client,result, masks_per_client,
-								dummyClient, result_mask);
+		if (!error) {
+			result->l3 = result_mask->first.l3;
+			result->l4 = result_mask->first.l4;
+			return error;
+//			return  get_mask_spool(packet, spool, client,result, masks_per_client,
+//								dummyClient, result_mask);
+		}
 
 		error = client_domain_exists(result_mask, spool, 2,
 				result);
