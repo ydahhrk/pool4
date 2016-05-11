@@ -117,7 +117,7 @@ int pool4_print_all(struct pool4 *pool4)
 	struct list_head *iter;
 	struct list_head *tmp;
 	struct pool4_entry *entry;
-	pr_info("Elements in the list:\n");
+	pr_info("Elements in pool4:\n");
 
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
@@ -301,7 +301,7 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 	list_for_each(iter, &pool4->list) {
 		entry = list_entry(iter, struct pool4_entry, list_hook);
 		if (((domain->first.l3.s_addr == entry->addr.s_addr) &&
-				(entry->range.min < domain->first.l4) &&
+				(entry->range.min <= domain->first.l4) &&
 				(entry->range.max > domain->first.l4))
 				|| flag) {
 			if (!flag) {
