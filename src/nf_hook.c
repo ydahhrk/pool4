@@ -104,23 +104,6 @@ int callback(struct in6_addr *addr, void *arg)
 
 // Test functions...
 
-//static bool is_valid_taddr(struct pool4 *cpool, struct in_addr *addr)
-//{
-//	bool valid_taddr = true;
-//	struct pool4_entry *listed;
-//	struct list_head *iter;
-//	struct list_head *tmp;
-//
-//	list_for_each_safe(iter, tmp, &cpool->list)
-//	{
-//		listed = list_entry(iter, struct pool4_entry, list_hook);
-//		if (listed->addr.s_addr == addr->s_addr)
-//			return valid_taddr;
-//	}
-//
-//	return false;
-//}
-
 static bool init(struct pool4 *cpool, struct pool4 *spool,
 		struct client *client)
 {
@@ -509,8 +492,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 9, &result),
 			"Asking for the 9th taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("9th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
@@ -523,8 +504,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 5, &result),
 			"Asking for the 5th taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("5th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
@@ -537,8 +516,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 3, &result),
 			"Asking for the 3rd taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("3rd taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
@@ -551,8 +528,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 8, &result),
 			"Asking for the 8th taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("8th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
@@ -565,8 +540,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 7, &result),
 			"Asking for the 7th taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("7th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
@@ -579,8 +552,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 6, &result),
 			"Asking for the 6th taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("6th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
@@ -593,8 +564,6 @@ static bool pool4_get_nth_taddr_test(struct pool4 *cpool, struct pool4 *spool,
 	success &= ASSERT_INT(0,
 			pool4_get_nth_taddr(cpool, &domain, 2, &result),
 			"Asking for the 2nd taddr...");
-//	success &= ASSERT_BOOL(true, get_valid_nth_taddr(cpool, &domain, 3,
-//			&result), "Asking for the 3rd taddr...");
 	pr_info("2nd taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
