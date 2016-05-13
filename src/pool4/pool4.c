@@ -436,7 +436,7 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
  *
  */
 	if (pool4_is_empty(cpool))
-			return  get_mask_spool(packet, spool, client,result, masks_per_client,
+			return  get_mask_spool(packet, spool, client, result, masks_per_client,
 					dummyClient, result_mask);
 	//get_mask_from_spool(spool)
 
@@ -444,32 +444,32 @@ int get_mask(struct packet *packet, struct pool4 *cpool,
 	 * if it exists it just skips the instruction
 	 *  */
 
-		if (!(client_addr_exist(client, &packet->hdr->saddr))) {
-			if (dynamic_assigment) { //if its dynamic it enters
-				dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
-				dummyClient->len = 128;
-				client_add(client, dummyClient);
-			}
-			else
-				return  get_mask_spool(packet, spool, client,result, masks_per_client,
-									dummyClient, result_mask);
+	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
+		if (dynamic_assigment) { //if its dynamic it enters
+			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+			dummyClient->len = 128;
+			client_add(client, dummyClient);
 		}
+		else
+			return  get_mask_spool(packet, spool, client, result, masks_per_client,
+								dummyClient, result_mask);
+	}
 
-		error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
-				result_mask, masks_per_client);
-		if (!error) {
-			result->l3 = result_mask->first.l3;
-			result->l4 = result_mask->first.l4;
-			return error;
+	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
+			result_mask, masks_per_client);
+	result->l3 = result_mask->first.l3;
+	result->l4 = result_mask->first.l4;
+	if (error) {
+		return error;
 //			return  get_mask_spool(packet, spool, client,result, masks_per_client,
 //								dummyClient, result_mask);
-		}
+	}
 
-		error = client_domain_exists(result_mask, spool, 2,
-				result);
-		if (!error)
-			return get_mask_spool(packet, spool, client,result, masks_per_client,
-					dummyClient, result_mask);
+	error = client_domain_exists(result_mask, spool, 2,
+			result);
+	if (!error)
+		return get_mask_spool(packet, spool, client,result, masks_per_client,
+				dummyClient, result_mask);
 
 	return 0;
 }
