@@ -146,12 +146,12 @@ int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 	list_for_each_safe(iter, tmp, &pool4->list) {
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
-			pr_info("It is in the list.\n\n");
+//			pr_info("It is in the list.\n\n");
 			return 1;
 		}
 	}
 
-	pr_info("It is not in the list.\n\n");
+//	pr_info("It is not in the list.\n\n");
 	return 0;
 }
 
