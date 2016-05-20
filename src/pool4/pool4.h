@@ -25,7 +25,7 @@ int pool4_rm(struct pool4 *pool4, __u32 mark, __u8 proto,
 
 int pool4_flush(struct pool4 *pool4);
 
-int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
+bool pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range);
 
 int pool4_is_empty(struct pool4 *pool4);

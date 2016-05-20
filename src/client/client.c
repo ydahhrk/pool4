@@ -157,7 +157,7 @@ void addr6_iterations(struct in6_addr *client)
 	}
 }
 
-int client_addr_exist(struct client *client, struct in6_addr *addr)
+bool client_addr_exist(struct client *client, struct in6_addr *addr)
 {
 	struct list_head *iter;
 	struct ipv6_client *obj_ptr;
@@ -173,11 +173,11 @@ int client_addr_exist(struct client *client, struct in6_addr *addr)
 				&& addr->s6_addr32[1] == dummy.s6_addr32[1]
 				&& addr->s6_addr32[2] == dummy.s6_addr32[2]
 				&& addr->s6_addr32[3] == dummy.s6_addr32[3])
-				return 0;
+				return true;
 			addr6_iterations(&dummy);
 		}
 	}
-	return -1;
+	return false;
 }
 
 int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),

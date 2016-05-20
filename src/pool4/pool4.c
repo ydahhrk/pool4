@@ -129,7 +129,7 @@ int pool4_print_all(struct pool4 *pool4)
 	return 0;
 }
 
-int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
+bool pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		struct in_addr *addr, struct port_range *range)
 {
 	struct list_head *iter;
@@ -147,12 +147,12 @@ int pool4_contains(struct pool4 *pool4, __u32 mark, __u8 proto,
 		listed = list_entry(iter, struct pool4_entry, list_hook);
 		if (pool4_compare(&requested, listed)) {
 //			pr_info("It is in the list.\n\n");
-			return 1;
+			return true;
 		}
 	}
 
 //	pr_info("It is not in the list.\n\n");
-	return 0;
+	return false;
 }
 
 int pool4_count(struct pool4 *pool4)

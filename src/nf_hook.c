@@ -29,10 +29,14 @@ struct ipv6_prefix prefix4;
 struct ipv6_prefix prefix5;
 struct ipv6_prefix prefix6;
 
+struct pool4_entry entries[7];
+struct pool4_mask masks[75];
+struct ipv6_prefix prefixes[7];
+
 int callb(struct pool4_entry *entry, void *arg)
 {
 	int *arg_int = arg;
-//	char addr[16];
+	int i;
 
 	if (arg) {
 		pr_info("%pI4 %u-%u %d\n", &entry->addr, entry->range.min,
@@ -43,13 +47,21 @@ int callb(struct pool4_entry *entry, void *arg)
 				entry->range.max);
 	}
 
-	return 0;
+	for (i = 0; i <= 6; i++) {
+		if (&entry->addr == &entries[i].addr &&
+				entry->range.min == entries[i].range.min &&
+				entry->range.max == entries[i].range.max) {
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 int cback(struct pool4_mask *mask, void *arg)
 {
-//	char addr[16];
 	int *arg_int = arg;
+	int i;
 
 	if (arg) {
 		pr_info("%pI4 %u %d\n", &mask->addr, mask->port, *arg_int);
@@ -58,15 +70,23 @@ int cback(struct pool4_mask *mask, void *arg)
 		pr_info("%pI4 %u\n", &mask->addr, mask->port);
 	}
 
-	if (mask->port == 64)
-		return 1; /* interrumpir temprano. */
+	for (i = 0; i <= 74; i++) {
+		if (&mask->addr == &masks[i].addr &&
+				mask->port == masks[i].port) {
+			if (mask->port == 64)
+				return 1; /* interrumpir temprano. */
+			return 0;
+		}
+	}
 
-	return 0;
+	return 1;
 }
 
 int cb(struct ipv6_prefix *prefix, void *arg)
 {
 	int *arg_int = arg;
+	int i;
+
 	if (arg) {
 		pr_info("Address: %x:%x:%x:%x\nLength:%u  %d\n",
 				prefix->address.s6_addr32[0],
@@ -83,7 +103,21 @@ int cb(struct ipv6_prefix *prefix, void *arg)
 				prefix->address.s6_addr32[3], prefix->len);
 	}
 
-	return 0;
+	for(i = 0; i <= 6; i++) {
+		if (prefix->address.s6_addr32[0] ==
+				prefixes[i].address.s6_addr32[0] &&
+				prefix->address.s6_addr32[1] ==
+				prefixes[i].address.s6_addr32[1] &&
+				prefix->address.s6_addr32[2] ==
+				prefixes[i].address.s6_addr32[2] &&
+				prefix->address.s6_addr32[3] ==
+				prefixes[i].address.s6_addr32[3] &&
+				prefix->len == prefixes[i].len) {
+			return 0;
+		}
+	}
+
+	return 1;
 }
 
 int callback(struct in6_addr *addr, void *arg)
@@ -107,6 +141,36 @@ int callback(struct in6_addr *addr, void *arg)
 }
 
 // Test functions...
+
+//static int nodes_count_from_a(int init_a, int final_a)
+//{
+//	int result = 0;
+//
+//	return result = final_a - init_a;
+//}
+//
+//static int nodes_count_from_offset(struct pool4_entry *offset)
+//{
+//	struct list_head *iter;
+//	struct pool4_entry *entry;
+//	unsigned int entries = 0;
+//
+//	list_for_each(iter, &cpool.list) {
+//		entry = list_entry(iter, struct pool4_entry, list_hook);
+//
+//		if(!offset) {
+//			entries++;
+//		} else if (offset->mark == entry->mark &&
+//				offset->proto == entry->proto &&
+//				offset->addr.s_addr == entry->addr.s_addr &&
+//				offset->range.min == entry->range.min &&
+//				offset->range.max == entry->range.max) {
+//			offset = NULL;
+//		}
+//	}
+//
+//	return entries;
+//}
 
 static bool init(void)
 {
@@ -251,31 +315,31 @@ static bool init(void)
 	// Filling client database...
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix0), "add 0 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix0.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix0.address),
 			"exist prefix0 test");
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix1), "add 1 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix1.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix1.address),
 			"exist prefix1 test");
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix2), "add 2 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix2.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix2.address),
 			"exist prefix2 test");
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix3), "add 3 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix3.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix3.address),
 			"exist prefix3 test");
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix4), "add 4 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix4.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix4.address),
 			"exist prefix4 test");
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix5), "add 5 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix5.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix5.address),
 			"exist prefix5 test");
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix6), "add 6 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix6.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix6.address),
 			"exist prefix6 test");
 
 	return success;
@@ -350,37 +414,37 @@ static bool remove_entries(void)
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix0),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix0.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix0.address),
 			"exist prefix0 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix1),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix1.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix1.address),
 			"exist prefix1 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix2),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix2.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix2.address),
 			"exist prefix2 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix3),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix3.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix3.address),
 			"exist prefix3 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix4),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix4.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix4.address),
 			"exist prefix4 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix5),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix5.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix5.address),
 			"exist prefix5 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix6),
 			"client_delete test");
-	success &= ASSERT_INT(-1, client_addr_exist(&client, &prefix6.address),
+	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix6.address),
 			"exist prefix6 test");
 
 
@@ -451,19 +515,19 @@ static bool addr_exist(void)
 			seven.proto, &seven.addr, &seven.range),
 			"seven exist test");
 
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix0.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix0.address),
 			"exist prefix0 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix1.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix1.address),
 			"exist prefix1 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix2.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix2.address),
 			"exist prefix2 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix3.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix3.address),
 			"exist prefix3 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix4.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix4.address),
 			"exist prefix4 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix5.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix5.address),
 			"exist prefix5 test");
-	success &= ASSERT_INT(0, client_addr_exist(&client, &prefix6.address),
+	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix6.address),
 			"exist prefix6 test");
 
 	return success;

@@ -5,6 +5,7 @@
 #include <linux/in6.h>
 #include <linux/in.h>
 #include <linux/ipv6.h>
+#include <stdbool.h>
 
 struct ipv6_prefix {
 	/** IPv6 prefix. */
