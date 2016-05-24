@@ -29,9 +29,15 @@ struct ipv6_prefix prefix4;
 struct ipv6_prefix prefix5;
 struct ipv6_prefix prefix6;
 
-struct pool4_entry entries[7];
-struct pool4_mask masks[75];
-struct ipv6_prefix prefixes[7];
+struct pool4_entry node4_exp[7];
+struct pool4_entry node4_seen[7];
+struct ipv6_prefix node6_exp[7];
+struct ipv6_prefix node6_seen[7];
+struct pool4_mask mask_exp[75];
+struct pool4_mask mask_seen[75];
+struct in6_addr in6addr_exp[7];
+struct in6_addr in6addr_seen[7];
+
 
 int callb(struct pool4_entry *entry, void *arg)
 {
@@ -48,14 +54,16 @@ int callb(struct pool4_entry *entry, void *arg)
 	}
 
 	for (i = 0; i <= 6; i++) {
-		if (&entry->addr == &entries[i].addr &&
-				entry->range.min == entries[i].range.min &&
-				entry->range.max == entries[i].range.max) {
-			return 0;
+		if (entry->addr.s_addr == node4_exp[i].addr.s_addr &&
+				entry->range.min == node4_exp[i].range.min &&
+				entry->range.max == node4_exp[i].range.max) {
+			node4_seen[i].addr.s_addr = entry->addr.s_addr;
+			node4_seen[i].range.min = entry->range.min;
+			node4_seen[i].range.max = entry->range.max;
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 int cback(struct pool4_mask *mask, void *arg)
@@ -71,15 +79,16 @@ int cback(struct pool4_mask *mask, void *arg)
 	}
 
 	for (i = 0; i <= 74; i++) {
-		if (&mask->addr == &masks[i].addr &&
-				mask->port == masks[i].port) {
+		if (mask->addr.s_addr == mask_exp[i].addr.s_addr &&
+				mask->port == mask_exp[i].port) {
+			mask_seen[i].addr.s_addr = mask->addr.s_addr;
+			mask_seen[i].port = mask->port;
 			if (mask->port == 64)
 				return 1; /* interrumpir temprano. */
-			return 0;
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 int cb(struct ipv6_prefix *prefix, void *arg)
@@ -105,24 +114,33 @@ int cb(struct ipv6_prefix *prefix, void *arg)
 
 	for(i = 0; i <= 6; i++) {
 		if (prefix->address.s6_addr32[0] ==
-				prefixes[i].address.s6_addr32[0] &&
+				node6_exp[i].address.s6_addr32[0] &&
 				prefix->address.s6_addr32[1] ==
-				prefixes[i].address.s6_addr32[1] &&
+				node6_exp[i].address.s6_addr32[1] &&
 				prefix->address.s6_addr32[2] ==
-				prefixes[i].address.s6_addr32[2] &&
+				node6_exp[i].address.s6_addr32[2] &&
 				prefix->address.s6_addr32[3] ==
-				prefixes[i].address.s6_addr32[3] &&
-				prefix->len == prefixes[i].len) {
-			return 0;
+				node6_exp[i].address.s6_addr32[3] &&
+				prefix->len == node6_exp[i].len) {
+			node6_seen[i].address.s6_addr32[0] =
+					prefix->address.s6_addr32[0];
+			node6_seen[i].address.s6_addr32[1] =
+					prefix->address.s6_addr32[1];
+			node6_seen[i].address.s6_addr32[2] =
+					prefix->address.s6_addr32[2];
+			node6_seen[i].address.s6_addr32[3] =
+					prefix->address.s6_addr32[3];
+			node6_seen[i].len = prefix->len;
 		}
 	}
 
-	return 1;
+	return 0;
 }
 
 int callback(struct in6_addr *addr, void *arg)
 {
 	int *arg_int = arg;
+	int i;
 
 	if (arg) {
 		pr_info("%x:%x:%x:%x %d\n", addr->s6_addr32[0],
@@ -134,43 +152,213 @@ int callback(struct in6_addr *addr, void *arg)
 				addr->s6_addr32[2], addr->s6_addr32[3]);
 	}
 
-	if (addr->s6_addr[15] == 14)
-		return 1; /* Interrumpir temprano. */
+	for (i = 0; i <= 6; i++) {
+		if (addr->s6_addr32[0] == in6addr_exp[i].s6_addr32[0] &&
+				addr->s6_addr32[1] == in6addr_exp[i].s6_addr32[1] &&
+				addr->s6_addr32[2] == in6addr_exp[i].s6_addr32[2] &&
+				addr->s6_addr32[3] == in6addr_exp[i].s6_addr32[3]) {
+			in6addr_seen[i].s6_addr32[0] = addr->s6_addr32[0];
+			in6addr_seen[i].s6_addr32[1] = addr->s6_addr32[1];
+			in6addr_seen[i].s6_addr32[2] = addr->s6_addr32[2];
+			in6addr_seen[i].s6_addr32[3] = addr->s6_addr32[3];
+			if (addr->s6_addr[15] == 14)
+				return 1; /* Interrumpir temprano. */
+		}
+	}
 
 	return 0;
 }
 
 // Test functions...
 
-//static int nodes_count_from_a(int init_a, int final_a)
-//{
-//	int result = 0;
-//
-//	return result = final_a - init_a;
-//}
-//
-//static int nodes_count_from_offset(struct pool4_entry *offset)
-//{
-//	struct list_head *iter;
-//	struct pool4_entry *entry;
-//	unsigned int entries = 0;
-//
-//	list_for_each(iter, &cpool.list) {
-//		entry = list_entry(iter, struct pool4_entry, list_hook);
-//
-//		if(!offset) {
-//			entries++;
-//		} else if (offset->mark == entry->mark &&
-//				offset->proto == entry->proto &&
-//				offset->addr.s_addr == entry->addr.s_addr &&
-//				offset->range.min == entry->range.min &&
-//				offset->range.max == entry->range.max) {
-//			offset = NULL;
-//		}
-//	}
-//
-//	return entries;
-//}
+static int clear_nodes_arrays (void)
+{
+	int i;
+
+	for (i = 0; i <= 6; i++) {
+		node4_exp[i].mark = 0;
+		node4_exp[i].proto = 0;
+		node4_exp[i].addr.s_addr = 0;
+		node4_exp[i].range.min = 0;
+		node4_exp[i].range.max = 0;
+
+		node4_seen[i].mark = 0;
+		node4_seen[i].proto = 0;
+		node4_seen[i].addr.s_addr = 0;
+		node4_seen[i].range.min = 0;
+		node4_seen[i].range.max = 0;
+
+		node6_exp[i].address.s6_addr32[0] = 0;
+		node6_exp[i].address.s6_addr32[1] = 0;
+		node6_exp[i].address.s6_addr32[2] = 0;
+		node6_exp[i].address.s6_addr32[3] = 0;
+		node6_exp[i].len = 0;
+
+		node6_seen[i].address.s6_addr32[0] = 0;
+		node6_seen[i].address.s6_addr32[1] = 0;
+		node6_seen[i].address.s6_addr32[2] = 0;
+		node6_seen[i].address.s6_addr32[3] = 0;
+		node6_seen[i].len = 0;
+	}
+
+	return 0;
+}
+
+static bool match_pool4_nodes(void)
+{
+	int i;
+	bool match;
+
+	for (i = 0; i <= 6; i++) {
+//		pr_info("%pI4 %u-%u = %pI4 %u-%u\n", &node4_exp[i].addr,
+//				node4_exp[i].range.min,	node4_exp[i].range.max,
+//				&node4_seen[i].addr, node4_seen[i].range.min,
+//				node4_seen[i].range.max);
+		if (node4_exp[i].addr.s_addr == node4_seen[i].addr.s_addr &&
+				node4_exp[i].range.min ==
+				node4_seen[i].range.min &&
+				node4_exp[i].range.max ==
+				node4_seen[i].range.max)
+			match = true;
+		else
+			match = false;
+		if (!match)
+			return match;
+	}
+
+	return match;
+}
+
+static bool match_client_nodes(void)
+{
+	int i;
+	bool match;
+
+	for (i = 0; i <= 6; i++) {
+		if (node6_exp[i].address.s6_addr32[0] ==
+				node6_seen[i].address.s6_addr32[0] &&
+				node6_exp[i].address.s6_addr32[1] ==
+				node6_seen[i].address.s6_addr32[1] &&
+				node6_exp[i].address.s6_addr32[2] ==
+				node6_seen[i].address.s6_addr32[2] &&
+				node6_exp[i].address.s6_addr32[3] ==
+				node6_seen[i].address.s6_addr32[3] &&
+				node6_exp[i].len == node6_seen[i].len)
+			match = true;
+		else
+			match = false;
+		if (!match)
+			return match;
+	}
+
+	return match;
+}
+
+static int fill_exp_masks(void)
+{
+	struct list_head *iter;
+	struct pool4_entry *entry;
+	int i = 0;
+	int p;
+
+	while (i <= 74) {
+		list_for_each(iter, &cpool.list) {
+			entry = list_entry(iter, struct pool4_entry, list_hook);
+			for (p = entry->range.min; p <= entry->range.max; p++) {
+				mask_exp[i].addr.s_addr = entry->addr.s_addr;
+				mask_exp[i].port = p;
+				i++;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static bool match_masks(void)
+{
+	int i;
+	bool match;
+
+	for (i = 0; i <= 74; i++) {
+		if (mask_exp[i].addr.s_addr == mask_seen[i].addr.s_addr &&
+				mask_exp[i].port == mask_seen[i].port)
+			match = true;
+		else
+		{
+			match = false;
+		}
+		if (!match)
+			return match;
+	}
+
+	return match;
+}
+
+static int print_exp_masks(void)
+{
+	int i;
+
+	for (i = 0; i <= 74; i++) {
+		pr_info("%pI4 %u\n", &mask_exp[i].addr, mask_exp[i].port);
+	}
+
+	return 0;
+}
+
+static int fill_exp_in6_addr(void)
+{
+	struct list_head *iter;
+	struct ipv6_client *entry;
+	int i = 0;
+
+	while (i <= 6) {
+		list_for_each(iter, &client.list_hook) {
+			entry = list_entry(iter, struct ipv6_client, list_hook);
+			in6addr_exp[i].s6_addr32[0] = entry->ipx.address.s6_addr32[0];
+			in6addr_exp[i].s6_addr32[1] = entry->ipx.address.s6_addr32[1];
+			in6addr_exp[i].s6_addr32[2] = entry->ipx.address.s6_addr32[2];
+			in6addr_exp[i].s6_addr32[3] = entry->ipx.address.s6_addr32[3];
+			i++;
+		}
+	}
+
+	return 0;
+}
+
+static bool match_in6_addrs(void)
+{
+	int i;
+	bool match;
+
+	for (i = 0; i <= 6; i++) {
+		if (in6addr_exp[i].s6_addr32[0] == in6addr_seen[0].s6_addr32[0] &&
+			in6addr_exp[i].s6_addr32[1] == in6addr_seen[i].s6_addr32[1] &&
+			in6addr_exp[i].s6_addr32[2] == in6addr_seen[i].s6_addr32[2] &&
+			in6addr_exp[i].s6_addr32[3] == in6addr_seen[i].s6_addr32[3])
+			match = true;
+		else
+			match = false;
+		if (!match)
+			return match;
+	}
+
+	return match;
+}
+
+static int print_exp_in6_addrs(void)
+{
+	int i;
+
+	for (i = 0; i <= 6; i++) {
+		pr_info("%x:%x:%x:%x\n", in6addr_exp[i].s6_addr32[0],
+				in6addr_exp[i].s6_addr32[1],
+				in6addr_exp[i].s6_addr32[2],
+				in6addr_exp[i].s6_addr32[3]);
+	}
+
+	return 0;
+}
 
 static bool init(void)
 {
@@ -538,29 +726,69 @@ static bool foreach_sample(void)
 	bool success = true;
 	int a = 12;
 
+	node4_exp[0] = one;
+	node4_exp[1] = two;
+	node4_exp[2] = three;
+	node4_exp[3] = four;
+	node4_exp[4] = five;
+	node4_exp[5] = six;
+	node4_exp[6] = seven;
+
 	/* pool4_foreach_sample test */
 
 	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(0, pool4_foreach_sample(&cpool, callb, &a, NULL),
 			"pool4 for each sample, offset = NULL");
 	pr_info("%d\n", a);
+	success &= ASSERT_BOOL(true, match_pool4_nodes(), "Checking nodes");
 	pr_info("\n");
 
+	/* Here it needs to start from the 3rd node */
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
+
+	node4_exp[2] = three;
+	node4_exp[3] = four;
+	node4_exp[4] = five;
+	node4_exp[5] = six;
+	node4_exp[6] = seven;
+
 	success &= ASSERT_INT(0, pool4_foreach_sample(&cpool, callb, NULL, &two),
-			"pool4 for each sample, offset with value");
+			"pool4 for each sample, offset = 2nd node");
+	success &= ASSERT_BOOL(true, match_pool4_nodes(), "Checking nodes");
 	pr_info("\n");
 
 	/* client_foreach_sample test */
+
+	node6_exp[0] = prefix0;
+	node6_exp[1] = prefix1;
+	node6_exp[2] = prefix2;
+	node6_exp[3] = prefix3;
+	node6_exp[4] = prefix4;
+	node6_exp[5] = prefix5;
+	node6_exp[6] = prefix6;
 
 	pr_info("%d\n", a);
 	success &= ASSERT_INT(0, client_for_eachsample(&client, cb, &a, NULL),
 			"client for each sample, offset = NULL");
 	pr_info("%d\n", a);
+
+	success &= ASSERT_BOOL(true, match_client_nodes(), "Checking nodes");
 	pr_info("\n");
+
+	/* It needs to start from the 3rd node*/
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
+
+	node6_exp[2] = prefix2;
+	node6_exp[3] = prefix3;
+	node6_exp[4] = prefix4;
+	node6_exp[5] = prefix5;
+	node6_exp[6] = prefix6;
 
 	success &= ASSERT_INT(0,
 			client_for_eachsample(&client, cb, NULL, &prefix1),
-			"client for each sample, offset with value");
+			"client for each sample, offset = 2nd node");
+
+	success &= ASSERT_BOOL(true, match_client_nodes(), "Checking nodes");
 	pr_info("\n");
 
 	return success;
@@ -572,28 +800,40 @@ static bool for_each_addr(void)
 	int a = 0;
 
 	/* pool4_foreach_taddr4 test */
+	pr_info("\n");
+	success &= ASSERT_INT(0, fill_exp_masks(), "Fill all masks to array");
+//	success &= ASSERT_INT(0, print_exp_masks(), "Print expected masks");
 
 	pr_info("\n%d\n", a);
 	success = ASSERT_INT(0, pool4_foreach_taddr4(&cpool, cback, &a, 0),
 			"pool4 for each taddr4, offset = 0");
 	pr_info("%d\n", a);
+	success = ASSERT_BOOL(true, match_masks(), "Checking masks visited");
 	pr_info("\n");
 
 	success = ASSERT_INT(0, pool4_foreach_taddr4(&cpool, cback, NULL, 6),
 			"pool4 for each taddr4, offset = 6");
+	success &= ASSERT_BOOL(true, match_masks(), "Checking masks visited");
+
 
 	/* client_for_each test */
-
 	a = 12;
+
+	success &= ASSERT_INT(0, fill_exp_in6_addr(), "Fill all in6 addrs");
+//	success &= ASSERT_INT(0, print_exp_in6_addrs(), "Print exp in6 addrs");
 
 	pr_info("\n%d\n", a);
 	success = ASSERT_INT(0, client_for_each(&client, callback, &a, 0),
 			"client for each, offset = 0");
 	pr_info("%d\n", a);
+
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Checking nodes");
 	pr_info("\n");
 
 	success = ASSERT_INT(0, client_for_each(&client, callback, NULL, 2),
 			"client for each, offset = 2");
+
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Checking nodes");
 	pr_info("\n");
 
 	return success;
