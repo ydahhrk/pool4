@@ -256,9 +256,8 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 				mask.addr.s_addr = entry->addr.s_addr;
 				mask.port = i;
 				error = cback(&mask, arg);
-				if (error) {
+				if (error)
 					return error;
-				}
 			}
 			indx++;
 		}
