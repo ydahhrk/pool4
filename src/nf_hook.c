@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <linux/list.h>
 #include "pool4/pool4.h"
+#include "client/client.h"
 #include "unit_test.h"
 
 // Global variables
@@ -362,6 +363,71 @@ static int print_exp_in6_addrs(void)
 	}
 
 	return 0;
+}
+
+static bool match_domain(struct client_mask_domain *expected,
+		struct client *client, struct pool4 *pool4,
+		struct in6_addr *addr, struct client_mask_domain *domain,
+		unsigned int masks_per_client)
+{
+	bool success = true;
+	int error;
+
+	error = client_get_mask_domain(client, pool4, addr, domain,
+			masks_per_client);
+	if (error)
+		return false;
+
+	if (expected->first.l3.s_addr == domain->first.l3.s_addr &&
+			expected->first.l4 == domain->first.l4 &&
+			expected->step == domain->step &&
+			expected->count == domain->count)
+		success = true;
+	else
+		success = false;
+
+	return success;
+}
+
+static bool match_nth_taddr(struct ipv4_transport_addr *taddr_exp,
+		struct pool4 *pool4, struct client_mask_domain *domain,
+		unsigned int n, struct ipv4_transport_addr *result)
+{
+	bool success = true;
+	int error;
+
+	error = pool4_get_nth_taddr(pool4, domain, n, result);
+	if (error)
+		return false;
+
+	if (taddr_exp->l3.s_addr == result->l3.s_addr &&
+			taddr_exp->l4 == result->l4)
+		success = true;
+	else
+		success = false;
+
+	return success;
+}
+
+static bool valid_mask(struct ipv4_transport_addr *exp_mask,
+		struct packet *packet, struct pool4 *cpool, struct pool4 *spool,
+		struct client *client, struct ipv4_transport_addr *result,
+		unsigned int masks_per_client)
+{
+	bool success = true;
+	int error;
+
+	error = get_mask(packet, cpool, spool, client, result, masks_per_client);
+	if (error)
+		return false;
+
+	if (exp_mask->l3.s_addr == result->l3.s_addr &&
+			exp_mask->l4 == result->l4)
+		success = true;
+	else
+		success = false;
+
+	return success;
 }
 
 static bool init(void)
@@ -872,7 +938,7 @@ static bool for_each_addr(void)
 	success &= ASSERT_INT(1, pool4_foreach_taddr4(&cpool, cback, NULL, 0),
 			"Port 64 and offset = 0");
 //	pr_info("%d\n", a);
-	success &= ASSERT_BOOL(true, match_masks(), "Checking masks visited");
+	success &= ASSERT_BOOL(true, match_masks(), "Match masks visited");
 	pr_info("\n");
 
 	a = 0;
@@ -895,13 +961,13 @@ static bool for_each_addr(void)
 			"client for each, offset = 0");
 	pr_info("%d\n", a);
 
-	success &= ASSERT_BOOL(true, match_in6_addrs(), "Checking nodes");
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 	pr_info("\n");
 
 	success &= ASSERT_INT(0, client_for_each(&client, callback, NULL, 2),
 			"client for each, offset = 2");
 
-	success &= ASSERT_BOOL(true, match_in6_addrs(), "Checking nodes");
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 	pr_info("\n");
 
 
@@ -955,7 +1021,7 @@ static bool for_each_addr(void)
 	success &= ASSERT_INT(1, client_for_each(&client, callback, NULL, 0),
 			"Stops in addr 14, offset = 0");
 
-	success &= ASSERT_BOOL(true, match_in6_addrs(), "Checking nodes");
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 
 	a = 0;
 	pr_info("\n%d\n", a);
@@ -972,52 +1038,81 @@ static bool mask_domain_test(void)
 {
 	bool success = true;
 	struct client_mask_domain domain;
+	struct client_mask_domain expected;
 
 	/* Testing client_get_mask_domain */
 
 	pr_info("\n");
-	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print all test");
+	success &= ASSERT_INT(0, pool4_print_all(&cpool), "Actual pool4 nodes");
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix0.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000201);
+	expected.first.l4 = 4;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix0.address, &domain, 10), "1st addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix1.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000202);
+	expected.first.l4 = 16;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix1.address, &domain, 10), "2nd addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix2.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000203);
+	expected.first.l4 = 30;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix2.address, &domain, 10), "3rd addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix3.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000204);
+	expected.first.l4 = 40;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix3.address, &domain, 10), "4th addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix4.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000204);
+	expected.first.l4 = 50;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix4.address, &domain, 10), "5th addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix5.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000204);
+	expected.first.l4 = 60;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix5.address, &domain, 10), "6th addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix6.address,
-					&domain, 10), "get mask domain test");
+	expected.first.l3.s_addr = cpu_to_be32(0xc0000205);
+	expected.first.l4 = 71;
+	expected.step = 1;
+	expected.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&expected, &client, &cpool,
+			&prefix6.address, &domain, 10), "7th addr domain");
 	pr_info("%pI4: %u %u %u\n", &domain.first.l3, domain.first.l4,
 			domain.step, domain.count);
 	pr_info("\n");
@@ -1029,7 +1124,9 @@ static bool get_nth_taddr_test(void)
 {
 	bool success = true;
 	struct client_mask_domain domain;
+	struct client_mask_domain dom_exp;
 	struct ipv4_transport_addr result;
+	struct ipv4_transport_addr taddr_exp;
 
 	pr_info("\n");
 	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print all test");
@@ -1037,90 +1134,131 @@ static bool get_nth_taddr_test(void)
 
 	/* pool4_get_nth_taddr test */
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix0.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000201);
+	dom_exp.first.l4 = 4;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix0.address, &domain, 10), "1st addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 9, &result),
-			"Asking for the 9th taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
+	taddr_exp.l4 = 15;
+
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			9, &result), "Get 9th taddr");
 	pr_info("9th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix1.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000202);
+	dom_exp.first.l4 = 16;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix1.address, &domain, 10), "2nd addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 5, &result),
-			"Asking for the 5th taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000203);
+	taddr_exp.l4 = 25;
+
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			5, &result), "Get 5th taddr");
 	pr_info("5th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix2.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000203);
+	dom_exp.first.l4 = 30;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix2.address, &domain, 10), "3rd addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 3, &result),
-			"Asking for the 3rd taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000203);
+	taddr_exp.l4 = 33;
+
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			3, &result), "Get 3rd taddr");
 	pr_info("3rd taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix3.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000204);
+	dom_exp.first.l4 = 40;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix3.address, &domain, 10), "4th addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 8, &result),
-			"Asking for the 8th taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000204);
+	taddr_exp.l4 = 48;
+
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			8, &result), "Get 8th taddr");
 	pr_info("8th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix4.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000204);
+	dom_exp.first.l4 = 50;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix4.address, &domain, 10), "5th addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 7, &result),
-			"Asking for the 7th taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000204);
+	taddr_exp.l4 = 57;
+
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			7, &result), "Get 7th taddr");
 	pr_info("7th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix5.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000204);
+	dom_exp.first.l4 = 60;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix5.address, &domain, 10), "6th addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 6, &result),
-			"Asking for the 6th taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000205);
+	taddr_exp.l4 = 67;
+
+	success &=ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			6, &result), "Get 6th taddr");
 	pr_info("6th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
-	success &= ASSERT_INT(0,
-			client_get_mask_domain(&client, &cpool, &prefix6.address,
-					&domain, 10), "get mask domain test");
+	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000205);
+	dom_exp.first.l4 = 71;
+	dom_exp.step = 1;
+	dom_exp.count = 10;
+
+	success &= ASSERT_BOOL(true, match_domain(&dom_exp, &client, &cpool,
+			&prefix6.address, &domain, 10), "7th addr domain");
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
-	success &= ASSERT_INT(0,
-			pool4_get_nth_taddr(&cpool, &domain, 2, &result),
-			"Asking for the 2nd taddr...");
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000205);
+	taddr_exp.l4 = 73;
+
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			2, &result), "Get 2nd taddr");
 	pr_info("2nd taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
-
 
 	return success;
 }
@@ -1129,13 +1267,14 @@ static bool get_mask_test(void)
 {
 	bool success = true;
 	struct ipv4_transport_addr mask;
+	struct ipv4_transport_addr exp_mask;
 	struct packet packet;
 
 	pr_info("\n");
-	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print all test");
+	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print pool4s");
 	pr_info("\n");
 
-	success &= ASSERT_INT(0, client_print_all(&client), "print all test");
+	success &= ASSERT_INT(0, client_print_all(&client), "print clients");
 	pr_info("\n");
 
 	packet.hdr = kmalloc(sizeof(struct ipv6hdr), GFP_KERNEL);
@@ -1144,82 +1283,116 @@ static bool get_mask_test(void)
 		}
 
 	packet.hdr->saddr = prefix0.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 10),
-			"get mask test");
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
+	exp_mask.l4 = 4;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 10), "1st addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 10),
+//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix1.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 3),
-			"get mask test");
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
+	exp_mask.l4 = 7;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 3), "2nd addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 3),
+//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix2.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 11),
-			"get mask test");
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
+	exp_mask.l4 = 32;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 11), "3rd addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 11),
+//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix3.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 5),
-			"get mask test");
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
+	exp_mask.l4 = 25;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 5), "4th addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 5),
+//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix4.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 12),
-			"get mask test");
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000204);
+	exp_mask.l4 = 58;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 12), "5th addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 12),
+//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix5.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 2),
-			"get mask test");
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000202);
+	exp_mask.l4 = 16;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 2), "6th addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 2),
+//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix6.address;
-	pr_info("%x.%x.%x.%x\n\n", packet.hdr->saddr.in6_u.u6_addr32[0],
+	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
 			packet.hdr->saddr.in6_u.u6_addr32[1],
 			packet.hdr->saddr.in6_u.u6_addr32[2],
 			packet.hdr->saddr.in6_u.u6_addr32[3]);
 
-	success &= ASSERT_INT(0,
-			get_mask(&packet, &cpool, &spool, &client, &mask, 4),
-			"get mask test");
-	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
+	exp_mask.l4 = 34;
 
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 4), "7th addr mask");
+//	success &= ASSERT_INT(0,
+//			get_mask(&packet, &cpool, &spool, &client, &mask, 4),
+//			"get mask test");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	kfree(packet.hdr);
 	return success;
@@ -1230,15 +1403,15 @@ static int nat64_init(void)
 
 	START_TESTS("pool4 test");
 
-//	INIT_CALL_END(init(), remove_entries(), end(), "remove functions");
-//	INIT_CALL_END(init(), count_addr(), end(), "count functions");
-//	INIT_CALL_END(init(), print_all_addr(), end(), "print functions");
-//	INIT_CALL_END(init(), addr_exist(), end(), "entry exist functions");
-//	INIT_CALL_END(init(), foreach_sample(), end(), "for each sample");
+	INIT_CALL_END(init(), remove_entries(), end(), "remove functions");
+	INIT_CALL_END(init(), count_addr(), end(), "count functions");
+	INIT_CALL_END(init(), print_all_addr(), end(), "print functions");
+	INIT_CALL_END(init(), addr_exist(), end(), "entry exist functions");
+	INIT_CALL_END(init(), foreach_sample(), end(), "for each sample");
 	INIT_CALL_END(init(), for_each_addr(), end(), "for each addr");
-//	INIT_CALL_END(init(), mask_domain_test(), end(), "get mask domain");
-//	INIT_CALL_END(init(), get_nth_taddr_test(), end(), "get nth taddr");
-//	INIT_CALL_END(init(), get_mask_test(), end(), "get mask");
+	INIT_CALL_END(init(), mask_domain_test(), end(), "get mask domain");
+	INIT_CALL_END(init(), get_nth_taddr_test(), end(), "get nth taddr");
+	INIT_CALL_END(init(), get_mask_test(), end(), "get mask");
 
 	END_TESTS;
 
