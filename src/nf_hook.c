@@ -211,10 +211,6 @@ static bool match_pool4_nodes(void)
 	bool match;
 
 	for (i = 0; i <= 6; i++) {
-//		pr_info("%pI4 %u-%u = %pI4 %u-%u\n", &node4_exp[i].addr,
-//				node4_exp[i].range.min,	node4_exp[i].range.max,
-//				&node4_seen[i].addr, node4_seen[i].range.min,
-//				node4_seen[i].range.max);
 		if (node4_exp[i].addr.s_addr == node4_seen[i].addr.s_addr &&
 				node4_exp[i].range.min ==
 				node4_seen[i].range.min &&
@@ -480,46 +476,46 @@ static bool init(void)
 	seven.range.min = 253;
 	seven.range.max = 256;
 
-	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
+	prefix0.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix0.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix0.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix0.address.s6_addr32[3] = cpu_to_le32(0x0000);
 	prefix0.len = 128;
 
-	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
+	prefix1.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix1.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix1.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix1.address.s6_addr32[3] = cpu_to_le32(0x0001);
 	prefix1.len = 128;
 
-	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
+	prefix2.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix2.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix2.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix2.address.s6_addr32[3] = cpu_to_le32(0x0002);
 	prefix2.len = 128;
 
-	prefix3.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3.address.s6_addr32[3] = cpu_to_be32(0x0003);
+	prefix3.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix3.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix3.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix3.address.s6_addr32[3] = cpu_to_le32(0x0003);
 	prefix3.len = 128;
 
-	prefix4.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix4.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix4.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix4.address.s6_addr32[3] = cpu_to_be32(0x0004);
+	prefix4.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix4.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix4.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix4.address.s6_addr32[3] = cpu_to_le32(0x0004);
 	prefix4.len = 128;
 
-	prefix5.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix5.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix5.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix5.address.s6_addr32[3] = cpu_to_be32(0x0005);
+	prefix5.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix5.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix5.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix5.address.s6_addr32[3] = cpu_to_le32(0x0005);
 	prefix5.len = 128;
 
-	prefix6.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix6.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix6.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix6.address.s6_addr32[3] = cpu_to_be32(0x0006);
+	prefix6.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix6.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix6.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix6.address.s6_addr32[3] = cpu_to_le32(0x0006);
 	prefix6.len = 128;
 
 	// Filling cpool database...
@@ -666,45 +662,43 @@ static bool remove_entries(void)
 			"Confirm rm...");
 
 	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print test");
-	pr_info("\n");
 
 	/* Removing elements from client... */
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix0),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix0.address),
-			"exist prefix0 test");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix0.address), "exist prefix0 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix1),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix1.address),
-			"exist prefix1 test");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix1.address), "exist prefix1 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix2),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix2.address),
-			"exist prefix2 test");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix2.address), "exist prefix2 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix3),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix3.address),
-			"exist prefix3 test");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix3.address), "exist prefix3 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix4),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix4.address),
-			"exist prefix4 test");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix4.address), "exist prefix4 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix5),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix5.address),
-			"exist prefix5 test");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix5.address), "exist prefix5 test");
 
 	success &= ASSERT_INT(0, client_delete(&client, &prefix6),
 			"client_delete test");
-	success &= ASSERT_BOOL(false, client_addr_exist(&client, &prefix6.address),
-			"exist prefix6 test");
-
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix6.address), "exist prefix6 test");
 
 	success &= ASSERT_INT(0, client_print_all(&client), "print test");
 	pr_info("\n");
@@ -738,9 +732,9 @@ static bool print_all_addr(void)
 	bool success = true;
 
 	pr_info("\n");
-	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print pool4 test");
+	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print pool4");
 
-	success &= ASSERT_INT(0, client_print_all(&client), "print client test");
+	success &= ASSERT_INT(0, client_print_all(&client), "print client");
 	pr_info("\n");
 
 	return success;
@@ -773,20 +767,20 @@ static bool addr_exist(void)
 			seven.proto, &seven.addr, &seven.range),
 			"seven exist test");
 
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix0.address),
-			"exist prefix0 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix1.address),
-			"exist prefix1 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix2.address),
-			"exist prefix2 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix3.address),
-			"exist prefix3 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix4.address),
-			"exist prefix4 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix5.address),
-			"exist prefix5 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix6.address),
-			"exist prefix6 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix0.address), "exist prefix0 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix1.address), "exist prefix1 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix2.address), "exist prefix2 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix3.address), "exist prefix3 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix4.address), "exist prefix4 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix5.address), "exist prefix5 test");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix6.address), "exist prefix6 test");
 
 	return success;
 }
@@ -885,7 +879,6 @@ static bool for_each_addr(void)
 			"pool4 for each taddr4, offset = 6");
 	success &= ASSERT_BOOL(true, match_masks(), "Checking masks visited");
 
-
 	/* When cb gets port 64 */
 
 	success &= ASSERT_INT(0, pool4_flush(&cpool), "Cleanning pool4");
@@ -934,10 +927,8 @@ static bool for_each_addr(void)
 
 	success &= ASSERT_INT(0, fill_exp_masks(), "Fill exp masks to array");
 
-//	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(1, pool4_foreach_taddr4(&cpool, cback, NULL, 0),
 			"Port 64 and offset = 0");
-//	pr_info("%d\n", a);
 	success &= ASSERT_BOOL(true, match_masks(), "Match masks visited");
 	pr_info("\n");
 
@@ -947,7 +938,6 @@ static bool for_each_addr(void)
 			"Port 64 and offset = 4");
 	pr_info("%d", a);
 	success &= ASSERT_BOOL(true, match_masks(), "Match masks visited");
-
 
 	/* client_for_each test */
 
@@ -960,79 +950,74 @@ static bool for_each_addr(void)
 	success &= ASSERT_INT(0, client_for_each(&client, callback, &a, 0),
 			"client for each, offset = 0");
 	pr_info("%d\n", a);
-
 	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 	pr_info("\n");
 
 	success &= ASSERT_INT(0, client_for_each(&client, callback, NULL, 2),
 			"client for each, offset = 2");
-
 	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 	pr_info("\n");
-
 
 	/* When cb gets addr 14 */
 
 	success &= ASSERT_INT(0, client_flush(&client), "Cleanning client");
 
-	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
+	prefix0.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix0.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix0.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix0.address.s6_addr32[3] = cpu_to_le32(0x0000);
 	prefix0.len = 128;
 
-	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
+	prefix1.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix1.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix1.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix1.address.s6_addr32[3] = cpu_to_le32(0x0001);
 	prefix1.len = 128;
 
-	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
+	prefix2.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix2.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix2.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix2.address.s6_addr32[3] = cpu_to_le32(0x0002);
 	prefix2.len = 128;
 	prefix2.address.s6_addr[15] = 14; /* Adding addr 14 */
 
-	prefix3.address.s6_addr32[0] = cpu_to_be32(0x2001);
-	prefix3.address.s6_addr32[1] = cpu_to_be32(0x0db8);
-	prefix3.address.s6_addr32[2] = cpu_to_be32(0x0000);
-	prefix3.address.s6_addr32[3] = cpu_to_be32(0x0003);
+	prefix3.address.s6_addr32[0] = cpu_to_le32(0x2001);
+	prefix3.address.s6_addr32[1] = cpu_to_le32(0x0db8);
+	prefix3.address.s6_addr32[2] = cpu_to_le32(0x0000);
+	prefix3.address.s6_addr32[3] = cpu_to_le32(0x0003);
 	prefix3.len = 128;
 
-	success &= ASSERT_INT(0, client_add(&client, &prefix0), "add 0 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix0.address),
-			"exist prefix0 test");
+	success &= ASSERT_INT(0, client_add(&client, &prefix0), "add prefix 0");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix0.address), "exist prefix0 test");
 
-	success &= ASSERT_INT(0, client_add(&client, &prefix1), "add 1 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix1.address),
-			"exist prefix1 test");
+	success &= ASSERT_INT(0, client_add(&client, &prefix1), "add prefix 1");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix1.address), "exist prefix1 test");
 
-	success &= ASSERT_INT(0, client_add(&client, &prefix2), "add 2 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix2.address),
-			"exist prefix2 test");
+	success &= ASSERT_INT(0, client_add(&client, &prefix2), "add prefix 2");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix2.address), "exist prefix2 test");
 
-	success &= ASSERT_INT(0, client_add(&client, &prefix3), "add 3 test");
-	success &= ASSERT_BOOL(true, client_addr_exist(&client, &prefix3.address),
-			"exist prefix3 test");
+	success &= ASSERT_INT(0, client_add(&client, &prefix3), "add prefix 3");
+	success &= ASSERT_BOOL(true, client_addr_exist(&client,
+			&prefix3.address), "exist prefix3 test");
 
 	success &= ASSERT_INT(0, fill_exp_in6_addr(), "Fill exp in6 addrs");
 
 	success &= ASSERT_INT(1, client_for_each(&client, callback, NULL, 0),
-			"Stops in addr 14, offset = 0");
-
+			"Stops at addr 14, offset = 0");
 	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 
 	a = 0;
 	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(1, client_for_each(&client, callback, &a, 1),
-			"Stops in addr 14, offset = 1");
+			"Stops at addr 14, offset = 1");
 	pr_info("%d\n\n", a);
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 
 	return success;
 }
-
-//static bool for_each_addr_
 
 static bool mask_domain_test(void)
 {
@@ -1293,9 +1278,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 10), "1st addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 10),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix1.address;
@@ -1309,9 +1291,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 3), "2nd addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 3),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix2.address;
@@ -1325,9 +1304,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 11), "3rd addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 11),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix3.address;
@@ -1341,9 +1317,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 5), "4th addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 5),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix4.address;
@@ -1357,9 +1330,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 12), "5th addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 12),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix5.address;
@@ -1373,9 +1343,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 2), "6th addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 2),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix6.address;
@@ -1389,9 +1356,6 @@ static bool get_mask_test(void)
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 4), "7th addr mask");
-//	success &= ASSERT_INT(0,
-//			get_mask(&packet, &cpool, &spool, &client, &mask, 4),
-//			"get mask test");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	kfree(packet.hdr);
