@@ -253,16 +253,29 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	if (client_count(client) > pool4_count(pool4)) {
 		pr_info("There are more clients than mask entries\n");
+		/* TODO this is supposed to be a failure, not a success. */
 		return 0;
 	}
 
 	list_for_each(iter, &client->list_hook) {
 		ipv6_listed = list_entry(iter, struct ipv6_client, list_hook);
+		/*
+		 * TODO this shouldn't be an address equals;
+		 * it should be a prefix contains.
+		 * clients is a prefix list, not an address list.
+		 */
 		if (ipv6_addr_equal(addr, &ipv6_listed->ipx.address)) {
 			break;
 		}
 		ipv6_pos++;
 	}
+
+	/*
+	 * TODO if the database didn't contain the client,
+	 * this code is going to use the last client anyway.
+	 * If the loop ended and the client wasn't found,
+	 * you're supposed to return -ESRCH.
+	 */
 
 	error = pool4_taddr4_find_pos(pool4, ipv6_pos, result, masks_per_client);
 	if (error)

@@ -5,8 +5,6 @@
 //#include "nat64/mod/stateful/bib/entry.h"
 //#include "nat64/mod/stateful/session/entry.h"
 
-/* TODO (test) The UNIT_TESTING macro is a hack; remove it. */
-
 #define ASSERT_PRIMITIVE(expected, actual, specifier, name, ...) ({	\
 		/* don't want these to be evaluated multiple times. */	\
 		typeof(expected) __expected = expected;			\
