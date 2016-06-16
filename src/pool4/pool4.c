@@ -207,7 +207,7 @@ int pool4_taddr4_find_pos(struct pool4 *pool4, int ipv6_pos,
 
 	if(masks_per_client == 0) {
 		pr_info("Number of masks per client given is invalid.\n");
-		return 0;
+		return 1;
 	}
 
 	list_for_each(iter, &pool4->list) {
@@ -287,7 +287,6 @@ int pool4_foreach_taddr4(struct pool4 *pool4,
 	return 0;
 }
 
-
 int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 			unsigned int n, struct ipv4_transport_addr *result)
 {
@@ -335,170 +334,235 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 	return -ESRCH;
 }
 
+//int mask_remains(struct pool4 *pool)
+//{
+//	return 1;
+//}
 
-int mask_remains(struct pool4 *pool)
-{
-	return 1;
-}
+//int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *pool4, int n,
+//		struct ipv4_transport_addr *result)
+//{
+//	struct list_head *iter;
+//	struct pool4_entry *dummy;
+//	int i;
+//
+//	list_for_each(iter, &pool4->list) {
+//		dummy = list_entry(iter, struct pool4_entry, list_hook);
+//		/*
+//		 * Checks if address exists in pool4
+//		 */
+//		/*
+//		 * TODO why are you only comparing it to the first address of
+//		 * the range?
+//		 * The range can have many addresses, all of which should match.
+//		 */
+//		if (dummy->addr.s_addr == mask_domain->first.l3.s_addr) {
+//			/*
+//			 * Checks if mask_domain address exists in the port range
+//			 */
+//			if ((dummy->range.min < mask_domain->first.l4) &&
+//					(dummy->range.max > mask_domain->first.l4)) {
+//				for (i = dummy->range.min;
+//						i <= dummy->range.max;
+//						i += mask_domain->step) {
+//					if (n != 0) {
+//						n--;
+//					}
+//					else {
+//						if (!(bibdb_contains4(&mask_domain->first))) {
+//							result->l3 = mask_domain->first.l3;
+//							result->l4 = mask_domain->first.l4;
+//							return 1;
+//						}
+//						else
+//							return 0;
+//					}
+//				}
+//				return 0;
+//			}
+//		}
+//	}
+//	return 0;
+//}
 
+//static int get_mask_spool(struct packet *packet, struct pool4 *spool,
+//		struct client *client, struct ipv4_transport_addr *result
+//		,unsigned int masks_per_client, struct ipv6_prefix *dummyClient,
+//		struct client_mask_domain *result_mask)
+//{
+//	int error;
+//	if(pool4_is_empty(spool))
+//		/* TODO this is supposed to be a failure, not a success. */
+//		return 1;
+//
+//	/*
+//	 * TODO Why is this querying the clients database?
+//	 * spool is, by definition, independent from clients.
+//	 */
+//	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
+//			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+//			dummyClient->len = 128;
+//			client_add(client, dummyClient);
+//	}
+//
+//	if(mask_remains(spool)) {
+//		/* TODO find the mask and return it? */
+//		return  0;
+//	} /* TODO else return failure? */
+//
+//	/*
+//	 * TODO What is this?
+//	 * As per the above if, there are no masks remaining,
+//	 * so you should just return failure.
+//	 * And again, why are you querying clients?
+//	 */
+//	error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
+//			result_mask, masks_per_client);
+//	if (!error)
+//		return  0;
+//
+//	/*
+//	 * TODO This function is rather counter-intuitive.
+//	 * It sounds like it's a query that should just return a boolean,
+//	 * but @result is actually being defined inside of it. And the return
+//	 * value is an error code.
+//	 * And I still don't know what this whole codepath is supposed to be
+//	 * doing.
+//	 * Please design it better.
+//	 */
+//	error = client_domain_exists(result_mask, spool, 2, result);
+//	if (!error)
+//		return 0;
+//	return 1;
+//}
+
+//int get_mask(struct packet *packet, struct pool4 *cpool,
+//		struct pool4 *spool, struct client *client, struct ipv4_transport_addr *result
+//		,unsigned int masks_per_client)
+//{
+//	/*
+//	 * TODO "GFP_KERNEL" should be "GFP_ATOMIC" in this case.
+//	 * TODO The result value of kmalloc is not being validated.
+//	 */
+//	struct client_mask_domain *result_mask = kmalloc(sizeof(*result_mask), GFP_KERNEL);
+//	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient), GFP_KERNEL);
+//	int error;
+//
+//	if (pool4_is_empty(cpool))
+//			return  get_mask_spool(packet, spool, client, result, masks_per_client,
+//					dummyClient, result_mask);
+//
+//	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
+//		if (dynamic_assigment) { //if its dynamic it enters
+//			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
+//			dummyClient->len = 128;
+//			client_add(client, dummyClient);
+//		}
+//		else
+//			return  get_mask_spool(packet, spool, client, result, masks_per_client,
+//								dummyClient, result_mask);
+//	}
+//
+//	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
+//			result_mask, masks_per_client);
+//	/*
+//	 * TODO when a function returns failure, the result parameter must
+//	 * be assumed to be undefined.
+//	 * You must *not* touch @result_mask if error.
+//	 */
+//	result->l3 = result_mask->first.l3;
+//	result->l4 = result_mask->first.l4;
+//	if (error) {
+//		return error;
+//	}
+//
+//	error = client_domain_exists(result_mask, spool, 2,
+//			result);
+//	if (!error)
+//		/*
+//		 * TODO
+//		 * "if we successfully found a transport address (no error),
+//		 * try to use the fallback option"?
+//		 * This doesn't sound right.
+//		 */
+//		return get_mask_spool(packet, spool, client,result, masks_per_client,
+//				dummyClient, result_mask);
+//
+//	return 0;
+//}
 
 int bibdb_contains4(const struct ipv4_transport_addr *addr){
-	return 1;
+	return addr->l4 & 1;
 }
 
-
-
-
-int client_domain_exists(struct client_mask_domain *mask_domain, struct pool4 *pool4, int n,
+static int get_spool_mask(struct packet *packet, struct pool4 *spool,
 		struct ipv4_transport_addr *result)
 {
-	struct list_head *iter;
-	struct pool4_entry *dummy;
-	int i;
+//	if (pool4_is_empty(spool))
+//		return 1;
 
-	list_for_each(iter, &pool4->list) {
-		dummy = list_entry(iter, struct pool4_entry, list_hook);
-		/*
-		 * Checks if address exists in pool4
-		 */
-		/*
-		 * TODO why are you only comparing it to the first address of
-		 * the range?
-		 * The range can have many addresses, all of which should match.
-		 */
-		if (dummy->addr.s_addr == mask_domain->first.l3.s_addr) {
-			/*
-			 * Checks if mask_domain address exists in the port range
-			 */
-			if ((dummy->range.min < mask_domain->first.l4) &&
-					(dummy->range.max > mask_domain->first.l4)) {
-				for (i = dummy->range.min;
-						i <= dummy->range.max;
-						i += mask_domain->step) {
-					if (n != 0) {
-						n--;
-					}
-					else {
-						if (!(bibdb_contains4(&mask_domain->first))) {
-							result->l3 = mask_domain->first.l3;
-							result->l4 = mask_domain->first.l4;
-							return 1;
-						}
-						else
-							return 0;
-					}
-				}
-				return 0;
-			}
-		}
-	}
+	result->l3.s_addr = cpu_to_be32(0x00000000);
+	result->l4 = 0;
+
 	return 0;
-	}
-
-
-
-static int get_mask_spool(struct packet *packet, struct pool4 *spool,
-		struct client *client, struct ipv4_transport_addr *result
-		,unsigned int masks_per_client, struct ipv6_prefix *dummyClient,
-		struct client_mask_domain *result_mask)
-{
-	int error;
-	if(pool4_is_empty(spool))
-		/* TODO this is supposed to be a failure, not a success. */
-		return 0;
-
-	/*
-	 * TODO Why is this querying the clients database?
-	 * spool is, by definition, independent from clients.
-	 */
-	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
-			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
-			dummyClient->len = 128;
-			client_add(client, dummyClient);
-	}
-
-	if(mask_remains(spool)) {
-		/* TODO find the mask and return it? */
-		return  0;
-	} /* TODO else return failure? */
-
-	/*
-	 * TODO What is this?
-	 * As per the above if, there are no masks remaining,
-	 * so you should just return failure.
-	 * And again, why are you querying clients?
-	 */
-	error = client_get_mask_domain(client, spool, &packet->hdr->saddr,
-			result_mask, masks_per_client);
-	if (!error)
-		return  0;
-
-	/*
-	 * TODO This function is rather counter-intuitive.
-	 * It sounds like it's a query that should just return a boolean,
-	 * but @result is actually being defined inside of it. And the return
-	 * value is an error code.
-	 * And I still don't know what this whole codepath is supposed to be
-	 * doing.
-	 * Please design it better.
-	 */
-	error = client_domain_exists(result_mask, spool, 2, result);
-	if (!error)
-		return 0;
-	return 1;
 }
 
-int get_mask(struct packet *packet, struct pool4 *cpool,
-		struct pool4 *spool, struct client *client, struct ipv4_transport_addr *result
-		,unsigned int masks_per_client)
+int get_mask(struct packet *packet, struct pool4 *cpool, struct pool4 *spool,
+		struct client *client, struct ipv4_transport_addr *result,
+		unsigned int masks_per_client)
 {
-	/*
-	 * TODO "GFP_KERNEL" should be "GFP_ATOMIC" in this case.
-	 * TODO The result value of kmalloc is not being validated.
-	 */
-	struct client_mask_domain *result_mask = kmalloc(sizeof(*result_mask), GFP_KERNEL);
-	struct ipv6_prefix *dummyClient = kmalloc(sizeof(*dummyClient), GFP_KERNEL);
-	int error;
+	int i;
+	int n;
+	int error = 0;
+	struct list_head *iter;
+	struct pool4_entry *entry;
+	struct client_mask_domain mask_domain;
+	struct ipv6_prefix dummyClient;
 
 	if (pool4_is_empty(cpool))
-			return  get_mask_spool(packet, spool, client, result, masks_per_client,
-					dummyClient, result_mask);
+		// Try to use spool
+		error = get_spool_mask(packet, spool, result);
+		if (error)
+			return error;
 
-	if (!(client_addr_exist(client, &packet->hdr->saddr))) {
-		if (dynamic_assigment) { //if its dynamic it enters
-			dummyClient->address.in6_u = packet->hdr->saddr.in6_u;
-			dummyClient->len = 128;
-			client_add(client, dummyClient);
+	if (!client_addr_exist(client, &packet->hdr->saddr)) {
+		if (dynamic_assigment) {
+			dummyClient.address.in6_u = packet->hdr->saddr.in6_u;
+			dummyClient.len = 128;
+			client_add(client, &dummyClient);
 		}
 		else
-			return  get_mask_spool(packet, spool, client, result, masks_per_client,
-								dummyClient, result_mask);
+			// Try to use spool
+			error = get_spool_mask(packet, spool, result);
+			if (error)
+				return error;
 	}
 
 	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,
-			result_mask, masks_per_client);
-	/*
-	 * TODO when a function returns failure, the result parameter must
-	 * be assumed to be undefined.
-	 * You must *not* touch @result_mask if error.
-	 */
-	result->l3 = result_mask->first.l3;
-	result->l4 = result_mask->first.l4;
-	if (error) {
+			&mask_domain, masks_per_client);
+	if (error)
 		return error;
+
+	n = mask_domain.count;
+
+	list_for_each(iter, &cpool->list) {
+		entry = list_entry(iter, struct pool4_entry, list_hook);
+		for (i = entry->range.min; i <= entry->range.max; i++) {
+			if (entry->addr.s_addr == mask_domain.first.l3.s_addr &&
+					i == mask_domain.first.l4) {
+				result->l3.s_addr = entry->addr.s_addr;
+				result->l4 = i;
+				if (!bibdb_contains4(result))
+					return error;
+				n--;
+				if (n == 0)
+					break;
+			}
+		}
 	}
 
-	error = client_domain_exists(result_mask, spool, 2,
-			result);
-	if (!error)
-		/*
-		 * TODO
-		 * "if we successfully found a transport address (no error),
-		 * try to use the fallback option"?
-		 * This doesn't sound right.
-		 */
-		return get_mask_spool(packet, spool, client,result, masks_per_client,
-				dummyClient, result_mask);
+	error = get_spool_mask(packet, spool, result);
 
-	return 0;
+	return error;
 }
+

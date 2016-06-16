@@ -250,11 +250,12 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 	struct ipv6_client *ipv6_listed;
 	int ipv6_pos = 0;
 	int error = 0;
+	bool addr_exist = false;
 
 	if (client_count(client) > pool4_count(pool4)) {
 		pr_info("There are more clients than mask entries\n");
 		/* TODO this is supposed to be a failure, not a success. */
-		return 0;
+		return 1;
 	}
 
 	list_for_each(iter, &client->list_hook) {
@@ -264,11 +265,18 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 		 * it should be a prefix contains.
 		 * clients is a prefix list, not an address list.
 		 */
-		if (ipv6_addr_equal(addr, &ipv6_listed->ipx.address)) {
+		if (ipv6_listed->ipx.address.s6_addr32[0] == addr->s6_addr32[0]
+		  && ipv6_listed->ipx.address.s6_addr32[1] == addr->s6_addr32[1]
+		  && ipv6_listed->ipx.address.s6_addr32[2] == addr->s6_addr32[2]
+		  && ipv6_listed->ipx.address.s6_addr32[3] == addr->s6_addr32[3]) {
+			addr_exist = true;
 			break;
 		}
 		ipv6_pos++;
 	}
+
+	if (!addr_exist)
+		return -ESRCH;
 
 	/*
 	 * TODO if the database didn't contain the client,
@@ -283,4 +291,3 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	return 0;
 }
-

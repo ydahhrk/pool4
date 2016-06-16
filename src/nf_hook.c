@@ -284,9 +284,7 @@ static bool match_masks(void)
 				mask_exp[i].port == mask_seen[i].port)
 			match = true;
 		else
-		{
 			match = false;
-		}
 		if (!match)
 			return match;
 	}
@@ -1263,9 +1261,8 @@ static bool get_mask_test(void)
 	pr_info("\n");
 
 	packet.hdr = kmalloc(sizeof(struct ipv6hdr), GFP_KERNEL);
-	if (!packet.hdr) {
-			return -ENOMEM;
-		}
+	if (!packet.hdr)
+		return -ENOMEM;
 
 	packet.hdr->saddr = prefix0.address;
 	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
@@ -1289,7 +1286,7 @@ static bool get_mask_test(void)
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
 	exp_mask.l4 = 7;
 
-	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+	success &= ASSERT_BOOL(false, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 3), "2nd addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
@@ -1315,7 +1312,7 @@ static bool get_mask_test(void)
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
 	exp_mask.l4 = 25;
 
-	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+	success &= ASSERT_BOOL(false, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 5), "4th addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
