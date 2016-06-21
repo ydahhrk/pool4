@@ -6,7 +6,7 @@
 #include <linux/slab.h>
 #include "client.h"
 
-#define MAXipv6		cpu_to_be32(0xffffffff)
+#define MAXipv6		cpu_to_le32(0xffffffff)
 
 struct list_head client_hook;
 
@@ -65,7 +65,6 @@ int client_flush(struct client *client)
 	return 0;
 }
 
-
 int client_exist(struct client *client, struct ipv6_prefix *prefix)
 {
 	struct list_head *iter;
@@ -79,8 +78,6 @@ int client_exist(struct client *client, struct ipv6_prefix *prefix)
 	}
 	return 0;
 }
-
-
 
 unsigned int client_count(struct client *client)
 {
@@ -97,7 +94,6 @@ unsigned int client_count(struct client *client)
 
 
 }
-
 
 int client_print_all(struct client *client)
 {
@@ -144,17 +140,35 @@ void addr6_iterations(struct in6_addr *client)
 	if (!(client->s6_addr32[3] == MAXipv6)) {
 		client->s6_addr32[3]++;
 	}else if (!(client->s6_addr32[2] == MAXipv6)) {
-		client->s6_addr32[3] = cpu_to_be32(0x0);
+		client->s6_addr32[3] = cpu_to_le32(0x0);
 		client->s6_addr32[2]++;
 	}else if (!(client->s6_addr32[1] == MAXipv6)) {
-		client->s6_addr32[3] = cpu_to_be32(0x0);
-		client->s6_addr32[2] = cpu_to_be32(0x0);
+		client->s6_addr32[3] = cpu_to_le32(0x0);
+		client->s6_addr32[2] = cpu_to_le32(0x0);
 		client->s6_addr32[1]++;
 	}else if (!(client->s6_addr32[1] == MAXipv6)) {
-		client->s6_addr32[3] = cpu_to_be32(0x0);
-		client->s6_addr32[2] = cpu_to_be32(0x0);
-		client->s6_addr32[1] = cpu_to_be32(0X0);
+		client->s6_addr32[3] = cpu_to_le32(0x0);
+		client->s6_addr32[2] = cpu_to_le32(0x0);
+		client->s6_addr32[1] = cpu_to_le32(0X0);
 	}
+}
+
+static bool prefix_contains(struct ipv6_prefix *prefix, struct in6_addr *addr)
+{
+	__u32 mask = le32_to_cpu(MAXipv6) << (128 - prefix->len);
+
+	__u32 prefixaddr0 = le32_to_cpu(prefix->address.s6_addr32[0]) & mask;
+	__u32 prefixaddr1 = le32_to_cpu(prefix->address.s6_addr32[1]) & mask;
+	__u32 prefixaddr2 = le32_to_cpu(prefix->address.s6_addr32[2]) & mask;
+	__u32 prefixaddr3 = le32_to_cpu(prefix->address.s6_addr32[3]) & mask;
+
+	__u32 addr0 = le32_to_cpu(addr->s6_addr32[0]) & mask;
+	__u32 addr1 = le32_to_cpu(addr->s6_addr32[1]) & mask;
+	__u32 addr2 = le32_to_cpu(addr->s6_addr32[2]) & mask;
+	__u32 addr3 = le32_to_cpu(addr->s6_addr32[3]) & mask;
+
+	return (prefixaddr0 == addr0 && prefixaddr1 == addr1 &&
+			prefixaddr2 == addr2 && prefixaddr3 == addr3);
 }
 
 bool client_addr_exist(struct client *client, struct in6_addr *addr)
@@ -177,6 +191,7 @@ bool client_addr_exist(struct client *client, struct in6_addr *addr)
 			addr6_iterations(&dummy);
 		}
 	}
+
 	return false;
 }
 
@@ -254,21 +269,12 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	if (client_count(client) > pool4_count(pool4)) {
 		pr_info("There are more clients than mask entries\n");
-		/* TODO this is supposed to be a failure, not a success. */
 		return 1;
 	}
 
 	list_for_each(iter, &client->list_hook) {
 		ipv6_listed = list_entry(iter, struct ipv6_client, list_hook);
-		/*
-		 * TODO this shouldn't be an address equals;
-		 * it should be a prefix contains.
-		 * clients is a prefix list, not an address list.
-		 */
-		if (ipv6_listed->ipx.address.s6_addr32[0] == addr->s6_addr32[0]
-		  && ipv6_listed->ipx.address.s6_addr32[1] == addr->s6_addr32[1]
-		  && ipv6_listed->ipx.address.s6_addr32[2] == addr->s6_addr32[2]
-		  && ipv6_listed->ipx.address.s6_addr32[3] == addr->s6_addr32[3]) {
+		if (prefix_contains(&ipv6_listed->ipx, addr)) {
 			addr_exist = true;
 			break;
 		}
@@ -277,13 +283,6 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 
 	if (!addr_exist)
 		return -ESRCH;
-
-	/*
-	 * TODO if the database didn't contain the client,
-	 * this code is going to use the last client anyway.
-	 * If the loop ended and the client wasn't found,
-	 * you're supposed to return -ESRCH.
-	 */
 
 	error = pool4_taddr4_find_pos(pool4, ipv6_pos, result, masks_per_client);
 	if (error)
