@@ -99,18 +99,19 @@ int cb(struct ipv6_prefix *prefix, void *arg)
 
 	if (arg) {
 		pr_info("Address: %x:%x:%x:%x\nLength:%u  %d\n",
-				prefix->address.s6_addr32[0],
-				prefix->address.s6_addr32[1],
-				prefix->address.s6_addr32[2],
-				prefix->address.s6_addr32[3], prefix->len,
-				*arg_int);
+				be32_to_cpu(prefix->address.s6_addr32[0]),
+				be32_to_cpu(prefix->address.s6_addr32[1]),
+				be32_to_cpu(prefix->address.s6_addr32[2]),
+				be32_to_cpu(prefix->address.s6_addr32[3]),
+				prefix->len, *arg_int);
 		(*arg_int)++;
 	} else {
 		pr_info("Address: %x:%x:%x:%x\nLength:%u\n",
-				prefix->address.s6_addr32[0],
-				prefix->address.s6_addr32[1],
-				prefix->address.s6_addr32[2],
-				prefix->address.s6_addr32[3], prefix->len);
+				be32_to_cpu(prefix->address.s6_addr32[0]),
+				be32_to_cpu(prefix->address.s6_addr32[1]),
+				be32_to_cpu(prefix->address.s6_addr32[2]),
+				be32_to_cpu(prefix->address.s6_addr32[3]),
+				prefix->len);
 	}
 
 	for(i = 0; i <= 6; i++) {
@@ -144,13 +145,16 @@ int callback(struct in6_addr *addr, void *arg)
 	int i;
 
 	if (arg) {
-		pr_info("%x:%x:%x:%x %d\n", addr->s6_addr32[0],
-				addr->s6_addr32[1], addr->s6_addr32[2],
-				addr->s6_addr32[3], *arg_int);
+		pr_info("%x:%x:%x:%x %d\n", be32_to_cpu(addr->s6_addr32[0]),
+				be32_to_cpu(addr->s6_addr32[1]),
+				be32_to_cpu(addr->s6_addr32[2]),
+				be32_to_cpu(addr->s6_addr32[3]), *arg_int);
 		(*arg_int)++;
 	} else {
-		pr_info("%x:%x:%x:%x\n", addr->s6_addr32[0], addr->s6_addr32[1],
-				addr->s6_addr32[2], addr->s6_addr32[3]);
+		pr_info("%x:%x:%x:%x\n", be32_to_cpu(addr->s6_addr32[0]),
+				be32_to_cpu(addr->s6_addr32[1]),
+				be32_to_cpu(addr->s6_addr32[2]),
+				be32_to_cpu(addr->s6_addr32[3]));
 	}
 
 	for (i = 0; i <= 6; i++) {
@@ -474,46 +478,46 @@ static bool init(void)
 	seven.range.min = 253;
 	seven.range.max = 256;
 
-	prefix0.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix0.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix0.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix0.address.s6_addr32[3] = cpu_to_le32(0x0000);
+	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
 	prefix0.len = 128;
 
-	prefix1.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix1.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix1.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix1.address.s6_addr32[3] = cpu_to_le32(0x0001);
-	prefix1.len = 128;
+	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
+	prefix1.len = 122;
 
-	prefix2.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix2.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix2.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix2.address.s6_addr32[3] = cpu_to_le32(0x0002);
-	prefix2.len = 128;
+	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
+	prefix2.len = 127;
 
-	prefix3.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix3.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix3.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix3.address.s6_addr32[3] = cpu_to_le32(0x0003);
-	prefix3.len = 128;
+	prefix3.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix3.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix3.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix3.address.s6_addr32[3] = cpu_to_be32(0x0003);
+	prefix3.len = 126;
 
-	prefix4.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix4.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix4.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix4.address.s6_addr32[3] = cpu_to_le32(0x0004);
-	prefix4.len = 128;
+	prefix4.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix4.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix4.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix4.address.s6_addr32[3] = cpu_to_be32(0x0004);
+	prefix4.len = 127;
 
-	prefix5.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix5.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix5.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix5.address.s6_addr32[3] = cpu_to_le32(0x0005);
+	prefix5.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix5.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix5.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix5.address.s6_addr32[3] = cpu_to_be32(0x0005);
 	prefix5.len = 128;
 
-	prefix6.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix6.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix6.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix6.address.s6_addr32[3] = cpu_to_le32(0x0006);
+	prefix6.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix6.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix6.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix6.address.s6_addr32[3] = cpu_to_be32(0x0006);
 	prefix6.len = 128;
 
 	// Filling cpool database...
@@ -612,52 +616,52 @@ static bool remove_entries(void)
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, one.mark, one.proto, &one.addr,
-					&one.range), "pool4_rm test");
+					&one.range), "Remove element one");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, one.mark,
 			one.proto, &one.addr, &one.range),
-			"Confirm rm...");
+			"Confirm rm one...");
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, two.mark, two.proto, &two.addr,
-					&two.range), "pool4_rm test");
+					&two.range), "Remove element two");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, two.mark,
 			two.proto, &two.addr, &two.range),
-			"Confirm rm...");
+			"Confirm rm two...");
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, three.mark, three.proto, &three.addr,
-					&three.range), "pool_rm test");
+					&three.range), "Remove element three");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, three.mark,
 			three.proto, &three.addr, &three.range),
-			"Confirm rm...");
+			"Confirm rm three...");
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, four.mark, four.proto, &four.addr,
-					&four.range), "pool4_rm test");
+					&four.range), "Remove element four");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, four.mark,
 			four.proto, &four.addr, &four.range),
-			"Confirm rm...");
+			"Confirm rm four...");
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, five.mark, five.proto, &five.addr,
-					&five.range), "pool4_rm test");
+					&five.range), "Remove element five");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, five.mark,
 			five.proto, &five.addr, &five.range),
-			"Confirm rm...");
+			"Confirm rm five...");
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, six.mark, six.proto, &six.addr,
-					&six.range), "pool4_rm test");
+					&six.range), "Remove element six");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, six.mark,
 			six.proto, &six.addr, &six.range),
-			"Confirm rm...");
+			"Confirm rm six...");
 
 	success &= ASSERT_INT(0,
 			pool4_rm(&cpool, seven.mark, seven.proto, &seven.addr,
-					&seven.range), "pool4_rm test");
+					&seven.range), "Remove element seven");
 	success &= ASSERT_BOOL(false, pool4_contains(&cpool, seven.mark,
 			seven.proto, &seven.addr, &seven.range),
-			"Confirm rm...");
+			"Confirm rm seven...");
 
 	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print test");
 
@@ -704,33 +708,52 @@ static bool remove_entries(void)
 	return success;
 }
 
-static bool count_addr(void)
+static bool flush_dbases(void)
 {
+	int error = 0;
 	bool success = true;
 
-	int cpool_addrs = 0;
-	int client_addrs = 0;
+	error = pool4_flush(&cpool);
+	if (error)
+		return false;
 
-	success &= ASSERT_BOOL(false, pool4_is_empty(&cpool), "is empty test");
+	success &= ASSERT_INT(0, pool4_count(&cpool), "cpool flushing");
+	success &= ASSERT_BOOL(true, pool4_is_empty(&cpool), "cpool is empty");
 
-	cpool_addrs = pool4_count(&cpool);
-	client_addrs = client_count(&client);
+	error = pool4_flush(&spool);
+	if (error)
+		return false;
 
-	success &= ASSERT_INT(75, pool4_count(&cpool), "Count test");
-	success &= ASSERT_INT(7, client_count(&client), "Count test");
+	success &= ASSERT_INT(0, pool4_count(&spool), "spool flushing");
+	success &= ASSERT_BOOL(true, pool4_is_empty(&spool), "spool is empty");
 
-	pr_info("\nAddresses in cpool: %d\n", cpool_addrs);
-	pr_info("Addresses in client: %d\n\n", client_addrs);
+	error = client_flush(&client);
+	if (error)
+		return false;
+
+	success &= ASSERT_INT(0, client_count(&client), "client flushing");
 
 	return success;
 }
 
 static bool print_all_addr(void)
 {
+	int error;
 	bool success = true;
 
 	pr_info("\n");
-	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print pool4");
+	error = pool4_print_all(&cpool);
+	if (error)
+		return false;
+
+	pr_info("\n");
+	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print cpool");
+
+	pr_info("\n");
+	error = client_print_all(&client);
+	if (error)
+		return false;
+	pr_info("\n");
 
 	success &= ASSERT_INT(0, client_print_all(&client), "print client");
 	pr_info("\n");
@@ -738,10 +761,46 @@ static bool print_all_addr(void)
 	return success;
 }
 
-static bool addr_exist(void)
+static bool count_addr(void)
 {
 	bool success = true;
 
+	success &= ASSERT_BOOL(false, pool4_is_empty(&cpool), "cpool is empty");
+	success &= ASSERT_BOOL(true, pool4_is_empty(&spool), "spool is empty");
+
+	success &= ASSERT_INT(75, pool4_count(&cpool), "cpool count");
+	success &= ASSERT_INT(0, pool4_count(&spool), "spool count");
+	success &= ASSERT_INT(75, client_count(&client), "client count");
+
+	//cpool, removing elements and count
+	success &= ASSERT_INT(0,
+			pool4_rm(&cpool, four.mark, four.proto, &four.addr,
+					&four.range), "Remove element four");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, four.mark,
+			four.proto, &four.addr, &four.range),
+			"Confirm rm four...");
+
+	success &= ASSERT_BOOL(false, pool4_is_empty(&cpool), "cpool is empty");
+
+	success &= ASSERT_INT(51, pool4_count(&cpool), "cpool count");
+
+	//client, removing elements and count
+	success &= ASSERT_INT(0, client_delete(&client, &prefix3),
+			"delete prefix3");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix3.address), "exist prefix3");
+
+	success &= ASSERT_INT(71, client_count(&client), "client count");
+
+	return success;
+}
+
+static bool elements_exist(void)
+{
+	int error;
+	bool success = true;
+
+	//cpool elements
 	pr_info("\n");
 	success &= ASSERT_BOOL(true, pool4_contains(&cpool, one.mark,
 			one.proto, &one.addr, &one.range),
@@ -765,20 +824,99 @@ static bool addr_exist(void)
 			seven.proto, &seven.addr, &seven.range),
 			"seven exist test");
 
+	//cpool, erase elements and ask if exist them
+	error = pool4_flush(&cpool);
+	if (error)
+		return false;
+
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, one.mark,
+			one.proto, &one.addr, &one.range),
+			"one exist test");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, two.mark,
+			two.proto, &two.addr, &two.range),
+			"two exist test");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, three.mark,
+			three.proto, &three.addr, &three.range),
+			"three exist test");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, four.mark,
+			four.proto, &four.addr, &four.range),
+			"four exist test");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, five.mark,
+			five.proto, &five.addr, &five.range),
+			"five exist test");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, six.mark,
+			six.proto, &six.addr, &six.range),
+			"six exist test");
+	success &= ASSERT_BOOL(false, pool4_contains(&cpool, seven.mark,
+			seven.proto, &seven.addr, &seven.range),
+			"seven exist test");
+
+	//client elements
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix0),
+			"exist prefix0");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix1),
+			"exist prefix1");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix2),
+			"exist prefix2");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix3),
+			"exist prefix3");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix4),
+			"exist prefix4");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix5),
+			"exist prefix5");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix6),
+			"exist prefix6");
+
+	//client addresses
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix0.address), "exist prefix0 test");
+			&prefix0.address), "exist prefix0 address");
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix1.address), "exist prefix1 test");
+			&prefix1.address), "exist prefix1 address");
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix2.address), "exist prefix2 test");
+			&prefix2.address), "exist prefix2 address");
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix3.address), "exist prefix3 test");
+			&prefix3.address), "exist prefix3 address");
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix4.address), "exist prefix4 test");
+			&prefix4.address), "exist prefix4 address");
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix5.address), "exist prefix5 test");
+			&prefix5.address), "exist prefix5 address");
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
-			&prefix6.address), "exist prefix6 test");
+			&prefix6.address), "exist prefix6 address");
+
+	//client, erase elements and ask if exist them
+	error = client_flush(&client);
+	if (error)
+		return false;
+
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix0),
+			"exist prefix0");
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix1),
+			"exist prefix1");
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix2),
+			"exist prefix2");
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix3),
+			"exist prefix3");
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix4),
+			"exist prefix4");
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix5),
+			"exist prefix5");
+	success &= ASSERT_BOOL(false, client_exist(&client, &prefix6),
+			"exist prefix6");
+
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix0.address), "exist prefix0 address");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix1.address), "exist prefix1 address");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix2.address), "exist prefix2 address");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix3.address), "exist prefix3 address");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix4.address), "exist prefix4 address");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix5.address), "exist prefix5 address");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix6.address), "exist prefix6 address");
 
 	return success;
 }
@@ -786,7 +924,12 @@ static bool addr_exist(void)
 static bool foreach_sample(void)
 {
 	bool success = true;
-	int a = 12;
+	int a = 1;
+
+	/* pool4_foreach_sample test */
+
+	// cpool; offset = NULL, a = 1
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
 
 	node4_exp[0] = one;
 	node4_exp[1] = two;
@@ -796,8 +939,6 @@ static bool foreach_sample(void)
 	node4_exp[5] = six;
 	node4_exp[6] = seven;
 
-	/* pool4_foreach_sample test */
-
 	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(0, pool4_foreach_sample(&cpool, callb, &a, NULL),
 			"pool4 for each sample, offset = NULL");
@@ -805,7 +946,7 @@ static bool foreach_sample(void)
 	success &= ASSERT_BOOL(true, match_pool4_nodes(), "Match pool4 nodes");
 	pr_info("\n");
 
-	/* Here it needs to start from the 3rd node */
+	// cpool; offset = second node, arg = NULL, so it starts from 3rd node
 	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
 
 	node4_exp[2] = three;
@@ -819,7 +960,35 @@ static bool foreach_sample(void)
 	success &= ASSERT_BOOL(true, match_pool4_nodes(), "Match pool4 nodes");
 	pr_info("\n");
 
+	//cpool; offset = 5th node, arg = 1, so it starts from 6th node
+	a = 1;
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
+
+	node4_exp[5] = six;
+	node4_exp[6] = seven;
+
+	pr_info("%d\n", a);
+	success &= ASSERT_INT(0, pool4_foreach_sample(&cpool, callb, NULL, &five),
+			"pool4 for each sample, offset = 5th node");
+	pr_info("%d\n", a);
+	success &= ASSERT_BOOL(true, match_pool4_nodes(), "Match pool4 nodes");
+
+	// cpool; offset = last node, a = 1, so it does not visit any node
+	a = 1;
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
+
+	pr_info("\n%d\n", a);
+	success &= ASSERT_INT(0, pool4_foreach_sample(&cpool, callb, NULL, &seven),
+			"pool4 for each sample, offset = 7th node");
+	pr_info("%d\n", a);
+	success &= ASSERT_BOOL(true, match_pool4_nodes(), "Match pool4 nodes");
+	pr_info("\n");
+
 	/* client_foreach_sample test */
+
+	// client; offset = NULL, arg = 1
+	a = 1;
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
 
 	node6_exp[0] = prefix0;
 	node6_exp[1] = prefix1;
@@ -833,11 +1002,10 @@ static bool foreach_sample(void)
 	success &= ASSERT_INT(0, client_for_eachsample(&client, cb, &a, NULL),
 			"client for each sample, offset = NULL");
 	pr_info("%d\n", a);
-
 	success &= ASSERT_BOOL(true, match_client_nodes(), "Match client nodes");
 	pr_info("\n");
 
-	/* It needs to start from the 3rd node*/
+	// client; offset = 2nd node, arg = NULL, so it starts from 3rd node
 	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
 
 	node6_exp[2] = prefix2;
@@ -849,7 +1017,31 @@ static bool foreach_sample(void)
 	success &= ASSERT_INT(0,
 			client_for_eachsample(&client, cb, NULL, &prefix1),
 			"client for each sample, offset = 2nd node");
+	success &= ASSERT_BOOL(true, match_client_nodes(), "Match client nodes");
+	pr_info("\n");
 
+	// client; offset = 5th node, arg = 1, so it starts from 6th node
+	a = 1;
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
+
+	node6_exp[5] = prefix5;
+	node6_exp[6] = prefix6;
+
+	pr_info("%d\n", a);
+	success &= ASSERT_INT(0, client_for_eachsample(&client, cb, &a, &prefix4),
+			"client for each sample, offset = 5th node");
+	pr_info("%d\n", a);
+	success &= ASSERT_BOOL(true, match_client_nodes(), "Match client nodes");
+	pr_info("\n");
+
+	// client; offset = last node, a = 1, so it does not visit any node
+	a= 1;
+	success &= ASSERT_INT(0, clear_nodes_arrays(), "Clearing arrays...");
+
+	pr_info("%d\n", a);
+	success &= ASSERT_INT(0, client_for_eachsample(&client, cb, &a, &prefix6),
+			"client for each sample, offset = 5th node");
+	pr_info("%d\n", a);
 	success &= ASSERT_BOOL(true, match_client_nodes(), "Match client nodes");
 	pr_info("\n");
 
@@ -863,8 +1055,8 @@ static bool for_each_addr(void)
 
 	/* pool4_foreach_taddr4 test */
 
+	// cpool; offset = 0, arg = 0; so it starts from 1st node address
 	success &= ASSERT_INT(0, fill_exp_masks(), "Fill exp masks to array");
-//	success &= ASSERT_INT(0, print_exp_masks(), "Print expected masks");
 
 	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(0, pool4_foreach_taddr4(&cpool, cback, &a, 0),
@@ -873,12 +1065,18 @@ static bool for_each_addr(void)
 	success &= ASSERT_BOOL(true, match_masks(), "Checking masks visited");
 	pr_info("\n");
 
+	// cpool; offset = 6, arg = NULL; so it starts from 7th address
 	success &= ASSERT_INT(0, pool4_foreach_taddr4(&cpool, cback, NULL, 6),
 			"pool4 for each taddr4, offset = 6");
 	success &= ASSERT_BOOL(true, match_masks(), "Checking masks visited");
+	pr_info("\n");
 
-	/* When cb gets port 64 */
+	// cpool; offset = 78, so it starts from 4th address
+	success &= ASSERT_INT(0, pool4_foreach_taddr4(&cpool, cback, NULL, 78),
+			"pool4 for each taddr4, offset = 78");
+	success &= ASSERT_BOOL(true, match_masks(), "Checking masks visited");
 
+	// cpool; when cb gets port 64
 	success &= ASSERT_INT(0, pool4_flush(&cpool), "Cleanning pool4");
 
 	one.mark = 1;
@@ -925,25 +1123,27 @@ static bool for_each_addr(void)
 
 	success &= ASSERT_INT(0, fill_exp_masks(), "Fill exp masks to array");
 
+	// cpool; when cb gets port 64, offset = 0, arg = NULL, starts from 1st
 	success &= ASSERT_INT(1, pool4_foreach_taddr4(&cpool, cback, NULL, 0),
 			"Port 64 and offset = 0");
 	success &= ASSERT_BOOL(true, match_masks(), "Match masks visited");
 	pr_info("\n");
 
-	a = 0;
+	// cpool; when cb gets port 64, offset = 4, arg = 0, starts from 5th
+	a = 1;
 	pr_info("%d\n", a);
 	success &= ASSERT_INT(1, pool4_foreach_taddr4(&cpool, cback, &a, 4),
 			"Port 64 and offset = 4");
 	pr_info("%d", a);
 	success &= ASSERT_BOOL(true, match_masks(), "Match masks visited");
 
+
 	/* client_for_each test */
 
-	a = 12;
-
+	// client; offset = 0, arg = 1, so it starts from 1st
 	success &= ASSERT_INT(0, fill_exp_in6_addr(), "Fill exp in6 addrs");
-//	success &= ASSERT_INT(0, print_exp_in6_addrs(), "Print exp in6 addrs");
 
+	a = 1;
 	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(0, client_for_each(&client, callback, &a, 0),
 			"client for each, offset = 0");
@@ -951,38 +1151,45 @@ static bool for_each_addr(void)
 	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 	pr_info("\n");
 
+	// client; offset = 2, arg = NULL; it starts from 3rd
 	success &= ASSERT_INT(0, client_for_each(&client, callback, NULL, 2),
 			"client for each, offset = 2");
 	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 	pr_info("\n");
 
-	/* When cb gets addr 14 */
+	// client; offset = 80, arg = NULL; it starts from 6th
+	success &= ASSERT_INT(0, client_for_each(&client, callback, NULL, 80),
+			"client for each, offset = 80");
+	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
+	pr_info("\n");
+
+	// client; When cb gets addr 14
 
 	success &= ASSERT_INT(0, client_flush(&client), "Cleanning client");
 
-	prefix0.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix0.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix0.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix0.address.s6_addr32[3] = cpu_to_le32(0x0000);
+	prefix0.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix0.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix0.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix0.address.s6_addr32[3] = cpu_to_be32(0x0000);
 	prefix0.len = 128;
 
-	prefix1.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix1.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix1.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix1.address.s6_addr32[3] = cpu_to_le32(0x0001);
+	prefix1.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix1.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix1.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix1.address.s6_addr32[3] = cpu_to_be32(0x0001);
 	prefix1.len = 128;
 
-	prefix2.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix2.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix2.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix2.address.s6_addr32[3] = cpu_to_le32(0x0002);
+	prefix2.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix2.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix2.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix2.address.s6_addr32[3] = cpu_to_be32(0x0002);
 	prefix2.len = 128;
 	prefix2.address.s6_addr[15] = 14; /* Adding addr 14 */
 
-	prefix3.address.s6_addr32[0] = cpu_to_le32(0x2001);
-	prefix3.address.s6_addr32[1] = cpu_to_le32(0x0db8);
-	prefix3.address.s6_addr32[2] = cpu_to_le32(0x0000);
-	prefix3.address.s6_addr32[3] = cpu_to_le32(0x0003);
+	prefix3.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix3.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix3.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix3.address.s6_addr32[3] = cpu_to_be32(0x0003);
 	prefix3.len = 128;
 
 	success &= ASSERT_INT(0, client_add(&client, &prefix0), "add prefix 0");
@@ -1001,12 +1208,18 @@ static bool for_each_addr(void)
 	success &= ASSERT_BOOL(true, client_addr_exist(&client,
 			&prefix3.address), "exist prefix3 test");
 
+	pr_info("\n");
+	client_print_all(&client);
+	pr_info("\n");
+
 	success &= ASSERT_INT(0, fill_exp_in6_addr(), "Fill exp in6 addrs");
 
+	// client; when cb gets addr 14, offset = 0, it starts from 1st
 	success &= ASSERT_INT(1, client_for_each(&client, callback, NULL, 0),
 			"Stops at addr 14, offset = 0");
 	success &= ASSERT_BOOL(true, match_in6_addrs(), "Match in6 nodes");
 
+	// client; when cb gets addr 14, offset = 1, it starts from 2nd
 	a = 0;
 	pr_info("\n%d\n", a);
 	success &= ASSERT_INT(1, client_for_each(&client, callback, &a, 1),
@@ -1265,10 +1478,10 @@ static bool get_mask_test(void)
 		return -ENOMEM;
 
 	packet.hdr->saddr = prefix0.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
 	exp_mask.l4 = 4;
@@ -1278,23 +1491,24 @@ static bool get_mask_test(void)
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix1.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
-	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
-	exp_mask.l4 = 7;
+	//Mask domain not available, get spool
+	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
+	exp_mask.l4 = 0;
 
-	success &= ASSERT_BOOL(false, valid_mask(&exp_mask, &packet, &cpool,
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 3), "2nd addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix2.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
 	exp_mask.l4 = 32;
@@ -1304,23 +1518,24 @@ static bool get_mask_test(void)
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix3.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
-	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
-	exp_mask.l4 = 25;
+	//Mask domain not available, get spool
+	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
+	exp_mask.l4 = 0;
 
-	success &= ASSERT_BOOL(false, valid_mask(&exp_mask, &packet, &cpool,
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 5), "4th addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix4.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000204);
 	exp_mask.l4 = 58;
@@ -1330,10 +1545,10 @@ static bool get_mask_test(void)
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix5.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000202);
 	exp_mask.l4 = 16;
@@ -1343,10 +1558,10 @@ static bool get_mask_test(void)
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	packet.hdr->saddr = prefix6.address;
-	pr_info("%x.%x.%x.%x\n", packet.hdr->saddr.in6_u.u6_addr32[0],
-			packet.hdr->saddr.in6_u.u6_addr32[1],
-			packet.hdr->saddr.in6_u.u6_addr32[2],
-			packet.hdr->saddr.in6_u.u6_addr32[3]);
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
 	exp_mask.l4 = 34;
@@ -1365,9 +1580,10 @@ static int nat64_init(void)
 	START_TESTS("pool4 test");
 
 	INIT_CALL_END(init(), remove_entries(), end(), "remove functions");
+	INIT_CALL_END(init(), flush_dbases(), end(), "flush functions");
 	INIT_CALL_END(init(), count_addr(), end(), "count functions");
 	INIT_CALL_END(init(), print_all_addr(), end(), "print functions");
-	INIT_CALL_END(init(), addr_exist(), end(), "entry exist functions");
+	INIT_CALL_END(init(), elements_exist(), end(), "entry exist functions");
 	INIT_CALL_END(init(), foreach_sample(), end(), "for each sample");
 	INIT_CALL_END(init(), for_each_addr(), end(), "for each addr");
 	INIT_CALL_END(init(), mask_domain_test(), end(), "get mask domain");

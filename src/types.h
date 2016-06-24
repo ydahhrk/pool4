@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 struct ipv6_prefix {
-	/** IPv6 prefix. */
+	/* IPv6 prefix. */
 	struct in6_addr address;
 	/** Number of bits from "address" which represent the network. */
 	__u8 len;

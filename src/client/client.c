@@ -6,7 +6,7 @@
 #include <linux/slab.h>
 #include "client.h"
 
-#define MAXipv6		cpu_to_le32(0xffffffff)
+#define MAXipv6		cpu_to_be32(0xffffffff)
 
 struct list_head client_hook;
 
@@ -24,13 +24,14 @@ int client_init(struct client *client)
 int client_add(struct client *client, struct ipv6_prefix *prefix)
 {
 	struct ipv6_client *add;
+
 	add = kmalloc(sizeof(struct ipv6_client), GFP_KERNEL);
-	if (!add) {
+	if (!add)
 		return -ENOMEM;
 
-	}
 	add->ipx = *prefix;
 	list_add_tail(&(add->list_hook), &(client->list_hook));
+
 	return 0;
 }
 
@@ -103,10 +104,10 @@ int client_print_all(struct client *client)
 	list_for_each(iter, &client->list_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client , list_hook);
 		pr_info("Address: %x.%x.%x.%x\nLength:%u\n",
-				obj_ptr->ipx.address.s6_addr32[0],
-				obj_ptr->ipx.address.s6_addr32[1],
-				obj_ptr->ipx.address.s6_addr32[2],
-				obj_ptr->ipx.address.s6_addr32[3],
+				be32_to_cpu(obj_ptr->ipx.address.s6_addr32[0]),
+				be32_to_cpu(obj_ptr->ipx.address.s6_addr32[1]),
+				be32_to_cpu(obj_ptr->ipx.address.s6_addr32[2]),
+				be32_to_cpu(obj_ptr->ipx.address.s6_addr32[3]),
 				obj_ptr->ipx.len);
 	}
 
@@ -140,32 +141,32 @@ void addr6_iterations(struct in6_addr *client)
 	if (!(client->s6_addr32[3] == MAXipv6)) {
 		client->s6_addr32[3]++;
 	}else if (!(client->s6_addr32[2] == MAXipv6)) {
-		client->s6_addr32[3] = cpu_to_le32(0x0);
+		client->s6_addr32[3] = cpu_to_be32(0x0);
 		client->s6_addr32[2]++;
 	}else if (!(client->s6_addr32[1] == MAXipv6)) {
-		client->s6_addr32[3] = cpu_to_le32(0x0);
-		client->s6_addr32[2] = cpu_to_le32(0x0);
+		client->s6_addr32[3] = cpu_to_be32(0x0);
+		client->s6_addr32[2] = cpu_to_be32(0x0);
 		client->s6_addr32[1]++;
 	}else if (!(client->s6_addr32[1] == MAXipv6)) {
-		client->s6_addr32[3] = cpu_to_le32(0x0);
-		client->s6_addr32[2] = cpu_to_le32(0x0);
-		client->s6_addr32[1] = cpu_to_le32(0X0);
+		client->s6_addr32[3] = cpu_to_be32(0x0);
+		client->s6_addr32[2] = cpu_to_be32(0x0);
+		client->s6_addr32[1] = cpu_to_be32(0X0);
 	}
 }
 
 static bool prefix_contains(struct ipv6_prefix *prefix, struct in6_addr *addr)
 {
-	__u32 mask = le32_to_cpu(MAXipv6) << (128 - prefix->len);
+	__u32 mask = ((__u64) MAXipv6) << (128 - prefix->len);
 
-	__u32 prefixaddr0 = le32_to_cpu(prefix->address.s6_addr32[0]) & mask;
-	__u32 prefixaddr1 = le32_to_cpu(prefix->address.s6_addr32[1]) & mask;
-	__u32 prefixaddr2 = le32_to_cpu(prefix->address.s6_addr32[2]) & mask;
-	__u32 prefixaddr3 = le32_to_cpu(prefix->address.s6_addr32[3]) & mask;
+	__u32 prefixaddr0 = prefix->address.s6_addr32[0] & mask;
+	__u32 prefixaddr1 = prefix->address.s6_addr32[1] & mask;
+	__u32 prefixaddr2 = prefix->address.s6_addr32[2] & mask;
+	__u32 prefixaddr3 = prefix->address.s6_addr32[3] & mask;
 
-	__u32 addr0 = le32_to_cpu(addr->s6_addr32[0]) & mask;
-	__u32 addr1 = le32_to_cpu(addr->s6_addr32[1]) & mask;
-	__u32 addr2 = le32_to_cpu(addr->s6_addr32[2]) & mask;
-	__u32 addr3 = le32_to_cpu(addr->s6_addr32[3]) & mask;
+	__u32 addr0 = addr->s6_addr32[0] & mask;
+	__u32 addr1 = addr->s6_addr32[1] & mask;
+	__u32 addr2 = addr->s6_addr32[2] & mask;
+	__u32 addr3 = addr->s6_addr32[3] & mask;
 
 	return (prefixaddr0 == addr0 && prefixaddr1 == addr1 &&
 			prefixaddr2 == addr2 && prefixaddr3 == addr3);
@@ -211,7 +212,6 @@ int client_for_each(struct client *client, int (*cb)(struct in6_addr *, void *),
 	list_for_each(iter, &client->list_hook) {
 		obj_ptr = list_entry(iter, struct ipv6_client, list_hook);
 		total_clients = total_clients + get_addr6_count(&obj_ptr->ipx);
-
 	}
 
 	offset = offset%total_clients;

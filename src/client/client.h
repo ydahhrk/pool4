@@ -22,7 +22,7 @@ int client_delete(struct client *client, struct ipv6_prefix *prefix);
 
 int client_flush(struct client *client);
 
-//int client_exist(struct client *client, struct ipv6_prefix *prefix)
+int client_exist(struct client *client, struct ipv6_prefix *prefix);
 
 unsigned int client_count(struct client *client);
 
