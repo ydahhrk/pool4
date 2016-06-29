@@ -12,7 +12,7 @@
 #include <linux/slab.h>
 
 struct client;
-static int dynamic_assigment = 1;
+static int dynamic_assignment = 1;
 
 int pool4_init(struct pool4 *pool4)
 {
@@ -200,7 +200,7 @@ int pool4_taddr4_find_pos(struct pool4 *pool4, int ipv6_pos,
 	int i;
 
 	if(masks_per_client == 0) {
-		pr_info("Number of masks per client given is invalid.\n");
+		pr_info("Number of masks per client is invalid.\n");
 		return 1;
 	}
 
@@ -310,7 +310,7 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 				}
 				flag = 1;
 			}
-			else{
+			else {
 				for (i = entry->range.min;
 						i <= entry->range.max;
 						i += domain->step) {
@@ -324,7 +324,6 @@ int pool4_get_nth_taddr(struct pool4 *pool4, struct client_mask_domain *domain,
 			}
 		}
 	}
-
 
 	return -ESRCH;
 }
@@ -355,25 +354,25 @@ int get_mask(struct packet *packet, struct pool4 *cpool, struct pool4 *spool,
 	struct list_head *iter;
 	struct pool4_entry *entry;
 	struct client_mask_domain mask_domain;
-	struct ipv6_prefix dummyClient;
+	struct ipv6_prefix prefix;
 
-	if (pool4_is_empty(cpool))
-		// Try to use spool
+	if (pool4_is_empty(cpool)){
+		// cpool4 is not available; use spool4
 		error = get_spool_mask(packet, spool, result);
-		if (error)
 			return error;
+	}
 
 	if (!client_addr_exist(client, &packet->hdr->saddr)) {
-		if (dynamic_assigment) {
-			dummyClient.address.in6_u = packet->hdr->saddr.in6_u;
-			dummyClient.len = 128;
-			client_add(client, &dummyClient);
+		if (dynamic_assignment) {
+			prefix.address = packet->hdr->saddr;
+			prefix.len = 128;
+			client_add(client, &prefix);
 		}
-		else
-			// Try to use spool
+		else {
+			// cpool4 cannot be used; use spool4
 			error = get_spool_mask(packet, spool, result);
-			if (error)
 				return error;
+		}
 	}
 
 	error = client_get_mask_domain(client, cpool, &packet->hdr->saddr,

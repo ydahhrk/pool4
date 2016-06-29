@@ -268,7 +268,7 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 	bool addr_exist = false;
 
 	if (client_count(client) > pool4_count(pool4)) {
-		pr_info("There are more clients than mask entries\n");
+//		pr_info("More clients than mask entries\n");
 		return 1;
 	}
 
@@ -281,8 +281,10 @@ int client_get_mask_domain(struct client *client, struct pool4 *pool4,
 		ipv6_pos++;
 	}
 
-	if (!addr_exist)
+	if (!addr_exist) {
+		pr_info("addr does not exist in client database\n");
 		return -ESRCH;
+	}
 
 	error = pool4_taddr4_find_pos(pool4, ipv6_pos, result, masks_per_client);
 	if (error)

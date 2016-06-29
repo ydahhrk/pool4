@@ -21,7 +21,6 @@ struct ipv4_transport_addr {
 
 char *ip4_to_str (unsigned int ip, char *buffer);
 
-
 struct client_mask_domain {
 	struct ipv4_transport_addr first;
 	unsigned int step;

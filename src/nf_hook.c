@@ -888,6 +888,7 @@ static bool elements_exist(void)
 	if (error)
 		return false;
 
+	//clients elements
 	success &= ASSERT_BOOL(false, client_exist(&client, &prefix0),
 			"exist prefix0");
 	success &= ASSERT_BOOL(false, client_exist(&client, &prefix1),
@@ -903,6 +904,7 @@ static bool elements_exist(void)
 	success &= ASSERT_BOOL(false, client_exist(&client, &prefix6),
 			"exist prefix6");
 
+	//clients addresses
 	success &= ASSERT_BOOL(false, client_addr_exist(&client,
 			&prefix0.address), "exist prefix0 address");
 	success &= ASSERT_BOOL(false, client_addr_exist(&client,
@@ -1235,8 +1237,7 @@ static bool mask_domain_test(void)
 	bool success = true;
 	struct client_mask_domain domain;
 	struct client_mask_domain expected;
-
-	/* Testing client_get_mask_domain */
+	struct ipv6_prefix prefix7;
 
 	pr_info("\n");
 	success &= ASSERT_INT(0, pool4_print_all(&cpool), "Actual pool4 nodes");
@@ -1313,6 +1314,60 @@ static bool mask_domain_test(void)
 			domain.step, domain.count);
 	pr_info("\n");
 
+	// If are more clients than pool4 addresses
+	prefix7.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix7.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix7.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix7.address.s6_addr32[3] = cpu_to_be32(0x0007);
+	prefix7.len = 128;
+
+	success &= ASSERT_INT(0, client_add(&client, &prefix7), "add prefix 7");
+	success &= ASSERT_BOOL(true, client_exist(&client, &prefix7),
+			"exist prefix7");
+
+	success &= ASSERT_BOOL(false, match_domain(&expected, &client, &cpool,
+			&prefix7.address, &domain, 10), "8th addr domain");
+	pr_info("\n");
+
+	success &= ASSERT_INT(0, client_delete(&client, &prefix7),
+			"delete prefix7");
+	success &= ASSERT_BOOL(false, client_addr_exist(&client,
+			&prefix7.address), "exist prefix7");
+
+	//if client addr doesn't exist in client database
+	success &= ASSERT_INT(-ESRCH, client_get_mask_domain(&client, &cpool,
+			&prefix7.address, &domain, 10), "addr not contained");
+
+	success &= ASSERT_BOOL(false, match_domain(&expected, &client, &cpool,
+			&prefix7.address, &domain, 10), "addr does not exist\n");
+
+	prefix7.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix7.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix7.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix7.address.s6_addr32[3] = cpu_to_be32(0x0008);
+
+	success &= ASSERT_INT(-ESRCH, client_get_mask_domain(&client, &cpool,
+			&prefix7.address, &domain, 10), "addr not contained");
+
+	success &= ASSERT_BOOL(false, match_domain(&expected, &client, &cpool,
+			&prefix7.address, &domain, 10), "addr does not exist\n");
+
+	prefix7.address.s6_addr32[0] = cpu_to_be32(0x2001);
+	prefix7.address.s6_addr32[1] = cpu_to_be32(0x0db8);
+	prefix7.address.s6_addr32[2] = cpu_to_be32(0x0000);
+	prefix7.address.s6_addr32[3] = cpu_to_be32(0x0009);
+
+	success &= ASSERT_INT(-ESRCH, client_get_mask_domain(&client, &cpool,
+			&prefix7.address, &domain, 10), "addr not contained");
+
+	success &= ASSERT_BOOL(false, match_domain(&expected, &client, &cpool,
+			&prefix7.address, &domain, 10), "addr does not exist\n");
+
+	//if 0 is given for masks_per_client
+	success &= ASSERT_BOOL(false, match_domain(&expected, &client, &cpool,
+			&prefix6.address, &domain, 0), "0 in masks_per_client");
+	pr_info("\n");
+
 	return success;
 }
 
@@ -1328,8 +1383,7 @@ static bool get_nth_taddr_test(void)
 	success &= ASSERT_INT(0, pool4_print_all(&cpool), "print all test");
 	pr_info("\n");
 
-	/* pool4_get_nth_taddr test */
-
+	// Domain of 1st prefix address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000201);
 	dom_exp.first.l4 = 4;
 	dom_exp.step = 1;
@@ -1340,14 +1394,68 @@ static bool get_nth_taddr_test(void)
 	pr_info("Mask domain: %pI4: %u %u %u\n", &domain.first.l3,
 			domain.first.l4, domain.step, domain.count);
 
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000201);
+	taddr_exp.l4 = 4;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			0, &result), "Get 1st taddr");
+	pr_info("1st taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000201);
+	taddr_exp.l4 = 5;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			1, &result), "Get 2nd taddr");
+	pr_info("2nd taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000201);
+	taddr_exp.l4 = 6;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			2, &result), "Get 3rd taddr");
+	pr_info("3rd taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000201);
+	taddr_exp.l4 = 7;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			3, &result), "Get 4th taddr");
+	pr_info("4th taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
+	taddr_exp.l4 = 10;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			4, &result), "Get 5th taddr");
+	pr_info("5th taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
+	taddr_exp.l4 = 11;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			5, &result), "Get 6th taddr");
+	pr_info("6th taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
+	taddr_exp.l4 = 12;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			6, &result), "Get 7th taddr");
+	pr_info("7th taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
+	taddr_exp.l4 = 13;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			7, &result), "Get 8th taddr");
+	pr_info("8th taddr: %pI4: %u\n", &result.l3, result.l4);
+
+	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
+	taddr_exp.l4 = 14;
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
+			8, &result), "Get 9th taddr");
+	pr_info("9th taddr: %pI4: %u\n", &result.l3, result.l4);
+
 	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000202);
 	taddr_exp.l4 = 15;
-
 	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
-			9, &result), "Get 9th taddr");
-	pr_info("9th taddr: %pI4: %u", &result.l3, result.l4);
+			9, &result), "Get 10th taddr");
+	pr_info("10th taddr: %pI4: %u\n", &result.l3, result.l4);
 	pr_info("\n");
 
+	//Domain of 2nd prefix address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000202);
 	dom_exp.first.l4 = 16;
 	dom_exp.step = 1;
@@ -1360,12 +1468,12 @@ static bool get_nth_taddr_test(void)
 
 	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000203);
 	taddr_exp.l4 = 25;
-
 	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
 			5, &result), "Get 5th taddr");
 	pr_info("5th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
+	//Domain of 3rd address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000203);
 	dom_exp.first.l4 = 30;
 	dom_exp.step = 1;
@@ -1378,12 +1486,12 @@ static bool get_nth_taddr_test(void)
 
 	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000203);
 	taddr_exp.l4 = 33;
-
 	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
 			3, &result), "Get 3rd taddr");
 	pr_info("3rd taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
+	//Domain of 4th prefix address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000204);
 	dom_exp.first.l4 = 40;
 	dom_exp.step = 1;
@@ -1396,12 +1504,12 @@ static bool get_nth_taddr_test(void)
 
 	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000204);
 	taddr_exp.l4 = 48;
-
 	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
 			8, &result), "Get 8th taddr");
 	pr_info("8th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
+	//Domain of 5th prefix address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000204);
 	dom_exp.first.l4 = 50;
 	dom_exp.step = 1;
@@ -1414,12 +1522,12 @@ static bool get_nth_taddr_test(void)
 
 	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000204);
 	taddr_exp.l4 = 57;
-
 	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
 			7, &result), "Get 7th taddr");
 	pr_info("7th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
+	//Domain of 6th prefix address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000204);
 	dom_exp.first.l4 = 60;
 	dom_exp.step = 1;
@@ -1432,12 +1540,12 @@ static bool get_nth_taddr_test(void)
 
 	taddr_exp.l3.s_addr = cpu_to_be32(0xc0000205);
 	taddr_exp.l4 = 67;
-
 	success &=ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
 			6, &result), "Get 6th taddr");
 	pr_info("6th taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
 
+	//Domain of 7th prefix address
 	dom_exp.first.l3.s_addr = cpu_to_be32(0xc0000205);
 	dom_exp.first.l4 = 71;
 	dom_exp.step = 1;
@@ -1452,9 +1560,33 @@ static bool get_nth_taddr_test(void)
 	taddr_exp.l4 = 73;
 
 	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool, &domain,
-			2, &result), "Get 2nd taddr");
+			2, &result), "Get 3rd taddr");
 	pr_info("2nd taddr: %pI4: %u", &result.l3, result.l4);
 	pr_info("\n");
+
+	//If n > domain.count, continues counting from first address
+	success &= ASSERT_BOOL(true, match_nth_taddr(&taddr_exp, &cpool,
+			&domain, 12, &result), "n > domain.count");
+	pr_info("13th taddr: %pI4: %u", &result.l3, result.l4);
+	pr_info("\n");
+
+	//When gets a domain address that does not exist in pool4
+	domain.first.l3.s_addr = cpu_to_be32(0xc0000208);
+	domain.first.l4 = 71;
+	domain.step = 1;
+	domain.count = 10;
+
+	success &= ASSERT_INT(-ESRCH, pool4_get_nth_taddr(&cpool, &domain, 1,
+			&result), "domain addr non existent");
+
+	//When gets a range that does not correspond to an address
+	domain.first.l3.s_addr = cpu_to_be32(0xc0000201);
+	domain.first.l4 = 71;
+	domain.step = 1;
+	domain.count = 10;
+
+	success &= ASSERT_INT(-ESRCH, pool4_get_nth_taddr(&cpool, &domain, 1,
+			&result), "range out of address ports");
 
 	return success;
 }
@@ -1477,11 +1609,12 @@ static bool get_mask_test(void)
 	if (!packet.hdr)
 		return -ENOMEM;
 
+	//Get mask for 1st prefix address
 	packet.hdr->saddr = prefix0.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
 	exp_mask.l4 = 4;
@@ -1490,13 +1623,13 @@ static bool get_mask_test(void)
 			&spool, &client, &mask, 10), "1st addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
+	//Get mask for 2nd prefix address, domain not available, gets spool
 	packet.hdr->saddr = prefix1.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
-	//Mask domain not available, get spool
 	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
 	exp_mask.l4 = 0;
 
@@ -1504,11 +1637,12 @@ static bool get_mask_test(void)
 			&spool, &client, &mask, 3), "2nd addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
+	//Mask for 3rd prefix address
 	packet.hdr->saddr = prefix2.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
 	exp_mask.l4 = 32;
@@ -1517,13 +1651,13 @@ static bool get_mask_test(void)
 			&spool, &client, &mask, 11), "3rd addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
+	//Mask for 4th prefix address, domain not available, gets spool
 	packet.hdr->saddr = prefix3.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
-	//Mask domain not available, get spool
 	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
 	exp_mask.l4 = 0;
 
@@ -1531,11 +1665,12 @@ static bool get_mask_test(void)
 			&spool, &client, &mask, 5), "4th addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
+	//Mask for 5th prefix address
 	packet.hdr->saddr = prefix4.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000204);
 	exp_mask.l4 = 58;
@@ -1544,11 +1679,12 @@ static bool get_mask_test(void)
 			&spool, &client, &mask, 12), "5th addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
+	//Mask for 6th prefix address
 	packet.hdr->saddr = prefix5.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000202);
 	exp_mask.l4 = 16;
@@ -1557,17 +1693,137 @@ static bool get_mask_test(void)
 			&spool, &client, &mask, 2), "6th addr mask");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
+	//Mask for 7th prefix address
 	packet.hdr->saddr = prefix6.address;
-	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[0]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[1]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[2]),
-			be32_to_cpu(packet.hdr->saddr.in6_u.u6_addr32[3]));
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
 
 	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
 	exp_mask.l4 = 34;
 
 	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
 			&spool, &client, &mask, 4), "7th addr mask");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	//When client addresses does not exist on database
+	pr_info("Dynamic assignment\n\n");
+	success &= ASSERT_INT(0, client_flush(&client), "Flushing cpool");
+
+	/* 1st address */
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0010);
+
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
+
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000201);
+	exp_mask.l4 = 4;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 10), "dynamic assignment");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	/* 2nd address */
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0011);
+
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
+
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000202);
+	exp_mask.l4 = 16;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 10), "dynamic assignment");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	/* 3rd address */
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0012);
+
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
+
+	exp_mask.l3.s_addr = cpu_to_be32(0xc0000203);
+	exp_mask.l4 = 30;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 10), "dynamic assignment");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	success &= ASSERT_INT(0, client_print_all(&client), "print client");
+		pr_info("\n");
+
+	//When pool4 is empty, gets spool
+	pr_info("Gets spool cause cpool is empty\n\n");
+	success &= ASSERT_INT(0, pool4_flush(&cpool), "Flushing cpool");
+
+	/* 1st address */
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0010);
+
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
+
+	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
+	exp_mask.l4 = 0;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 4), "when pool4 is empty");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	/* 2nd address */
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0011);
+
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
+
+	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
+	exp_mask.l4 = 0;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 4), "when pool4 is empty");
+	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
+
+	/* 3rd address */
+	packet.hdr->saddr.s6_addr32[0] = cpu_to_be32(0x2001);
+	packet.hdr->saddr.s6_addr32[1] = cpu_to_be32(0x0db8);
+	packet.hdr->saddr.s6_addr32[2] = cpu_to_be32(0x0000);
+	packet.hdr->saddr.s6_addr32[3] = cpu_to_be32(0x0012);
+
+	pr_info("%x.%x.%x.%x\n", be32_to_cpu(packet.hdr->saddr.s6_addr32[0]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[1]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[2]),
+			be32_to_cpu(packet.hdr->saddr.s6_addr32[3]));
+
+	exp_mask.l3.s_addr = cpu_to_be32(0x00000000);
+	exp_mask.l4 = 0;
+
+	success &= ASSERT_BOOL(true, valid_mask(&exp_mask, &packet, &cpool,
+			&spool, &client, &mask, 4), "when pool4 is empty");
 	pr_info("%pI4: %u\n\n", &mask.l3, mask.l4);
 
 	kfree(packet.hdr);
